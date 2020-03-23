@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
@@ -18,9 +19,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page FERRRAZ Marco'),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -45,6 +46,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  String _job;
+  String _textGet;
+  String _textPost;
+  String _user;
+  String _id;
+
 
   void _incrementCounter() {
     setState(() {
@@ -53,12 +60,13 @@ class _MyHomePageState extends State<MyHomePage> {
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter=_counter+2;
+      _counter++;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -75,6 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
+          
           // Column is also a layout widget. It takes a list of children and
           // arranges them vertically. By default, it sizes itself to fit its
           // children horizontally, and tries to be as tall as its parent.
@@ -90,22 +99,98 @@ class _MyHomePageState extends State<MyHomePage> {
           // axis because Columns are vertical (the cross axis would be
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
+          
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times no way really?:',
+            /* Text(
+              'You have pushed the button this many times:',
             ),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.display1,
             ),
+            */
+            Container(
+              child: new TextFormField(
+                decoration: InputDecoration(
+                labelText: 'Enter a user here'
+                ),
+                onChanged: (text) {
+                _user = text;
+               },
+              ),
+            ),
+            new TextField(
+              decoration: InputDecoration(
+                labelText: 'Enter a job here'
+              ),
+              onChanged: (text) {
+                _job = text;
+              },
+            ),
+            new RaisedButton(
+              child: new Text("try a POST"),
+              onPressed: (){
+                randomPost();
+              },
+            ),
+            Text(
+              '$_textPost',
+              style: Theme.of(context).textTheme.body2,
+            ),
+
+            Divider(
+              color: Colors.black,
+              height: 30,
+            ),
+ 
+            new TextField(
+              decoration: InputDecoration(
+                labelText: 'Id to search'
+              ),
+              onChanged: (text) {
+                _id = text;
+              },
+            ),
+            new RaisedButton(
+              child: new Text("try a GET"),
+              onPressed: (){
+                fetchData();
+              },
+            ),
+          Text(
+              '$_textGet', 
+              style: Theme.of(context).textTheme.body2,
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+    /* floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),*/ // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+    Future fetchData() async {
+          await http.get('https://reqres.in/api/users/'+ '$_id').then((result) {
+            //print(result.body.substring(1));
+            setState(() {
+              _textGet=result.body;
+            });
+            
+          });
+    }
+    Future randomPost() async {
+      var url = 'https://reqres.in/api/users';
+      var response = await http.post(url, body: {'name': '$_user', 'job': '$_job'});
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      setState(() {
+        _textPost=response.body;
+      });
+      
+
+    
+
+    }
 }

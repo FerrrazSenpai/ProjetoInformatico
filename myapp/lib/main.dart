@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:app_condutor/login.dart';
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter_offline/flutter_offline.dart';
+import 'package:connectivity/connectivity.dart';
+import 'package:date_format/date_format.dart';
 
 void main() => runApp(MyApp());
 
@@ -32,6 +37,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   SharedPreferences sharedPreferences;
 
+  var location = new Location();
+
+  LocationData userLocation;
+  DateTime time;
+  double speedkmh;
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-         actions: <Widget>[
+        actions: <Widget>[
           FlatButton(
             onPressed: () {
               sharedPreferences.clear();
@@ -61,15 +72,90 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: new Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          new Image(
-            image: new AssetImage("assets/wallpBUS.jpg"),
-            fit: BoxFit.cover,
-          ),
-        ]
+      body: Builder(
+        builder: (BuildContext context){
+          return OfflineBuilder(
+            connectivityBuilder: (
+              BuildContext context,
+              ConnectivityResult connectivity,
+              Widget child
+            ){
+              final bool connected = connectivity != ConnectivityResult.none;
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  child,
+                  Positioned(
+                    left: 0.00,
+                    right: 0.00,
+                    height: 30.00,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      color: connected ? null : Color(0xFFFF0000),
+                      child: connected ? null :
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text("The device is disconnected", style: TextStyle(color: Colors.white),),
+                          SizedBox(width: 8.0,),
+                          SizedBox(width: 12.0, height: 12.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              );
+            },
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                new Image(
+                  image: new AssetImage("assets/wallpBUS.jpg"),
+                  fit: BoxFit.cover,
+                ),
+                userLocation == null 
+                ? Text("\n\n\n\n\n\nSem valores óbtidos", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),)
+                : Text("\n\n\n\n\n\n   " + userLocation.latitude.toString() + "  latitude \n   " + userLocation.longitude.toString() + "  longitude \n    " +
+                speedkmh.toStringAsFixed(3)+ "  km/h \n   " + formatDate(time, [yyyy,"-",mm,"-",dd," ",HH,":",nn,":",ss]), textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),
+                Container(
+                  width: 200.0,
+                  padding: EdgeInsets.fromLTRB(50.0, 315.0, 50.0, 315.0),
+                  child: new FlatButton(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text('Get Coordinates, speed and time', textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20),),
+                    color: Colors.white,
+                    onPressed: (){
+                      _getLocation().then((value) {
+                        setState(() {
+                          userLocation = value;
+                          // 1m/s -> 3.6km/h  speed -> speedkmh
+                          speedkmh = userLocation.speed.toDouble() * 3.600;
+                          time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
+                        });
+                      });
+                    }
+                  ),
+                )
+              ],
+            ),
+          );
+        },
       ),
     );
   }
+
+  Future<LocationData> _getLocation() async {
+    LocationData currentLocation;
+    try {
+      currentLocation = await location.getLocation();
+    } catch (e) {
+      currentLocation = null;
+    }
+    return currentLocation;
+  }
+
 }

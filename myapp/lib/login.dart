@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
             titleSection(),
             formSection(),
             buttonSection(),
-            errorSection(),
+            errorSection()
           ],
         )
       ),
@@ -122,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
     };
 
     //var jsonResponse = null;
-    var url = "http://192.168.1.34:80/api/login";
+    var url = "http://192.168.1.69:8000/api/login";
     //final response = null;
     
     try {      

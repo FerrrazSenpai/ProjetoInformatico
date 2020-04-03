@@ -141,9 +141,9 @@ class _MyHomePageState extends State<MyHomePage> {
                           // 1m/s -> 3.6km/h  speed -> speedkmh
                           speedkmh = userLocation.speed.toDouble() * 3.600;
                           time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
+                          _postLocation();
                         });
                       });
-                      _postLocation();
                     }
                   ),
                 )

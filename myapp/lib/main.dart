@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:app_condutor/login.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:date_format/date_format.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MyApp());
 
@@ -16,12 +18,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
-      //home: new LoginPage(),
+      home: new MyHomePage(
+        title: 'Flutter Demo Home Page',
+      ),
     );
+      //home: new LoginPage(),
   }
 }
 
@@ -42,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
   LocationData userLocation;
   DateTime time;
   double speedkmh;
+  final String url = 'http://192.168.1.69:8000/api/location';
 
   @override
   void initState() {
@@ -137,6 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
                         });
                       });
+                      _postLocation();
                     }
                   ),
                 )
@@ -158,4 +165,29 @@ class _MyHomePageState extends State<MyHomePage> {
     return currentLocation;
   }
 
+  
+  Future<String> _postLocation() async {
+
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    Map body = {
+      "latitude" : userLocation.latitude.toString(),
+      "longitude" : userLocation.longitude.toString(),
+      "speed" : speedkmh.toStringAsFixed(3),
+      "time" : formatDate(time, [yyyy,"-",mm,"-",dd," ",HH,":",nn,":",ss]),
+    };
+
+    var response = 
+        await http.post(
+          url,
+          headers: {
+            'Accept' : 'application/json',
+            'Authorization' : sharedPreferences.getString("access_token"),
+          },
+          body: body,
+        );
+    print(response.body);
+
+    return response.body;
+  }
 }

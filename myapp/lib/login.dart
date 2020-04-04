@@ -118,7 +118,15 @@ class _LoginPageState extends State<LoginPage> {
       _error = ""; //clear errors 
     });
 
-    
+    final regexEmail = RegExp(r"^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$");
+
+    if (!regexEmail.hasMatch(email) || password.trim()==""){
+      setState(() {
+        _error = "Please fill both fields"; //clear errors 
+      });
+      return;
+    }
+
     Map body = {
       "email" : email,
       "password" : password,
@@ -134,26 +142,28 @@ class _LoginPageState extends State<LoginPage> {
       if(response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
         if(jsonResponse.containsKey('access_token')) {
-          print("olaolaola\n\n\n");
           sharedPreferences.setString("access_token", jsonResponse['access_token']);
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'Flutter Demo Home Page')), (Route<dynamic> route) => false);
           print(jsonResponse['access_token']);
         }
         else{
           setState(() {
-            _error = "Wrong email/password";
+            _error = "Something went wrong!uncaught exception";
           });
-          print("wrong email/password");
+          print("Something went wrong!uncaught exception");
         }
       }
-      else if(response.statusCode == 302){
+      else if(response.statusCode == 400){
         setState(() {
-            _error = "Fields not valid";
+            _error = "Wrong Email/Password";
           });
-          print("Fields not valid");
+          print("Wrong Email/Password");
       }
       else{
-        print(response.body);
+        setState(() {
+            _error = "Something went very wrong!uncaught exception";
+          });
+        print("uncaught exception \n" + response.body);
       }
     }
     

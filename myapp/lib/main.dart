@@ -201,11 +201,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _logout() async {
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
-    final response = await http.post(url,headers: {
-            'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
-          },).timeout(const Duration(seconds: 5));
-    print(response.statusCode);
-  
+    try{
+      final response = await http.post(url,headers: {
+        'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
+      },).timeout(const Duration(seconds: 3));
+
+      print(response.statusCode);  
+    }catch(e){
+      print("Erro de conexão ao servidor, Access não eliminado");
+    }
   }
 
 

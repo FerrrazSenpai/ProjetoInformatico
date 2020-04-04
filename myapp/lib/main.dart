@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
+
 
 import 'package:app_condutor/login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_offline/flutter_offline.dart';
@@ -10,7 +13,10 @@ import 'package:connectivity/connectivity.dart';
 import 'package:date_format/date_format.dart';
 import 'package:http/http.dart' as http;
 
-void main() => runApp(MyApp());
+Future main() async {
+  await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -47,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
   LocationData userLocation;
   DateTime time;
   double speedkmh;
-  final String url = 'http://192.168.1.69:8000/api/location';
+  final String url = 'http://'+DotEnv().env['IP_ADDRESS']+'/api/location';
 
   @override
   void initState() {
@@ -71,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           FlatButton(
             onPressed: () {
+              _logout();
               sharedPreferences.clear();
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
             },
@@ -178,16 +185,28 @@ class _MyHomePageState extends State<MyHomePage> {
     };
 
     var response = 
-        await http.post(
+        await 
+        http.post(
           url,
           headers: {
             'Accept' : 'application/json',
-            'Authorization' : sharedPreferences.getString("access_token"),
+            'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
           },
           body: body,
         );
     print(response.body);
-
+    //print(body);
     return response.body;
   }
+
+  void _logout() async {
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
+    final response = await http.post(url,headers: {
+            'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
+          },).timeout(const Duration(seconds: 5));
+    print(response.statusCode);
+  
+  }
+
+
 }

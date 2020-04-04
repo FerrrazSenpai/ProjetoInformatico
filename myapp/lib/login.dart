@@ -1,14 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
 
-void main() => runApp(LoginPage());
-
+Future main() async{
+  await DotEnv().load('.env');
+  runApp(LoginPage());
+}
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState()=> _LoginPageState();
@@ -122,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
     };
 
     //var jsonResponse = null;
-    var url = "http://192.168.1.69:8000/api/login";
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/login";
     //final response = null;
     
     try {      

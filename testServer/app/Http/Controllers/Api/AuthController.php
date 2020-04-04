@@ -7,11 +7,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 // ALTERAR ESTES 3 VALORES:
-define('YOUR_SERVER_URL', 'http://127.0.0.1:8000'); 
+//define('YOUR_SERVER_URL', 'http://127.0.0.1:8000'); 
 
 // Check "oauth_clients" table for next 2 values: 
-define('CLIENT_ID', '2'); 
-define('CLIENT_SECRET','8bulBENEI8RuPcf5Qpx4FLsYZO2Tw0ySaE4lw1VJ');
+//define('CLIENT_ID', '2'); 
+//define('CLIENT_SECRET','8bulBENEI8RuPcf5Qpx4FLsYZO2Tw0ySaE4lw1VJ');
 
 class AuthController extends Controller
 {
@@ -37,11 +37,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $http = new \GuzzleHttp\Client;
-        $response = $http->post(YOUR_SERVER_URL.'/oauth/token', [
+        $response = $http->post(env('PASSPORT_URL').'/oauth/token', [
             'form_params' => [
                 'grant_type' => 'password', 
-                'client_id' => CLIENT_ID, 
-                'client_secret' => CLIENT_SECRET, 
+                'client_id' => env('PASSPORT_CLIENT_ID'), 
+                'client_secret' => env('PASSPORT_SECRET'), 
                 'username' => $request->email, 
                 'password' => $request->password, 
                 'scope' => ''
@@ -55,6 +55,12 @@ class AuthController extends Controller
             return response()->json(
                 ['msg'=>'User credentials are invalid'], $errorCode);
         } 
+    }
+	public function logout()
+    {
+        \Auth::guard('api')->user()->token()->revoke();
+        \Auth::guard('api')->user()->token()->delete();
+        return response()->json(['msg'=>'OK'], 200);
     }
 }
 //  $loginData = $request->validate([

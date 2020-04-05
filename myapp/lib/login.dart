@@ -23,6 +23,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        titleSpacing: 50.0,
+        backgroundColor: Colors.green[800],
+      ),
       body: new Container(
         /*decoration: new BoxDecoration(
           image: DecorationImage(
@@ -30,13 +34,13 @@ class _LoginPageState extends State<LoginPage> {
             fit: BoxFit.cover,
           ),
         ), */
-        color: Colors.white,
+        color: Colors.black54,
         child: ListView(
           children: <Widget>[
             titleSection(),
             formSection(),
+            errorSection(),
             buttonSection(),
-            errorSection()
           ],
         )
       ),
@@ -45,18 +49,20 @@ class _LoginPageState extends State<LoginPage> {
 
   Container titleSection() {
     return Container(
-      margin: EdgeInsets.only(top: 110.0),
-      child: Text("Olá, motorista", 
+      margin: EdgeInsets.only(top: 110.0, left: 30.0),
+      child: Text("Bem vindo, Sr. Condutor",
         style: TextStyle(
-          color: Colors.black45,
-          fontSize: 35.0,
-          fontWeight: FontWeight.bold)),
+          color: Colors.white,
+          fontSize: 32.0,
+          fontWeight: FontWeight.bold
+        )
+      ),
     );
   }
 
   Container  formSection(){
     return Container(
-      margin: EdgeInsets.only(top: 40.0),
+      margin: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
         child: Column(
           children: <Widget>[
             SizedBox(height: 60.0),
@@ -74,40 +80,59 @@ class _LoginPageState extends State<LoginPage> {
 
   TextFormField formInput(String hint, IconData iconName){
     return TextFormField(
+      cursorColor: Colors.white,
+      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
       obscureText: hint == "Password" ? true : false ,
       controller: hint == "Password" ? passwordControler : emailControler,
       decoration: InputDecoration(
+        border: InputBorder.none,
         hintText: hint,
-        icon: Icon(iconName),
+        hintStyle: TextStyle(color: Colors.white70),
+        icon: Icon(iconName, color: Colors.green[800],),
+        filled: true,
       ),
     );
   }
 
   Container buttonSection(){
     return Container(
-      padding: EdgeInsets.only(top: 20.0),
+      padding: EdgeInsets.only(top: 30.0),
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
           signIn(emailControler.text, passwordControler.text);
         },
-        color: Colors.yellow,
+        color: Colors.green[800],
+        elevation: 10.0,
+        padding: EdgeInsets.all(12.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: new BorderRadius.circular(20.0),
+          side: BorderSide(color: Colors.black54)
+        ),
+        splashColor: Colors.black54,
+        colorBrightness: Brightness.light,
         child: Text("Login",
           style: new TextStyle(
-          color: Colors.black,
+            color: Colors.white,
+            letterSpacing: 2.0,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
-     ),
     );
   }
 
   Container errorSection(){
     return Container(
+      padding: EdgeInsets.only(left: 70.0, top: 15.0),
       child: Text('$_error', 
         style: TextStyle(
-          color: Colors.red,
-          fontSize: 15.0,
-          fontWeight: FontWeight.bold)),
+          color: Colors.red[600],
+          fontSize: 17.0,
+          fontWeight: FontWeight.w600
+        ),
+      ),
     );
   }
 
@@ -122,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!regexEmail.hasMatch(email) || password.trim()==""){
       setState(() {
-        _error = "Please fill both fields"; //clear errors 
+        _error = "Preencha os dois campos"; //clear errors 
       });
       return;
     }
@@ -148,20 +173,20 @@ class _LoginPageState extends State<LoginPage> {
         }
         else{
           setState(() {
-            _error = "Something went wrong!uncaught exception";
+            _error = "Algo correu muito mal!uncaught exception";
           });
-          print("Something went wrong!uncaught exception");
+          print("Algo correu muito mal!uncaught exception");
         }
       }
       else if(response.statusCode == 400){
         setState(() {
-            _error = "Wrong Email/Password";
+            _error = "Email ou password incorretos";
           });
-          print("Wrong Email/Password");
+          print("Email ou password incorretos");
       }
       else{
         setState(() {
-            _error = "Something went very wrong!uncaught exception";
+            _error = "Algo correu muito mal!uncaught exception";
           });
         print("uncaught exception \n" + response.body);
       }

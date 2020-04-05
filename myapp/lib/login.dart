@@ -23,18 +23,30 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        titleSpacing: 50.0,
-        backgroundColor: Colors.green[800],
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 0.0,
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 180.0),
+            child: Icon(
+              Icons.directions_bus,
+              color: Theme.of(context).accentColor,
+              size: 60.0,
+            ),
+          ),
+        ],
       ),
       body: new Container(
-        /*decoration: new BoxDecoration(
-          image: DecorationImage(
-            image: ExactAssetImage("assets/wallpBUS.jpg"),
-            fit: BoxFit.cover,
+        margin: EdgeInsets.only(top: 20.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).accentColor,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15.0),
+            topRight: Radius.circular(15.0),
           ),
-        ), */
-        color: Colors.grey[800],
+        ),
         child: ListView(
           children: <Widget>[
             titleSection(),
@@ -86,10 +98,10 @@ class _LoginPageState extends State<LoginPage> {
       decoration: InputDecoration(
         border: InputBorder.none,
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.white70),
-        icon: Icon(iconName, color: Colors.green[800],),
+        hintStyle: TextStyle(color: Colors.white60),
+        icon: Icon(iconName, color: Theme.of(context).primaryColor,),
         filled: true,
-        fillColor: Colors.grey[850]
+        fillColor: Colors.grey[800]
       ),
     );
   }
@@ -102,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
         onPressed: () {
           signIn(emailControler.text, passwordControler.text);
         },
-        color: Colors.green[800],
+        color: Theme.of(context).primaryColor,
         elevation: 20.0,
         padding: EdgeInsets.all(15.0),
         shape: RoundedRectangleBorder(
@@ -111,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         splashColor: Colors.black54,
         colorBrightness: Brightness.light,
-        child: Text("Login",
+        child: Text("Iniciar Sessão",
           style: new TextStyle(
             color: Colors.white,
             letterSpacing: 2.0,

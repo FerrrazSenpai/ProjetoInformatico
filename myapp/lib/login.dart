@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
             fit: BoxFit.cover,
           ),
         ), */
-        color: Colors.black54,
+        color: Colors.grey[800],
         child: ListView(
           children: <Widget>[
             titleSection(),
@@ -68,7 +68,6 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 60.0),
             formInput("Email", Icons.email),
             formInput("Password", Icons.lock),
-
           ],
         )
     );
@@ -90,21 +89,22 @@ class _LoginPageState extends State<LoginPage> {
         hintStyle: TextStyle(color: Colors.white70),
         icon: Icon(iconName, color: Colors.green[800],),
         filled: true,
+        fillColor: Colors.grey[850]
       ),
     );
   }
 
   Container buttonSection(){
     return Container(
-      padding: EdgeInsets.only(top: 30.0),
+      padding: EdgeInsets.only(top: 20.0),
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
           signIn(emailControler.text, passwordControler.text);
         },
         color: Colors.green[800],
-        elevation: 10.0,
-        padding: EdgeInsets.all(12.0),
+        elevation: 20.0,
+        padding: EdgeInsets.all(15.0),
         shape: RoundedRectangleBorder(
           borderRadius: new BorderRadius.circular(20.0),
           side: BorderSide(color: Colors.black54)
@@ -125,17 +125,27 @@ class _LoginPageState extends State<LoginPage> {
 
   Container errorSection(){
     return Container(
-      padding: EdgeInsets.only(left: 70.0, top: 15.0),
-      child: Text('$_error', 
-        style: TextStyle(
-          color: Colors.red[600],
-          fontSize: 17.0,
-          fontWeight: FontWeight.w600
-        ),
+      padding: EdgeInsets.only(left: 70.0, top: 12.0),
+      child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
+      Row(
+        children: <Widget>[
+          Icon(
+            Icons.error_outline,
+            color: Colors.red[700],
+            size: 20.0,
+          ),
+          Text('  $_error', 
+            style: TextStyle(
+              color: Colors.red[700],
+              fontSize: 15.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
-
+  
   signIn(String email, String password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 

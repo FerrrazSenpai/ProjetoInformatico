@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum DialogAction { yes, abort }
+enum DialogAction { confirm, cancel }
 
 class Dialogs {
   static Future<DialogAction> yesAbortDialog(
@@ -37,14 +37,14 @@ class Dialogs {
                 ButtonTheme(
                   minWidth: 163.0,
                   child: FlatButton(
-                  onPressed: () => Navigator.of(context).pop(DialogAction.abort),
+                  onPressed: () => Navigator.of(context).pop(DialogAction.cancel),
                   child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 18.0),),
                   ),
                 ),
                 ButtonTheme(
                   minWidth: 163.0,
                   child: FlatButton(
-                  onPressed: () => Navigator.of(context).pop(DialogAction.yes),
+                  onPressed: () => Navigator.of(context).pop(DialogAction.confirm),
                   child: const Text('Confirmar', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 18.0),),
                   ),
                 ),
@@ -54,6 +54,6 @@ class Dialogs {
         );
       },
     );
-    return (action != null) ? action : DialogAction.abort;
+    return (action != null) ? action : DialogAction.cancel;
   }
 }

@@ -55,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   LocationData userLocation;
   DateTime time;
   double speedkmh;
+  bool connected;
   final String url = 'http://'+DotEnv().env['IP_ADDRESS']+'/api/location';
 
   @override
@@ -117,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () async{
                     final action =
                     await Dialogs.yesAbortDialog(context, 'Alerta', 'Pretende realmente sair?');
-                    if (action == DialogAction.yes) {
+                    if (action == DialogAction.confirm && connected) {
                       _logout();
                       sharedPreferences.clear();
                       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
@@ -140,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ConnectivityResult connectivity,
               Widget child
             ){
-              final bool connected = connectivity != ConnectivityResult.none;
+              connected = connectivity != ConnectivityResult.none;
               return Stack(
                 fit: StackFit.expand,
                 children: [
@@ -177,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   image: new AssetImage("assets/wallpBUS.jpg"),
                   fit: BoxFit.cover,
                 ),
-                userLocation == null 
+                userLocation == null || !connected
                 ? Text("\n\n\n\n\n\nSem valores óbtidos", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),)
                 : Text("\n\n\n\n\n\n   " + userLocation.latitude.toString() + "  latitude \n   " + userLocation.longitude.toString() + "  longitude \n    " +
                 speedkmh.toStringAsFixed(3)+ "  km/h \n   " + formatDate(time, [yyyy,"-",mm,"-",dd," ",HH,":",nn,":",ss]), textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),

@@ -12,6 +12,7 @@ Future main() async{
   await DotEnv().load('.env');
   runApp(LoginPage());
 }
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState()=> _LoginPageState();
@@ -19,24 +20,26 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   var _error = "";
+  bool checkBoxValue = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
-        elevation: 0.0,
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 180.0),
-            child: Icon(
+        elevation: 0.0, 
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
               Icons.directions_bus,
               color: Theme.of(context).accentColor,
-              size: 60.0,
+              size: 75.0,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       body: Builder(
         builder: (BuildContext context){
@@ -91,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                   formSection(),
                   errorSection(),
                   buttonSection(),
+                  checkBoxSection(),
                 ],
               )
             ),
@@ -198,6 +202,31 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+  Row checkBoxSection(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Theme(
+          data: Theme.of(context).copyWith(
+            unselectedWidgetColor: Theme.of(context).primaryColor,
+          ),
+          child: Checkbox(
+            value: checkBoxValue,
+            hoverColor: Colors.red,
+            activeColor: Theme.of(context).primaryColor,
+            checkColor: Theme.of(context).accentColor,
+            onChanged: (bool value){
+              setState(() {
+                checkBoxValue = value;
+              });
+            }
+          ),
+        ),
+        Text("Manter sessão iniciada", style: TextStyle(color: Colors.white70),textAlign: TextAlign.start,),
+      ],
+    );
+  }
   
   signIn(String email, String password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -229,10 +258,12 @@ class _LoginPageState extends State<LoginPage> {
       print(response.statusCode);
       if(response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
+        sharedPreferences.setBool("checkBox", checkBoxValue);
         if(jsonResponse.containsKey('access_token')) {
           sharedPreferences.setString("access_token", jsonResponse['access_token']);
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'Flutter Demo Home Page')), (Route<dynamic> route) => false);
           print(jsonResponse['access_token']);
+          print(sharedPreferences.getBool("checkBox"));
         }
         else{
           setState(() {

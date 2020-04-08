@@ -12,6 +12,7 @@ import 'package:flutter_offline/flutter_offline.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:date_format/date_format.dart';
 import 'package:http/http.dart' as http;
+import 'package:app_condutor/dialogs.dart';
 
 Future main() async {
   await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
@@ -26,10 +27,11 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primaryColor: Colors.teal[500],
+        accentColor: Colors.grey[900],
       ),
       home: new MyHomePage(
-        title: 'Flutter Demo Home Page',
+        title: 'Página inicial',
       ),
     );
       //home: new LoginPage(),
@@ -53,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   LocationData userLocation;
   DateTime time;
   double speedkmh;
+  bool connected;
   final String url = 'http://'+DotEnv().env['IP_ADDRESS']+'/api/location';
 
   @override
@@ -63,10 +66,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
   checkLoginStatus() async {
     sharedPreferences = await SharedPreferences.getInstance();
+    if(!sharedPreferences.getBool("checkBox")){
+      sharedPreferences.remove("access_token");
+      print(sharedPreferences.getBool("checkBox"));
+    }
     if(sharedPreferences.getString("access_token") == null) {
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
     }
     print(sharedPreferences.getString("access_token"));
+    print(sharedPreferences.getBool("checkBox"));
   }
 
   @override
@@ -74,16 +82,61 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        actions: <Widget>[
-          FlatButton(
-            onPressed: () {
-              _logout();
-              sharedPreferences.clear();
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
-            },
-            child: Text("Log Out", style: TextStyle(color: Colors.white)),
-          ),
-        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: <Color>[
+                    Colors.teal[900],
+                    Colors.teal[400],
+                  ]
+                ),
+              ),
+              child: Column(
+                children: <Widget>[
+                  Icon(
+                    Icons.directions_bus,
+                    color: Theme.of(context).accentColor,
+                    size: 100.0,
+                  ),
+                  Text("Que ganda autoBUS",
+                    style: TextStyle(
+                      fontSize: 25.0
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              children: <Widget>[
+                FlatButton(
+                  padding: EdgeInsets.only(right: 10.0),
+                  child: ListTile(
+                        leading: Icon(Icons.exit_to_app, color: Colors.black,),
+                        title: Text('Terminar Sessão', 
+                        style: TextStyle(fontSize: 17.0),),
+                  ),
+                  onPressed: () async{
+                    final action =
+                    await Dialogs.yesAbortDialog(context, 'Alerta', 'Pretende realmente sair?');
+                    if (action == DialogAction.confirm && connected) {
+                      _logout();
+                      sharedPreferences.clear();
+                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
+                    } else {
+                      setState((){});
+                    }
+                  },
+                ),
+                Divider(),
+              ],
+            )
+          ],
+        ),
       ),
       body: Builder(
         builder: (BuildContext context){
@@ -93,7 +146,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ConnectivityResult connectivity,
               Widget child
             ){
-              final bool connected = connectivity != ConnectivityResult.none;
+              connected = connectivity != ConnectivityResult.none;
               return Stack(
                 fit: StackFit.expand,
                 children: [
@@ -104,17 +157,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 30.00,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      color: connected ? null : Color(0xFFFF0000),
+                      color: connected ? null : Colors.black,
                       child: connected ? null :
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Text("The device is disconnected", style: TextStyle(color: Colors.white),),
+                          Text("The device is disconnected", style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold),),
                           SizedBox(width: 8.0,),
                           SizedBox(width: 12.0, height: 12.0,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.red[800]),
                           ),),
                         ],
                       ),
@@ -130,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   image: new AssetImage("assets/wallpBUS.jpg"),
                   fit: BoxFit.cover,
                 ),
-                userLocation == null 
+                userLocation == null || !connected
                 ? Text("\n\n\n\n\n\nSem valores óbtidos", textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),)
                 : Text("\n\n\n\n\n\n   " + userLocation.latitude.toString() + "  latitude \n   " + userLocation.longitude.toString() + "  longitude \n    " +
                 speedkmh.toStringAsFixed(3)+ "  km/h \n   " + formatDate(time, [yyyy,"-",mm,"-",dd," ",HH,":",nn,":",ss]), textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),

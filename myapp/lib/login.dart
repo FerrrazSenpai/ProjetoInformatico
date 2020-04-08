@@ -6,13 +6,14 @@ import 'package:http/http.dart' as http;
 import 'main.dart';
 import 'driverSetup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
+import 'package:flutter_offline/flutter_offline.dart';
+import 'package:connectivity/connectivity.dart';
 
 Future main() async{
   await DotEnv().load('.env');
   runApp(LoginPage());
 }
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState()=> _LoginPageState();
@@ -20,50 +21,111 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   var _error = "";
+  bool checkBoxValue = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: new Container(
-        /*decoration: new BoxDecoration(
-          image: DecorationImage(
-            image: ExactAssetImage("assets/wallpBUS.jpg"),
-            fit: BoxFit.cover,
-          ),
-        ), */
-        color: Colors.white,
-        child: ListView(
+      backgroundColor: Theme.of(context).primaryColor,
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 0.0, 
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            titleSection(),
-            formSection(),
-            buttonSection(),
-            errorSection()
+            Icon(
+              Icons.directions_bus,
+              color: Theme.of(context).accentColor,
+              size: 75.0,
+            ),
           ],
-        )
+        ),
+      ),
+      body: Builder(
+        builder: (BuildContext context){
+          return OfflineBuilder(
+            connectivityBuilder: (
+              BuildContext context,
+              ConnectivityResult connectivity,
+              Widget child
+            ){
+              final bool connected = connectivity != ConnectivityResult.none;
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  child,
+                  Positioned(
+                    left: 0.00,
+                    right: 0.00,
+                    height: 30.00,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      color: connected ? null : Colors.black,
+                      child: connected ? null :
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text("The device is disconnected", style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold),),
+                          SizedBox(width: 8.0,),
+                          SizedBox(width: 12.0, height: 12.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.red[800]),
+                          ),),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              );
+            },
+            child: Container(
+              margin: EdgeInsets.only(top: 20.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).accentColor,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15.0),
+                  topRight: Radius.circular(15.0),
+                ),
+              ),
+              child: ListView(
+                children: <Widget>[
+                  titleSection(),
+                  formSection(),
+                  errorSection(),
+                  buttonSection(),
+                  checkBoxSection(),
+                ],
+              )
+            ),
+          );
+        },
       ),
     );
   }
 
   Container titleSection() {
     return Container(
-      margin: EdgeInsets.only(top: 110.0),
-      child: Text("Olá, motorista", 
+      margin: EdgeInsets.only(top: 110.0, left: 30.0),
+      child: Text("Bem vindo, Sr. Condutor",
         style: TextStyle(
-          color: Colors.black45,
-          fontSize: 35.0,
-          fontWeight: FontWeight.bold)),
+          color: Colors.white,
+          fontSize: 32.0,
+          fontWeight: FontWeight.bold
+        )
+      ),
     );
   }
 
   Container  formSection(){
     return Container(
-      margin: EdgeInsets.only(top: 40.0),
+      margin: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
         child: Column(
           children: <Widget>[
             SizedBox(height: 60.0),
             formInput("Email", Icons.email),
             formInput("Password", Icons.lock),
-
           ],
         )
     );
@@ -75,11 +137,17 @@ class _LoginPageState extends State<LoginPage> {
 
   TextFormField formInput(String hint, IconData iconName){
     return TextFormField(
+      cursorColor: Colors.white,
+      style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
       obscureText: hint == "Password" ? true : false ,
       controller: hint == "Password" ? passwordControler : emailControler,
       decoration: InputDecoration(
+        border: InputBorder.none,
         hintText: hint,
-        icon: Icon(iconName),
+        hintStyle: TextStyle(color: Colors.white60),
+        icon: Icon(iconName, color: Theme.of(context).primaryColor,),
+        filled: true,
+        fillColor: Colors.grey[800]
       ),
     );
   }
@@ -92,26 +160,75 @@ class _LoginPageState extends State<LoginPage> {
         onPressed: () {
           signIn(emailControler.text, passwordControler.text);
         },
-        color: Colors.yellow,
-        child: Text("Login",
+        color: Theme.of(context).primaryColor,
+        elevation: 20.0,
+        padding: EdgeInsets.all(15.0),
+        shape: RoundedRectangleBorder(
+          borderRadius: new BorderRadius.circular(20.0),
+          side: BorderSide(color: Colors.black54)
+        ),
+        splashColor: Colors.black54,
+        colorBrightness: Brightness.light,
+        child: Text("Iniciar Sessão",
           style: new TextStyle(
-          color: Colors.black,
+            color: Colors.white,
+            letterSpacing: 2.0,
+            fontSize: 20.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
-     ),
     );
   }
 
   Container errorSection(){
     return Container(
-      child: Text('$_error', 
-        style: TextStyle(
-          color: Colors.red,
-          fontSize: 15.0,
-          fontWeight: FontWeight.bold)),
+      padding: EdgeInsets.only(left: 70.0, top: 12.0),
+      child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
+      Row(
+        children: <Widget>[
+          Icon(
+            Icons.error_outline,
+            color: Colors.red[700],
+            size: 20.0,
+          ),
+          Text('  $_error', 
+            style: TextStyle(
+              color: Colors.red[700],
+              fontSize: 15.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  Row checkBoxSection(){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Theme(
+          data: Theme.of(context).copyWith(
+            unselectedWidgetColor: Theme.of(context).primaryColor,
+          ),
+          child: Checkbox(
+            value: checkBoxValue,
+            hoverColor: Colors.red,
+            activeColor: Theme.of(context).primaryColor,
+            checkColor: Theme.of(context).accentColor,
+            onChanged: (bool value){
+              setState(() {
+                checkBoxValue = value;
+              });
+            }
+          ),
+        ),
+        Text("Manter sessão iniciada", style: TextStyle(color: Colors.white70),textAlign: TextAlign.start,),
+      ],
+    );
+  }
+  
   signIn(String email, String password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
@@ -123,7 +240,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (!regexEmail.hasMatch(email) || password.trim()==""){
       setState(() {
-        _error = "Please fill both fields"; //clear errors 
+        _error = "Preencha os dois campos"; //clear errors 
       });
       return;
     }
@@ -142,28 +259,30 @@ class _LoginPageState extends State<LoginPage> {
       print(response.statusCode);
       if(response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
+        sharedPreferences.setBool("checkBox", checkBoxValue);
         if(jsonResponse.containsKey('access_token')) {
           sharedPreferences.setString("access_token", jsonResponse['access_token']);
           sharedPreferences.setString("email", email);
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage()), (Route<dynamic> route) => false);
           print(jsonResponse['access_token']);
+          print(sharedPreferences.getBool("checkBox"));
         }
         else{
           setState(() {
-            _error = "Something went wrong!uncaught exception";
+            _error = "Algo correu muito mal!uncaught exception";
           });
-          print("Something went wrong!uncaught exception");
+          print("Algo correu muito mal!uncaught exception");
         }
       }
       else if(response.statusCode == 400){
         setState(() {
-            _error = "Wrong Email/Password";
+            _error = "Email ou password incorretos";
           });
-          print("Wrong Email/Password");
+          print("Email ou password incorretos");
       }
       else{
         setState(() {
-            _error = "Something went very wrong!uncaught exception";
+            _error = "Algo correu muito mal!uncaught exception";
           });
         print("uncaught exception \n" + response.body);
       }

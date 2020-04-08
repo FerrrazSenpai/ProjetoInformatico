@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   checkLoginStatus() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    if(!sharedPreferences.getBool("checkBox")){
+    if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")  ){
       sharedPreferences.remove("access_token");
       print(sharedPreferences.getBool("checkBox"));
     }

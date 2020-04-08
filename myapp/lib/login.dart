@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'main.dart';
+import 'driverSetup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -143,7 +144,8 @@ class _LoginPageState extends State<LoginPage> {
         var jsonResponse = json.decode(response.body);
         if(jsonResponse.containsKey('access_token')) {
           sharedPreferences.setString("access_token", jsonResponse['access_token']);
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'Flutter Demo Home Page')), (Route<dynamic> route) => false);
+          sharedPreferences.setString("email", email);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage()), (Route<dynamic> route) => false);
           print(jsonResponse['access_token']);
         }
         else{

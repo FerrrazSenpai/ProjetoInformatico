@@ -1,18 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'main.dart';
+import 'package:app_condutor/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_offline/flutter_offline.dart';
-import 'package:connectivity/connectivity.dart';
 import 'dart:convert';
-import 'package:date_format/date_format.dart';
-
-
-Future main() async{
-  await DotEnv().load('.env');
-  runApp(SetupPage());
-}
 
 class SetupPage extends StatefulWidget {
   @override
@@ -115,7 +106,7 @@ class _SetupPageState extends State<SetupPage> {
               _error="Por favor preencha ambos os campos.";
            });
           }       
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'Flutter Demo Home Page')), (Route<dynamic> route) => false);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: 'Página inicial')), (Route<dynamic> route) => false);
         },
 
         color: Theme.of(context).primaryColor,

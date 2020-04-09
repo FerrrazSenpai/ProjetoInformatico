@@ -1,16 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'main.dart';
 import 'driverSetup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:connectivity/connectivity.dart';
 
-Future main() async{
-  await DotEnv().load('.env');
+Future main() async {
+  await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
   runApp(LoginPage());
 }
 
@@ -22,6 +20,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   var _error = "";
   bool checkBoxValue = false;
+  bool connected;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
               ConnectivityResult connectivity,
               Widget child
             ){
-              final bool connected = connectivity != ConnectivityResult.none;
+              connected = connectivity != ConnectivityResult.none;
               return Stack(
                 fit: StackFit.expand,
                 children: [
@@ -145,7 +144,9 @@ class _LoginPageState extends State<LoginPage> {
         border: InputBorder.none,
         hintText: hint,
         hintStyle: TextStyle(color: Colors.white60),
-        icon: Icon(iconName, color: Theme.of(context).primaryColor,),
+        icon: Icon(iconName, 
+          color: Theme.of(context).primaryColor,
+        ),
         filled: true,
         fillColor: Colors.grey[800]
       ),
@@ -224,7 +225,12 @@ class _LoginPageState extends State<LoginPage> {
             }
           ),
         ),
-        Text("Manter sessão iniciada", style: TextStyle(color: Colors.white70),textAlign: TextAlign.start,),
+        Container(
+          padding: EdgeInsets.only(right: 20.0),
+          child: Text("Manter sessão iniciada", 
+            style: TextStyle(color: Colors.white70),
+            textAlign: TextAlign.start,)
+          ),
       ],
     );
   }

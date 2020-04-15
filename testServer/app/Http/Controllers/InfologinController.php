@@ -33,7 +33,7 @@ class InfologinController extends Controller
 
     public function updateinfo(Request $request)
     {
-        DB::table('autocarros')->where('id',$request->id_autocarro)->update(array('estado'=>'livre'));
+        DB::table('autocarros')->where('id',$request->id_autocarro)->update(array('estado'=>'Ocupado'));
         //$autocarro = Task::findOrFail($request->id);
         
 

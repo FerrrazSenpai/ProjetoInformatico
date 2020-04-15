@@ -25,9 +25,10 @@ class MyApp extends StatelessWidget {
 }
 
 class DashboardPage extends StatefulWidget {
-  DashboardPage({Key key, this.title}) : super(key: key);
+  DashboardPage({Key key, this.title, this.linha}) : super(key: key);
 
   final String title;
+  final int linha;
 
   @override
   DashboardPageState createState() => DashboardPageState();
@@ -130,7 +131,7 @@ class DashboardPageState extends State<DashboardPage> {
           );
         },
       ),
-      drawer: new DrawerPage(connected: true),
+      drawer: new DrawerPage(connected: connected),
     );
   }
 

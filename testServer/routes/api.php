@@ -29,7 +29,5 @@ Route::group(['middleware' => 'auth:api'], function () {
 	Route::post('/logout','Api\AuthController@logout');
 	Route::post('/info', 'InfologinController@info');
 	Route::post('/updateinfo', 'InfologinController@updateinfo');
-
-
-
+	Route::get('/userid', 'Api\AuthController@verify');
 });

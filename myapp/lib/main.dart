@@ -4,7 +4,6 @@ import 'package:app_condutor/login.dart';
 import 'package:app_condutor/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future main() async {

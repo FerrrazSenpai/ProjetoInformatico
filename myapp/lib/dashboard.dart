@@ -148,7 +148,7 @@ class DashboardPageState extends State<DashboardPage> {
   Future<String> _postLocation() async {
 
     sharedPreferences = await SharedPreferences.getInstance();
-
+    var url = 'http://'+DotEnv().env['IP_ADDRESS']+'/api/location';
     Map body = {
       "latitude" : userLocation.latitude.toString(),
       "longitude" : userLocation.longitude.toString(),

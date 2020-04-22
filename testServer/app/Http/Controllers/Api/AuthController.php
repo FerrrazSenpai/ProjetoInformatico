@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 // ALTERAR ESTES 3 VALORES:
 //define('YOUR_SERVER_URL', 'http://127.0.0.1:8000'); 
@@ -61,6 +62,12 @@ class AuthController extends Controller
         \Auth::guard('api')->user()->token()->revoke();
         \Auth::guard('api')->user()->token()->delete();
         return response()->json(['msg'=>'OK'], 200);
+    }
+
+    public function verify()
+    {
+        $id = Auth::id();
+        return response()->json("Utilizador verificado", 200);
     }
 }
 //  $loginData = $request->validate([

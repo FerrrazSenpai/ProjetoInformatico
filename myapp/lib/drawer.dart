@@ -10,7 +10,6 @@ class DrawerPage extends StatefulWidget {
   DrawerPage({Key key, this.connected}) : super(key: key);
 
   final bool connected;
-
   @override
   MyDrawer createState() => MyDrawer();
 }
@@ -18,6 +17,7 @@ class DrawerPage extends StatefulWidget {
 class MyDrawer extends State<DrawerPage> {
   SharedPreferences sharedPreferences;
   var action;
+  int code;
   
   @override
   void initState() {
@@ -35,8 +35,8 @@ class MyDrawer extends State<DrawerPage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: <Color>[
-                  Colors.teal[900],
-                  Colors.teal[400],
+                  Colors.black87,
+                  Colors.grey[700],
                 ]
               ),
             ),
@@ -44,36 +44,27 @@ class MyDrawer extends State<DrawerPage> {
               children: <Widget>[
                 Icon(
                   Icons.directions_bus,
-                  color: Theme.of(context).accentColor,
+                  color: Theme.of(context).primaryColor,
                   size: 100.0,
                 ),
-                Text("Que ganda autoBUS",
+                Text("Aplicação Condutor",
                   style: TextStyle(
-                    fontSize: 25.0
+                    fontSize: 25.0,
                   ),
                 ),
               ],
             ),
           ),
-          Column(
-            children: <Widget>[
-              FlatButton(
-                padding: EdgeInsets.only(right: 10.0),
-                child: ListTile(
-                  leading: Icon(Icons.exit_to_app, color: Colors.black,),
-                  title: Text('Terminar Sessão', 
-                    style: TextStyle(fontSize: 17.0),
-                  ),
-                ),
-                onPressed: () async{
-                  action =
-                  await Dialogs.yesAbortDialog(context, 'Alerta', 'Pretende realmente sair?');
-                  onPressLogout();
-                },
-              ),
-              Divider(),
-            ],
-          )
+          ListTile(
+            leading: Icon(Icons.exit_to_app, color: Colors.black,),
+            title: Text('Terminar Sessão', style: TextStyle(fontSize: 17.0),),
+            onTap: () async {
+              action =
+              await Dialogs.yesAbortDialog(context, 'Alerta', 'Pretende realmente sair?');
+              onPressLogout();
+            },
+          ),
+          Divider(),
         ],
       ),
     );
@@ -99,13 +90,26 @@ class MyDrawer extends State<DrawerPage> {
 
   onPressLogout() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    print(widget.connected);
-    if (action == DialogAction.confirm && widget.connected) {
+
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/userid";
+    final response = await http.get(url,headers: {
+        'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
+    },).timeout(const Duration(seconds: 6));
+    
+    /* if (action == DialogAction.cancel) {
+      Navigator.of(context).pop();
+    } else if(action == DialogAction.confirm && response.statusCode == 200){
       _logout();
       sharedPreferences.clear();
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
-    } else {
+    }else{
       Navigator.of(context).pop();
+    } */
+
+    if (action == DialogAction.confirm) {
+      _logout();
+      sharedPreferences.clear();
+      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
     }
   }
 }

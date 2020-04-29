@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLinhasTable extends Migration
+class CreateLinhaparagemTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateLinhasTable extends Migration
      */
     public function up()
     {
-        Schema::create('linhas', function (Blueprint $table) {
-            $table->id('id_linha')->unique();
-            $table->string('nome');
-			$table->string('cor');
-            
+        Schema::create('linha_paragem', function (Blueprint $table) {
+            $table->id();
+            $table->integer('id_linha');
+			$table->integer('id_paragem');
+            $table->timestamp('hora');
         });
     }
 
@@ -28,8 +28,6 @@ class CreateLinhasTable extends Migration
      */
     public function down()
     {
-        Schema::table('linhas', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('linha_paragem');
     }
 }

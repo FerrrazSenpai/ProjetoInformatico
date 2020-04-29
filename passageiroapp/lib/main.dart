@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:passageiroapp/um.dart';
+import 'package:passageiroapp/map.dart';
 import 'login.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -35,14 +38,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   SharedPreferences sharedPreferences;
-  
+  int _selectedTab = 2;
+
   @override
   void initState() {
     super.initState();
     Future(() {
       checkLoginStatus();
     });
-    fillMarkers();
  }
 
   checkLoginStatus() async {
@@ -60,13 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   GoogleMapController mapController;
-  Set<Marker> markers = Set();
-  final LatLng _center = const LatLng(39.733222, -8.821096);
 
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,37 +76,52 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),*/
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () { },
-          tooltip: 'Increment',
-          child: Icon(Icons.map, color: Theme.of(context).accentColor),
-          elevation: 2.0,
-          backgroundColor: Theme.of(context).primaryColor,
-        ),
+      //body: _pageOptions[_selectedTab],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
 
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(icon: Icon(Icons.menu), onPressed: onPressLogout,),
-            IconButton(icon: Icon(Icons.card_giftcard), onPressed: onPressLogout,),
-            SizedBox(width: 48),
-            IconButton(icon: Icon(Icons.hd), onPressed: onPressLogout,),
-            IconButton(icon: Icon(Icons.pages), onPressed: onPressLogout,),
-          ],
-        ),
-        shape: CircularNotchedRectangle(), 
-        color: Colors.white,
+        currentIndex: _selectedTab,
+        onTap: (int index) {
+            setState(() {
+            _selectedTab = index;
+          });
+        },
+
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu),
+            title: Text('Menu'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.card_giftcard),
+            title: Text('Home'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            title: Text('Map'),
+          ),
+          //SizedBox(width: 48),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.hd),
+            title: Text('Home'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.pages),
+            title: Text('Home'),
+          ),
+        ]
       ),
-      body: GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: _center,
-          zoom: 17.0,
-        ),
-        markers: Set.from(markers),
-      ),
+      body: 
+      IndexedStack(
+        children: <Widget>[
+          UmPage(),
+          UmPage(),
+          MapPage(),
+          UmPage(),
+          UmPage(),
+        ],
+      index: _selectedTab,
+     ),
     );
   }
 
@@ -118,18 +130,5 @@ class _MyHomePageState extends State<MyHomePage> {
     
       sharedPreferences.clear();
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
-  }
-
-  fillMarkers(){
-    markers.addAll([ 
-    Marker(
-        markerId: MarkerId('value'),
-        position: LatLng(39.733222, -8.821096),
-        infoWindow: InfoWindow(title: "Paragem Biblioteca")),
-    Marker(
-        markerId: MarkerId('value2'),
-        position: LatLng(39.735196, -8.823338),
-        infoWindow: InfoWindow(title: "Paragem Rotunda")),
-    ]);
   }
 }

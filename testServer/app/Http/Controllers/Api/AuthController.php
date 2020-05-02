@@ -69,6 +69,12 @@ class AuthController extends Controller
         $id = Auth::id();
         return response()->json("Utilizador verificado", 200);
     }
+    
+    public function profile()
+    {    
+        $user = Auth::user();    
+        return $user;
+    }
 }
 //  $loginData = $request->validate([
         //      'email' => 'email|required',

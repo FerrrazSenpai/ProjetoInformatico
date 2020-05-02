@@ -31,5 +31,5 @@ Route::group(['middleware' => 'auth:api'], function () {
 	Route::post('/info', 'InfologinController@info');
 	Route::post('/updateinfo', 'InfologinController@updateinfo');
 	Route::get('/userid', 'Api\AuthController@verify');
-
+	Route::get('/profile', 'Api\AuthController@profile');
 });

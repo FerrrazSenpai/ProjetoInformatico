@@ -1,13 +1,20 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:app_condutor/login.dart';
 import 'package:app_condutor/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 Future main() async {
   await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.dumpErrorToConsole(details);
+    if (kReleaseMode)
+      exit(1);
+  };
   runApp(MyApp());
 }
 

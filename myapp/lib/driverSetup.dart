@@ -35,7 +35,7 @@ class _SetupPageState extends State<SetupPage> {
 
   Future getData() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horarioCondutor/" + sharedPreferences.getInt("id_condutor").toString();
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horarioCondutor/" + sharedPreferences.getString("id_condutor");
     //var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
     print(url + "Bearer " +sharedPreferences.getString("access_token"));
     try {      
@@ -150,8 +150,8 @@ class _SetupPageState extends State<SetupPage> {
               //fazer o post para corrigir 
             }
             
-            sharedPreferences.setInt("id_autocarro", _selectedBus);
-            sharedPreferences.setInt("id_linha", _selectedLine);
+            sharedPreferences.setString("id_autocarro", _selectedBus.toString());
+            sharedPreferences.setString("id_linha", _selectedLine.toString());
 
           }else{
             setState(() {

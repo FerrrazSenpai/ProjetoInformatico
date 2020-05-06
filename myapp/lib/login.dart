@@ -275,6 +275,8 @@ class _LoginPageState extends State<LoginPage> {
             sharedPreferences.setString("nome", jsonResponse['user']['nome']);
             sharedPreferences.setString("localidade", jsonResponse['user']['localidade']);
             sharedPreferences.setString("data_nascimento", jsonResponse['user']['data_nascimento']);
+            sharedPreferences.setString("id_condutor", jsonResponse['user']['id'].toString());
+
 
 
             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage()), (Route<dynamic> route) => false);

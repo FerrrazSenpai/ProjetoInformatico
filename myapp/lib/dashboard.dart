@@ -233,14 +233,17 @@ class DashboardPageState extends State<DashboardPage> {
 
   
   Future<String> _postLocation() async {
-
     sharedPreferences = await SharedPreferences.getInstance();
-    var url = 'http://'+DotEnv().env['IP_ADDRESS']+'/api/location';
+    
+    var url = 'http://'+DotEnv().env['IP_ADDRESS']+'/api/tempos';
     Map body = {
       "latitude" : userLocation.latitude.toString(),
       "longitude" : userLocation.longitude.toString(),
-      "speed" : speedkmh.toStringAsFixed(3),
-      "time" : formatDate(time, [yyyy,"-",mm,"-",dd," ",HH,":",nn,":",ss]),
+      "velocidade" : speedkmh.toStringAsFixed(3),
+      "hora" : formatDate(time, [HH,":",nn]),
+      "id_linha" : sharedPreferences.getString("id_linha"),
+      "id_autocarro" : sharedPreferences.getString("id_autocarro"),
+      "id_condutor" : sharedPreferences.getString("id_condutor"),
     };
 
     var response = 
@@ -256,6 +259,7 @@ class DashboardPageState extends State<DashboardPage> {
     print(response.body);
     //print(body);
     return response.body;
+    
   }
 
   getUserData() async {

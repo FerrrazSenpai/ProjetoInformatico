@@ -49,6 +49,25 @@ class DashboardPageState extends State<DashboardPage> {
   String localidade;
   String dataNascimento;
 
+  static const duration = const Duration(minutes: 1);
+  bool isActive = false;
+
+  Timer timer;
+
+  void handleTick() {
+    if (isActive) {
+      _getLocation().then((value) {
+        setState(() {
+          userLocation = value;
+          // 1m/s -> 3.6km/h  speed -> speedkmh
+          speedkmh = userLocation.speed.toDouble() * 3.600;
+          time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
+          _postLocation();
+        });
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +76,13 @@ class DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    if (timer == null) {
+      timer = Timer.periodic(duration, (Timer t) {
+        handleTick();
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -134,28 +160,28 @@ class DashboardPageState extends State<DashboardPage> {
                               Row(
                                 children: <Widget>[
                                   Expanded(
-                                    child: Text('\nNome: ' + nome + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20)),
+                                    child: Text('\nNome: ' + '$nome' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20)),
                                   ),
                                 ],
                               ),
                               Row(
                                 children: <Widget>[
                                   Expanded(
-                                    child: Text('Email: ' + email + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
+                                    child: Text('Email: ' + '$email' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
                                   ),
                                 ],
                               ),
                               Row(
                                 children: <Widget>[
                                   Expanded(
-                                    child: Text('Data de nascimento: ' + dataNascimento + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
+                                    child: Text('Data de nascimento: ' + '$dataNascimento' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
                                   ),
                                 ],
                               ),
                               Row(
                                 children: <Widget>[
                                   Expanded(
-                                    child: Text('Localidade: ' + localidade + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
+                                    child: Text('Localidade: ' + '$localidade' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
                                   ),
                                 ],
                               ),
@@ -174,17 +200,11 @@ class DashboardPageState extends State<DashboardPage> {
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(15.0),
                       ),
-                      child: Text('Get Coordinates, speed and time', textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20),),
+                      child: Text(isActive ? 'Parar o envio de localização' : 'Começar o envio de localização', textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20),),
                       color: Colors.white,
                       onPressed: (){
-                        _getLocation().then((value) {
-                          setState(() {
-                            userLocation = value;
-                            // 1m/s -> 3.6km/h  speed -> speedkmh
-                            speedkmh = userLocation.speed.toDouble() * 3.600;
-                            time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
-                            _postLocation();
-                          });
+                        setState(() {
+                          isActive = !isActive;
                         });
                       }
                     ),
@@ -256,16 +276,25 @@ class DashboardPageState extends State<DashboardPage> {
         setState(() {
           nome = dados['name'];
           email = dados['email'];
-          localidade = dados['localidade'];
           dataNascimento = dados['data_nascimento'];
-          ano = dataNascimento.substring(0,4);
-          dia = dataNascimento.substring(8,10);
-          mes = dataNascimento.substring(5,7);
-          dataNascimento = dia + '-' + mes + '-' + ano;
+          localidade = dados['localidade'];
+          if(dataNascimento != null ){
+            ano = dataNascimento.substring(0,4);
+            dia = dataNascimento.substring(8,10);
+            mes = dataNascimento.substring(5,7);
+            dataNascimento = dia + '-' + mes + '-' + ano;
+            print(dataNascimento);
+          }else{
+            dataNascimento = 'Desconhecida';
+          }
+
+          if (localidade != null ){
+            print(localidade);
+          }else{
+            localidade = 'Desconhecida';
+          }
           print(nome);
           print(email);
-          print(dataNascimento);
-          print(localidade);
         });
       }
     }catch(e){

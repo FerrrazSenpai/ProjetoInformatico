@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")){
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
-    }else if (sharedPreferences.getString("access_token") == null) {
+    }else if (sharedPreferences.getString("access_token") == null || sharedPreferences.getInt("id_condutor")==null || sharedPreferences.getInt("id_linha")==null || sharedPreferences.getInt("id_autocarro")==null) {
       sharedPreferences.remove("access_token");
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
     }

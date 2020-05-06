@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:app_condutor/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
 
 class SetupPage extends StatefulWidget {
   @override
@@ -12,10 +13,16 @@ class SetupPage extends StatefulWidget {
 
 class _SetupPageState extends State<SetupPage> {
   SharedPreferences sharedPreferences;
+  var array;
   var _error = "";
-  var _selectedBus;
+  int _selectedBus;
   int _selectedLine;
   int _idCondutor;
+  var _defaultLine=0;
+  var _defaultBus=0;
+
+  final TextEditingController __selectedLineController = new TextEditingController();
+  final TextEditingController __selectedBusController = new TextEditingController();
 
   List bus = List();
   List linhas = List();
@@ -28,35 +35,46 @@ class _SetupPageState extends State<SetupPage> {
 
   Future getData() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    var now = new DateTime.now().toString();
-    Map body = {"email":sharedPreferences.getString("email"), "data":now};
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
-    
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horarioCondutor/" + sharedPreferences.getInt("id_condutor").toString();
+    //var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
+    print(url + "Bearer " +sharedPreferences.getString("access_token"));
     try {      
-      final response = await http.post(url,headers: {
-        'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
-      },body: body).timeout(const Duration(seconds: 6));
-
-      print("driverSetup.dart: " + response.body); ///JUST DEBUG
-      Map<String, dynamic> list = jsonDecode(response.body);
-
-      if(list['id_linha'].length !=0){ //se o motorista tiver no seu horario
+      final response = await http.get(
+        url,
+        headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},
+        ).timeout(const Duration(seconds: 6));
+    
+      if(response.body[1]=="]"){ //ou seja a resposta é só []
+        print("EMPTY RESPONSE");
         setState(() {
-          _selectedLine = int.parse(list['id_linha'][0].toString());
+          _error="Sem infos no server";
+        });
+        return; //nao ha nada para fazer nesta funcao entao
+      }
+      Map<String, dynamic> list = jsonDecode(response.body)[0];
+      //array = jsonDecode(response.body)[0];
+
+
+      //print("linha: " + array["id_linha"]);
+      //print("bus: " + array["id_autocarro"]);
+
+      if(list.containsKey('id_linha')){   //se vier linha da api
+        setState(() {
+          _selectedLine = int.parse(list['id_linha'].toString());
+          __selectedLineController.text = _selectedLine.toString();
+          _defaultLine=_selectedLine;
         });
       }
 
-      if(list['autocarros_livres'].length !=0 && list['linhas'].length !=0){
+      if(list.containsKey('id_autocarro')){ 
         setState(() {
-          bus = list['autocarros_livres'];
-          linhas = list['linhas'];
-          _idCondutor = int.parse(list['id_condutor'][0].toString());
-        });
-      }else{
-        setState(() {
-          _error = "Erro ao ir buscar os autocarros/linhas";
+          _selectedBus = int.parse(list['id_autocarro'].toString());
+          __selectedBusController.text = _selectedBus.toString();
+          _defaultBus=_selectedBus;
+
         });
       }
+      
 
     }catch(e){
       setState(() {
@@ -64,6 +82,7 @@ class _SetupPageState extends State<SetupPage> {
       });
       print(e.toString());
     }
+    
   }
 
 
@@ -76,10 +95,38 @@ class _SetupPageState extends State<SetupPage> {
             children: <Widget>[
               Padding(padding: EdgeInsets.only(top: 75.0)),
               costumLabel("Numero do autocarro:"),
-              dropDownNrBus(),
+              //dropDownNrBus(),
+              new Container(
+                  child: new TextField(
+                    decoration: const InputDecoration(hintText: "Numero do autocarro"),
+                    autocorrect: false,
+                    controller: __selectedBusController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                        WhitelistingTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (String value) {
+                      _selectedBus = int.parse(value);
+                    },
+                  ),
+                ),
               Padding(padding: EdgeInsets.only(top: 30.0)),
               costumLabel("Numero da linha:"),
-              dropDownLinhas(),
+              //dropDownLinhas(),
+              new Container(
+                  child: new TextField(
+                    decoration: const InputDecoration(hintText: "Linha"),
+                    autocorrect: false,
+                    controller: __selectedLineController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                        WhitelistingTextInputFormatter.digitsOnly
+                    ],
+                    onChanged: (String value) {
+                      _selectedLine = int.parse(value);
+                    },
+                  ),
+                ),
               errorSection(),
               buttonSection(),
             ],
@@ -97,9 +144,14 @@ class _SetupPageState extends State<SetupPage> {
           if(_selectedLine!=null && _selectedBus!=null ){
             print("bus: " + _selectedBus.toString()); //debug
             print("linha: " + _selectedLine.toString()); //debug
-            print("condutor: " + _idCondutor.toString()); //debug
 
-            fillHistory();
+            if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
+            {
+              //fazer o post para corrigir 
+            }
+            
+            sharedPreferences.setInt("id_autocarro", _selectedBus);
+            sharedPreferences.setInt("id_linha", _selectedLine);
 
           }else{
             setState(() {
@@ -205,44 +257,6 @@ class _SetupPageState extends State<SetupPage> {
         ],
       ),
     );
-  }
-
-  fillHistory() async {
-    var data = new DateTime.now().toString();
-    Map body = {
-      "id_condutor": _idCondutor.toString(),
-      "id_autocarro":_selectedBus.toString(),
-      "id_linha": _selectedLine.toString(),
-      "time": data
-    };
-
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/updateinfo";
-    
-    try {      
-      final response = await http.post(url,headers: {
-        'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
-      },body: body).timeout(const Duration(seconds: 6));
-
-      if(response.statusCode == 200) {
-
-        sharedPreferences = await SharedPreferences.getInstance();
-        sharedPreferences.setInt('id_condutor', _idCondutor);
-        sharedPreferences.setInt('id_linha', _selectedLine);
-        sharedPreferences.setInt('id_autocarro', _selectedBus);
-
-      }else{
-        setState(() {
-          print(response.body);
-          _error = response.body;
-        });
-      }
-
-    }catch(e){
-      print(e.toString());
-      setState(() {
-        _error=e.toString();
-      });
-    }
   }
 
 }

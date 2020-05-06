@@ -28,7 +28,7 @@ Route::get('/markers', 'LocationController@markers');
 Route::group(['middleware' => 'auth:api'], function () {
 	Route::post('/location', 'LocationController@location');
 	Route::post('/logout','Api\AuthController@logout');
-	Route::post('/info', 'InfologinController@info');
+	Route::get('/info', 'InfologinController@info');
 	Route::post('/updateinfo', 'InfologinController@updateinfo');
 	Route::get('/userid', 'Api\AuthController@verify');
 	Route::get('/profile', 'Api\AuthController@profile');

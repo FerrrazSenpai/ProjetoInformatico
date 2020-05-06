@@ -52,7 +52,9 @@ class DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    getUserData();
+    //getUserData();
+    getUserData2();
+    
   }
 
   @override
@@ -266,11 +268,26 @@ class DashboardPageState extends State<DashboardPage> {
           print(email);
           print(dataNascimento);
           print(localidade);
+          
         });
       }
     }catch(e){
       print(e);
     }
+  }
+
+  getUserData2() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    setState(() {
+      
+      nome = sharedPreferences.getString("nome");
+      email = sharedPreferences.getString("email");
+      localidade = sharedPreferences.getString("localidade");
+      dataNascimento = sharedPreferences.getString("data_nascimento");
+
+    });
+
   }
 
 }

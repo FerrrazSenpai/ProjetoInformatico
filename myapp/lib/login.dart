@@ -257,47 +257,69 @@ class _LoginPageState extends State<LoginPage> {
     };
 
     //var jsonResponse = null;
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/login";
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/loginAPI";
     //final response = null;
     
     try {      
-      final response = await http.post(url, body: body).timeout(const Duration(seconds: 5));
+      final response = await http.post(url, body: body).timeout(const Duration(seconds: 6));
       print(response.statusCode);
       if(response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
-        sharedPreferences.setBool("checkBox", checkBoxValue);
-        if(jsonResponse.containsKey('access_token')) {
-          sharedPreferences.setString("access_token", jsonResponse['access_token']);
-          sharedPreferences.setString("email", email);
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage()), (Route<dynamic> route) => false);
-          print(jsonResponse['access_token']);
-          print(sharedPreferences.getBool("checkBox"));
-        }
-        else{
+        if(jsonResponse['user']['tipo']=='d'){
+          if(jsonResponse['token'].containsKey('access_token')) {
+            sharedPreferences.setBool("checkBox", checkBoxValue);
+            //print(jsonResponse['token'].containsKey('access_token'));
+            //print("id: " + jsonResponse['user']['id'].toString());
+            sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
+            sharedPreferences.setString("email", email);
+            sharedPreferences.setString("nome", jsonResponse['user']['nome']);
+            sharedPreferences.setString("localidade", jsonResponse['user']['localidade']);
+            sharedPreferences.setString("data_nascimento", jsonResponse['user']['data_nascimento']);
+
+
+            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage()), (Route<dynamic> route) => false);
+            //print(jsonResponse['access_token']);
+            //print(sharedPreferences.getBool("checkBox"));
+          }
+          else{
+            sharedPreferences.clear();
+            setState(() {
+              _error = "Algo correu muito mal 1!uncaught exception";
+            });
+            print("Algo correu muito mal 1!uncaught exception");
+          }
+        }else{
+          sharedPreferences.clear();
           setState(() {
-            _error = "Algo correu muito mal!uncaught exception";
-          });
-          print("Algo correu muito mal!uncaught exception");
+              _error = "Tem de utilizar uma conta de condutor!";
+            });
         }
       }
       else if(response.statusCode == 400){
+        sharedPreferences.clear();
         setState(() {
             _error = "Email ou password incorretos";
           });
           print("Email ou password incorretos");
       }
       else{
+        sharedPreferences.clear();
         setState(() {
-            _error = "Algo correu muito mal!uncaught exception";
+            _error = "Algo correu muito mal 2!uncaught exception";
           });
         print("uncaught exception \n" + response.body);
       }
     }
     
     catch(e){
-//      if(e.toString().contains("TimeoutException")) {
-//        print("demasiado tempo para conectar ao servidor");
-//      }
+      if(e.toString().contains("TimeoutException")) {
+        setState(() {
+          _error="Demasiado tempo para conectar ao servidor";
+        });
+        print("demasiado tempo para conectar ao servidor");
+      }
+    sharedPreferences.clear();
+    print(e);
     setState(() {
       _error="Erro de conexão ao servidor";
     });

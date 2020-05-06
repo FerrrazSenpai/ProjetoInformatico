@@ -12,7 +12,7 @@ class InfologinController extends Controller
 {
     public function info(Request $request)
     {         
-        $a= DB::table('autocarros')->where('estado','livre')->pluck('id');
+        /*$a= DB::table('autocarros')->where('estado','livre')->pluck('id');
         $b= DB::table('users')->where('email', $request->email)->pluck('id');
 
         $day = date("Y-m-d",strtotime($request->data));
@@ -21,6 +21,12 @@ class InfologinController extends Controller
         $c=DB::table('horarios_condutores')->where('id_condutor', $b)->whereDate('data', $day)->whereTime('hora_inicio', '<=', $time)->whereTime('hora_fim', '>', $time)->pluck('id_linha');
        
 		$d=DB::table('linhas')->pluck('linha');
+        */
+        return [
+            //['id_linha'=>"1",
+            //'id_autocarro'=>"2"
+            //]
+        ];
 
         return response()->json([
 			'autocarros_livres'=>$a,

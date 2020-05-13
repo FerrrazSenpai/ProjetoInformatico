@@ -148,6 +148,9 @@ class _SetupPageState extends State<SetupPage> {
             if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
             {
               //fazer o post para corrigir 
+              //
+              //correctInfo();
+              //confirmar se o pedido é com id horario ou condutor
             }
             
             sharedPreferences.setString("id_autocarro", _selectedBus.toString());
@@ -257,6 +260,32 @@ class _SetupPageState extends State<SetupPage> {
         ],
       ),
     );
+  }
+
+  correctInfo() async {
+    //sharedPreferences = await SharedPreferences.getInstance();
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horario/" + sharedPreferences.getString("id_condutor");
+//VER SE É ID_CONDUTOR OU ID_HORARIO
+
+    Map body = {
+      "id_autocarro" : _selectedBus,
+      "id_linha" : _selectedLine,
+    };
+
+    try {      
+      final response = await http.post(
+        url,
+        headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},
+        body: body).timeout(const Duration(seconds: 6));
+      
+      print(response.statusCode);
+    
+    }catch(e){
+      print(e);
+      setState(() {
+        _error=e.toString();
+      });
+    }
   }
 
 }

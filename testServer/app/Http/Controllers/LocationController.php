@@ -25,16 +25,41 @@ class LocationController extends Controller
 
     public function markers(Request $request)
     { 
-        $a=DB::table('linha_paragem')->where('id_linha','1')->pluck('id_paragem'); //[idParagem, idParagem, idParagem ......]
+       /*
+        $a=DB::table('linha_paragem')->select('id_paragem', 'id_linha')->get(); //[idParagem, idParagem, idParagem ......]
         if($a->isEmpty()){
             return $a;
         }
-
+        //return $a[0];/////////////////
+       
         foreach ($a as $paragem){ 
-            $a= DB::table('paragem')->where('id',$paragem)->get(); //[idParagem, idParagem, idParagem ......]   
-            $lista[]=$a[0];
+            $a1= DB::table('paragem')->where('id',$paragem->id_paragem)->get(); //[idParagem, idParagem, idParagem ......]   
+          
+            $a1[0]->id_linha = $paragem->id_linha;
+
+            $lista[]=$a1[0];
+        }
+
+        return $lista; */
+
+        $a=DB::table('paragem')->get(); //[idParagem, idParagem, idParagem ......]
+        //return $a;
+        foreach ($a as $paragem){ 
+
+
+            $a1['linhas']= DB::table('linha_paragem')->where('id_paragem',$paragem->id)->get('id_linha'); //[idParagem, idParagem, idParagem ......]   
+
+            $a1["latitude"] = $paragem->latitude;
+            $a1["longitude"] = $paragem->longitude;
+            $a1["id_paragem"] = $paragem->id;
+            $a1["nome"] = $paragem->nome;
+
+            
+            $lista[]= $a1;
+
         }
 
         return $lista;
+
     }
 }

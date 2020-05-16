@@ -26,10 +26,9 @@ class MyApp extends StatelessWidget {
 }
 
 class DashboardPage extends StatefulWidget {
-  DashboardPage({Key key, this.title, this.linha}) : super(key: key);
+  DashboardPage({Key key, this.title}) : super(key: key);
 
   final String title;
-  final int linha;
 
   @override
   DashboardPageState createState() => DashboardPageState();
@@ -194,13 +193,12 @@ class DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
                   Container(
-                    width: 200.0,
                     padding: EdgeInsets.fromLTRB(30.0, 570.0, 30.0, 50.0),
-                    child: new RaisedButton(
+                    child: RaisedButton(
                       padding: EdgeInsets.all(8.0),
                       elevation: 15,
                       shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(15.0),
+                        borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Text(isActive ? 'Parar o envio de localização' : 'Começar o envio de localização', textAlign: TextAlign.center, style: TextStyle(color: Colors.black, fontSize: 20),),
                       color: Colors.white,
@@ -217,7 +215,7 @@ class DashboardPageState extends State<DashboardPage> {
           },
         ),
       ),
-      drawer: new DrawerPage(connected: connected),
+      drawer: new DrawerPage(),
     );
   }
 

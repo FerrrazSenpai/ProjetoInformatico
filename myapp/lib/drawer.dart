@@ -4,12 +4,10 @@ import 'package:app_condutor/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
+import 'package:app_condutor/schedule.dart';
+import 'package:app_condutor/dashboard.dart';
 
 class DrawerPage extends StatefulWidget {
-  DrawerPage({Key key, this.connected}) : super(key: key);
-
-  final bool connected;
   @override
   MyDrawer createState() => MyDrawer();
 }
@@ -56,6 +54,20 @@ class MyDrawer extends State<DrawerPage> {
             ),
           ),
           ListTile(
+            leading: Icon(Icons.home, color: Colors.black,),
+            title: Text('Página Inicial', style: TextStyle(fontSize: 17.0),),
+            onTap: () async {
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: 'Página inicial')), (Route<dynamic> route) => false);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.schedule, color: Colors.black,),
+            title: Text('Horário', style: TextStyle(fontSize: 17.0),),
+            onTap: () async {
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => schedulePage()), (Route<dynamic> route) => false);
+            },
+          ),
+          ListTile(
             leading: Icon(Icons.exit_to_app, color: Colors.black,),
             title: Text('Terminar Sessão', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
@@ -64,7 +76,6 @@ class MyDrawer extends State<DrawerPage> {
               onPressLogout();
             },
           ),
-          Divider(),
         ],
       ),
     );

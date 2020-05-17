@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
-import 'driverSetup.dart';
+import 'package:app_condutor/driverSetup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_offline/flutter_offline.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:app_condutor/connectivity.dart';
 
 Future main() async {
   await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
@@ -33,78 +32,42 @@ class _LoginPageState extends State<LoginPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(
-              Icons.directions_bus,
-              color: Theme.of(context).accentColor,
-              size: 75.0,
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Icon(
+                Icons.directions_bus,
+                color: Theme.of(context).accentColor,
+                size: 75.0,
+              ),
             ),
           ],
         ),
       ),
-      body: Builder(
-        builder: (BuildContext context){
-          return OfflineBuilder(
-            connectivityBuilder: (
-              BuildContext context,
-              ConnectivityResult connectivity,
-              Widget child
-            ){
-              connected = connectivity != ConnectivityResult.none;
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  child,
-                  Positioned(
-                    left: 0.00,
-                    right: 0.00,
-                    height: 30.00,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      color: connected ? null : Colors.black,
-                      child: connected ? null :
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text("The device is disconnected", style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold),),
-                          SizedBox(width: 8.0,),
-                          SizedBox(width: 12.0, height: 12.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.red[800]),
-                          ),),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              );
-            },
-            child: Container(
-              margin: EdgeInsets.only(top: 20.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).accentColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15.0),
-                  topRight: Radius.circular(15.0),
-                ),
-              ),
-              child: ListView(
-                children: <Widget>[
-                  titleSection(),
-                  formSection(),
-                  errorSection(),
-                  buttonSection(),
-                  checkBoxSection(),
-                ],
-              )
+      body: new ConnectivityPage(
+        widget: Container(
+          margin: EdgeInsets.only(top: 20.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).accentColor,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15.0),
+              topRight: Radius.circular(15.0),
             ),
-          );
-        },
+          ),
+          child: ListView(
+            children: <Widget>[
+              _titleSection(),
+              _formSection(),
+              _errorSection(),
+              _buttonSection(),
+              _checkBoxSection(),
+            ],
+          )
+        ),
       ),
     );
   }
 
-  Container titleSection() {
+  Container _titleSection() {
     return Container(
       margin: EdgeInsets.only(top: 110.0, left: 30.0),
       child: Text("Bem vindo, Sr. Condutor",
@@ -117,14 +80,14 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Container  formSection(){
+  Container  _formSection(){
     return Container(
       margin: EdgeInsets.only(top: 20.0, left: 20.0, right: 20.0),
         child: Column(
           children: <Widget>[
             SizedBox(height: 60.0),
-            formInput("Email", Icons.email),
-            formInput("Password", Icons.lock),
+            _formInput("Email", Icons.email),
+            _formInput("Password", Icons.lock),
           ],
         )
     );
@@ -134,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordControler = new TextEditingController();
 
 
-  TextFormField formInput(String hint, IconData iconName){
+  TextFormField _formInput(String hint, IconData iconName){
     return TextFormField(
       cursorColor: Colors.white,
       style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
@@ -153,13 +116,13 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Container buttonSection(){
+  Container _buttonSection(){
     return Container(
-      padding: EdgeInsets.only(top: 20.0),
+      padding: EdgeInsets.only(top: 20.0, bottom: 15.0),
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
-          signIn(emailControler.text, passwordControler.text);
+          _signIn(emailControler.text, passwordControler.text);
         },
         color: Theme.of(context).primaryColor,
         elevation: 20.0,
@@ -182,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Container errorSection(){
+  Container _errorSection(){
     return Container(
       padding: EdgeInsets.only(left: 70.0, top: 12.0),
       child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
@@ -205,7 +168,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Row checkBoxSection(){
+  Row _checkBoxSection(){
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -235,7 +198,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
   
-  signIn(String email, String password) async {
+  _signIn(String email, String password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     setState(() {
@@ -279,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
 
 
 
-            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage()), (Route<dynamic> route) => false);
+            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage(btnText: 'Avançar',)), (Route<dynamic> route) => false);
             //print(jsonResponse['access_token']);
             //print(sharedPreferences.getBool("checkBox"));
           }

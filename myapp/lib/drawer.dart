@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:app_condutor/schedule.dart';
 import 'package:app_condutor/dashboard.dart';
+import 'package:app_condutor/driverSetup.dart';
 
 class DrawerPage extends StatefulWidget {
   @override
@@ -20,7 +21,7 @@ class MyDrawer extends State<DrawerPage> {
   @override
   void initState() {
     super.initState();
-    getStuff();
+    _getData();
   }
 
   @override
@@ -64,16 +65,24 @@ class MyDrawer extends State<DrawerPage> {
             leading: Icon(Icons.schedule, color: Colors.black,),
             title: Text('Horário', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => schedulePage()), (Route<dynamic> route) => false);
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SchedulePage()), (Route<dynamic> route) => false);
             },
           ),
+          ListTile(
+            leading: Icon(Icons.settings, color: Colors.black,),
+            title: Text('Configurar autocarro e linha', style: TextStyle(fontSize: 17.0),),
+            onTap: () async {
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage(btnText: 'Voltar à página inicial',)), (Route<dynamic> route) => false);
+            },
+          ),
+
           ListTile(
             leading: Icon(Icons.exit_to_app, color: Colors.black,),
             title: Text('Terminar Sessão', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
               action =
               await Dialogs.yesAbortDialog(context, 'Alerta', 'Pretende realmente sair?');
-              onPressLogout();
+              _onPressLogout();
             },
           ),
         ],
@@ -94,12 +103,12 @@ class MyDrawer extends State<DrawerPage> {
     }
   }
 
-  Future<SharedPreferences> getStuff() async {
+  Future<SharedPreferences> _getData() async {
     sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences;
   }
 
-  onPressLogout() async {
+  _onPressLogout() async {
     sharedPreferences = await SharedPreferences.getInstance();
 
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/userid";

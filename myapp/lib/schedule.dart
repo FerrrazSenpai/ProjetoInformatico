@@ -3,17 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:app_condutor/connectivity.dart';
 
-class schedulePage extends StatefulWidget {
+
+class SchedulePage extends StatefulWidget {
   @override
   schedulePageStateState createState() => schedulePageStateState();
 }
 
-class schedulePageStateState extends State<schedulePage> with TickerProviderStateMixin{
+class schedulePageStateState extends State<SchedulePage> with TickerProviderStateMixin{
   CalendarController _calendarController;
   Map<DateTime, List> _events;
   List _selectedEvents;
   Color color = Colors.white;
+  bool connected;
 
   @override
   void initState() {
@@ -26,14 +29,14 @@ class schedulePageStateState extends State<schedulePage> with TickerProviderStat
       _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
       _selectedDay.subtract(Duration(days: 20)): ['Event A2', 'Event B2', 'Event C2', 'Event D2'],
       _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
-      _selectedDay.subtract(Duration(days: 10)): ['Event A4', 'Event B4', 'Event C4'],
-      _selectedDay.subtract(Duration(days: 4)): ['1 9h00-10h10'],
-      _selectedDay.subtract(Duration(days: 2)): ['1 9h00-10h10', '4 15h00-16h20', '3 uma hora qualquer'],
+      _selectedDay.subtract(Duration(days: 10)): ['10 9h00-10h10', '7 15h00-16h20'],
+      _selectedDay.subtract(Duration(days: 4)): ['3 9h00-10h10'],
+      _selectedDay.subtract(Duration(days: 2)): ['6 9h00-10h10', '7 15h00-16h20', '8 uma hora qualquer'],
       _selectedDay: ['1 9h00-10h10', '4 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 1)): Set.from(['Event A8', 'Event B8', 'Event C8', 'Event D8','1 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','1 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer']).toList(),
+      _selectedDay.add(Duration(days: 1)): Set.from(['1 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','5 uma hora qualquer','10 uma hora qualquer']).toList(),
       _selectedDay.add(Duration(days: 3)): Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
-      _selectedDay.add(Duration(days: 7)): ['1 9h00-10h10', '4 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 11)): ['Event A11', 'Event B11'],
+      _selectedDay.add(Duration(days: 7)): ['1 9h00-10h10', '5 15h00-16h20', '3 uma hora qualquer'],
+      _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 CHUPAMOS'],
       _selectedDay.add(Duration(days: 17)): ['Event A12', 'Event B12', 'Event C12', 'Event D12'],
       _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
       _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
@@ -56,15 +59,19 @@ class schedulePageStateState extends State<schedulePage> with TickerProviderStat
         title: Text('Horário'),
       ),
       backgroundColor: Theme.of(context).accentColor,
-      body: ListView(
-        children: <Widget>[
-          _buildTableCalendar(),
-          Divider(
-            color: Colors.transparent,
-            height: 20,
-          ), 
-          _buildEventList(),
-        ],
+      body: Container(
+        child: new ConnectivityPage(
+          widget: ListView(
+          children: <Widget>[
+            _buildTableCalendar(),
+            Divider(
+              color: Colors.transparent,
+              height: 20,
+            ),
+            _buildEventList(),
+          ],
+        ),
+        )
       ),
       drawer: new DrawerPage(),
     );
@@ -245,33 +252,36 @@ class schedulePageStateState extends State<schedulePage> with TickerProviderStat
     return Column(
       children: _selectedEvents
       .map((event) {
-        switch (event.toString().substring(0,1)) {
-          case '1':
+        switch (event.toString().substring(0,2)) {
+          case '1 ':
             color = Colors.red;
           break;
-          case '2':
-            color = Colors.green;
+          case '2 ':
+            color = Colors.lightGreen;
           break;
-          case '3':
-            color = Colors.blue;
+          case '3 ':
+            color = Colors.blue[300];
           break;
-          case '4':
-            color = Colors.blueGrey;
+          case '4 ':
+            color = Colors.blue[900];
           break;
-          case '5':
-            color = Colors.green;
+          case '5 ':
+            color = Colors.deepPurpleAccent;
           break;
-          case '6':
+          case '6 ':
             color = Colors.pink;
           break;
-          case '7':
-            color = Colors.yellow;
+          case '7 ':
+            color = Colors.yellow[600];
           break;
-          case '8':
+          case '8 ':
             color = Colors.orange;
           break;
-          case '9':
+          case '9 ':
             color = Colors.black;
+          break;
+          case '10':
+            color = Colors.teal;
           break;
           default:
             color = Colors.white;
@@ -280,7 +290,7 @@ class schedulePageStateState extends State<schedulePage> with TickerProviderStat
         var container = Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              stops: [0.1, 0.02],
+              stops: [0.11, 0.02],
               colors: [color, Colors.white]
             ),
             borderRadius: BorderRadius.all(Radius.circular(10.0))
@@ -288,7 +298,7 @@ class schedulePageStateState extends State<schedulePage> with TickerProviderStat
           margin: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 6.0),
           child: ListTile(
             leading: Text(
-              event.toString().substring(0,1),
+              event.toString().substring(0,2),
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,

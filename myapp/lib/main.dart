@@ -70,9 +70,35 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.teal[500],
-        title: Text(widget.title),
+      backgroundColor: Theme.of(context).accentColor,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 250),
+        child: Center(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 70,
+                  height: 70,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 5.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(
+                  height: 20
+                ),
+                Text("A carregar ...", 
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w700
+                )
+                ),
+              ]
+            )
+          ),
+        ),
       ),
     );
   }

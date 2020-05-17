@@ -151,16 +151,25 @@ class _LoginPageState extends State<LoginPage> {
       child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
       Row(
         children: <Widget>[
-          Icon(
-            Icons.error_outline,
-            color: Colors.red[700],
-            size: 20.0,
-          ),
-          Text('  $_error', 
-            style: TextStyle(
-              color: Colors.red[700],
-              fontSize: 15.0,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red[700],
+                  size: 20.0,
+                ),
+                SizedBox(width: 5.0),
+                Expanded(
+                  child: Text('$_error', 
+                    style: TextStyle(
+                      color: Colors.red[700],
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

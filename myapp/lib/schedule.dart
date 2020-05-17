@@ -33,7 +33,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
       _selectedDay.subtract(Duration(days: 4)): ['3 9h00-10h10'],
       _selectedDay.subtract(Duration(days: 2)): ['6 9h00-10h10', '7 15h00-16h20', '8 uma hora qualquer'],
       _selectedDay: ['1 9h00-10h10', '4 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 1)): Set.from(['1 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','5 uma hora qualquer','10 uma hora qualquer']).toList(),
+      _selectedDay.add(Duration(days: 1)): Set.from(['8 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','5 uma hora qualquer','10 uma hora qualquer']).toList(),
       _selectedDay.add(Duration(days: 3)): Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
       _selectedDay.add(Duration(days: 7)): ['1 9h00-10h10', '5 15h00-16h20', '3 uma hora qualquer'],
       _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 CHUPAMOS'],

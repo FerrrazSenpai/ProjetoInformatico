@@ -52,7 +52,7 @@ class _SetupPageState extends State<SetupPage> {
       if(response.body[1]=="]"){ //ou seja a resposta é só []
         print("EMPTY RESPONSE");
         setState(() {
-          _error="Sem infos no server";
+          _error="Sem informação no servidor";
         });
         return; //nao ha nada para fazer nesta funcao entao
       }
@@ -79,11 +79,9 @@ class _SetupPageState extends State<SetupPage> {
 
         });
       }
-      
-
     }catch(e){
       setState(() {
-        _error= e.toString();
+        _error= "Houve um problema ao estabelecer conexão";
       });
       print(e.toString());
     }
@@ -154,29 +152,49 @@ class _SetupPageState extends State<SetupPage> {
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
-          if(_selectedLine!=null && _selectedBus!=null ){
-            print("bus: " + _selectedBus.toString()); //debug
-            print("linha: " + _selectedLine.toString()); //debug
 
-            if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
-            {
-              //fazer o post para corrigir 
-              //
-              //correctInfo();
-              //confirmar se o pedido é com id horario ou condutor
-            }
+          // print("bus: " + __selectedBusController.text); //debug
+          // print("linha: " + __selectedLineController.text); //debug
+          // print("btnText = " + widget.btnText);
+
+          // if(_selectedLine!=null && _selectedBus!=null ){
+          //   print("bus: " + _selectedBus.toString()); //debug
+          //   print("linha: " + _selectedLine.toString()); //debug
+
+          //   if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
+          //   {
+          //     //fazer o post para corrigir 
+          //     //
+          //     //correctInfo();
+          //     //confirmar se o pedido é com id horario ou condutor
+          //   }
             
+          // }
+
+          if((__selectedBusController.text == "" || __selectedLineController.text == "") && widget.btnText == 'Avançar'){
+            sharedPreferences.setString("id_autocarro", null);
+            sharedPreferences.setString("id_linha", null);
+            // print("Vem do login e nao preencheu tudo");
+          }else if((__selectedBusController.text == "" || __selectedLineController.text == "") && widget.btnText == 'Voltar à página inicial'){
+            // print("Nada é alterado");
+          }else{
+            sharedPreferences.setString("id_autocarro", __selectedBusController.text);
+            sharedPreferences.setString("id_linha", __selectedLineController.text);
+            // print("Correu tudo bem");
           }
 
           if(checkBoxValue){
             sharedPreferences.setString("id_autocarro", null);
-            sharedPreferences.setString("id_linha", null);
-          }else{
-            sharedPreferences.setString("id_autocarro", _selectedBus.toString());
-            sharedPreferences.setString("id_linha", _selectedLine.toString());
+            sharedPreferences.setString("id_linha", null);   
+            // print("Checkbox ativada delete all");         
           }
+          // if(sharedPreferences.getString('id_autocarro') != null && sharedPreferences.getString('id_linha') != null){
+          //   print("autocarro corrente: " + sharedPreferences.getString('id_autocarro'));
+          //   print("linha atual: " + sharedPreferences.getString('id_linha'));
+          // }else{
+          //   print("ta null");
+          // }
 
-          print(checkBoxValue);
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: 'Página inicial')), (Route<dynamic> route) => false);
         },
 
@@ -265,16 +283,25 @@ class _SetupPageState extends State<SetupPage> {
       child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
       Row(
         children: <Widget>[
-          Icon(
-            Icons.error_outline,
-            color: Colors.red[700],
-            size: 20.0,
-          ),
-          Text('  $_error', 
-            style: TextStyle(
-              color: Colors.red[700],
-              fontSize: 15.0,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red[700],
+                  size: 20.0,
+                ),
+                SizedBox(width: 5.0),
+                Expanded(
+                  child: Text('  $_error', 
+                    style: TextStyle(
+                      color: Colors.red[700],
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

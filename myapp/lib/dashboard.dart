@@ -8,6 +8,7 @@ import 'package:date_format/date_format.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:app_condutor/connectivity.dart';
+import 'package:intl/intl.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -46,15 +47,15 @@ class DashboardPageState extends State<DashboardPage> {
   String email;
   String localidade;
   String dataNascimento;
+  String linha;
+  String bus;
 
   static const duration = const Duration(minutes: 1);
   bool isActive = false;
 
   Timer timer;
 
-  List _event;
-  List _eventVoid;
-  Color _color = Colors.white;
+  Color _color = Colors.teal;
   Map<DateTime, List> _events;
   List _selectedEvents;
 
@@ -79,6 +80,7 @@ class DashboardPageState extends State<DashboardPage> {
     super.initState();
     //_getUserData();
     _getUserData2();
+
     final _selectedDay = DateTime.now();
     _events = {
       _selectedDay.subtract(Duration(days: 30)): ['Event A0', 'Event B0', 'Event C0'],
@@ -88,25 +90,30 @@ class DashboardPageState extends State<DashboardPage> {
       _selectedDay.subtract(Duration(days: 10)): ['10 9h00-10h10', '7 15h00-16h20'],
       _selectedDay.subtract(Duration(days: 4)): ['3 9h00-10h10'],
       _selectedDay.subtract(Duration(days: 2)): ['6 9h00-10h10', '7 15h00-16h20', '8 uma hora qualquer'],
-      _selectedDay: ['1 9h00-10h10', '4 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 1)): Set.from(['1 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','5 uma hora qualquer','10 uma hora qualquer']).toList(),
-      _selectedDay.add(Duration(days: 3)): Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
+      _selectedDay: ['7 9h00-10h10', '8 15h00-16h20', '3 uma hora qualquer'],
+      _selectedDay.add(Duration(days: 1)): Set.from(['8 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','10 uma hora qualquer']).toList(),
+      _selectedDay.add(Duration(days: 3)): Set.from(['5 uma hora qualquer']).toList(),
       _selectedDay.add(Duration(days: 7)): ['1 9h00-10h10', '5 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 CHUPAMOS'],
+      _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 16h20-17h00'],
       _selectedDay.add(Duration(days: 17)): ['Event A12', 'Event B12', 'Event C12', 'Event D12'],
       _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
       _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
     };
 
-    _selectedEvents = _events[_selectedDay] ?? [];
+    _selectedEvents = _events[_selectedDay.add(Duration(days: 11))] ?? null;
+
+    print(_selectedEvents);
 
     _setupVerification();
 
+    _functionColor(linha);
   }
 
   @override
   Widget build(BuildContext context) {
     
+    _functionColor(linha);
+
     if (timer == null) {
       timer = Timer.periodic(duration, (Timer t) {
         handleTick();
@@ -115,20 +122,33 @@ class DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, style: TextStyle(color: _color == Colors.black ? Colors.white : Colors.black, fontWeight: FontWeight.bold),),
+        backgroundColor: _color,
+        iconTheme: new IconThemeData(color: _color == Colors.black ? Colors.white : Colors.black),
       ),
       backgroundColor: Theme.of(context).accentColor,
       body: Container(
-        
         child: new ConnectivityPage(
           widget: ListView(        
             children: <Widget>[
               _getProfile(),
               //_buildEventList(),
+              Text("Meus serviços para o dia de hoje",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 20.0,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+              SizedBox(
+                height: 6.0,
+              ),
+              _buildEventList(),
               _getLocationButton(),
             ],
           ),
-        )
+        ),
       ),
       drawer: new DrawerPage(),
     );
@@ -197,6 +217,7 @@ class DashboardPageState extends State<DashboardPage> {
           email = dados['email'];
           dataNascimento = dados['data_nascimento'];
           localidade = dados['localidade'];
+
           if(dataNascimento != null ){
             ano = dataNascimento.substring(0,4);
             dia = dataNascimento.substring(8,10);
@@ -236,6 +257,8 @@ class DashboardPageState extends State<DashboardPage> {
       email = sharedPreferences.getString("email");
       localidade = sharedPreferences.getString("localidade");
       dataNascimento = sharedPreferences.getString("data_nascimento");
+      linha = sharedPreferences.getString("id_linha");
+      bus = sharedPreferences.getString("id_autocarro");
 
       if(dataNascimento != null ){
         ano = dataNascimento.substring(0,4);
@@ -257,55 +280,98 @@ class DashboardPageState extends State<DashboardPage> {
 
   Widget _getProfile(){
     return Container(
-      margin: EdgeInsets.fromLTRB(30,50,30,10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 16.0, // has the effect of softening the shadow
-            spreadRadius: 3.0, // has the effect of extending the shadow
-            offset: Offset(
-              10.0, // horizontal, move right 10
-              10.0, // vertical, move down 10
-            ),
-          )
-        ],
-        borderRadius: BorderRadius.all(Radius.circular(15.0)),
-      ),
+      margin: EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 25.0),
       child: Row(
         children: <Widget>[
           Flexible(
             child: Column(
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('\nNome: ' + '$nome' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20)),
-                    ),
-                  ],
+                Icon(
+                  Icons.person_pin,
+                  color: _color,
+                  size: 65.0,
                 ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('Email: ' + '$email' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
-                    ),
-                  ],
+                Text("$nome",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 23.0,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                  ),
                 ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('Data de nascimento: ' + '$dataNascimento' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
-                    ),
-                  ],
+                SizedBox(
+                  height: 23.0,
                 ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Text('Localidade: ' + '$localidade' + '\n', textAlign: TextAlign.start, style: TextStyle(fontSize: 20),),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('\Email', 
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.white
                     ),
-                  ],
+                  ),
                 ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(" $email",
+                  textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Colors.white
+                    ),  
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Data de nascimento', 
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.white
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(" $dataNascimento",
+                  textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Colors.white
+                    ),  
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Localidade', 
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Colors.white
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(" $localidade",
+                  textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Colors.white
+                    ),  
+                  ),
+                ),
+                _verifyBusLinha(),
               ],
             ),
           ),
@@ -317,6 +383,8 @@ class DashboardPageState extends State<DashboardPage> {
   Widget _getLocationButton(){
     var _onPressed;
 
+    _functionColor(linha);
+
     if(_setup){
       _onPressed = (){
         setState(() {
@@ -325,68 +393,63 @@ class DashboardPageState extends State<DashboardPage> {
       };
     }
     return Container(
-      padding: EdgeInsets.only(right: 30.0,left: 30.0,top: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 20.0),
       child: RaisedButton(
+        focusElevation: 30,
         padding: EdgeInsets.all(15.0),
         elevation: 15,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.0),
+          borderRadius: BorderRadius.circular(30.0),
         ),
-        child: Text(isActive ? 'Parar o envio de localização' : 'Começar o envio de localização', textAlign: TextAlign.center, style: TextStyle(fontSize: 20),),
-        color: Colors.white,
+        child: Text(isActive ? 'Parar o envio de localização' : 'Começar o envio de localização',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 19,
+            color: _color == Colors.black ? Colors.white : Colors.black
+          ),
+        ),
+        color: _color,
         onPressed: _onPressed,
-        disabledColor: Colors.white70,
-        disabledTextColor: Colors.red[900],
+        disabledColor: Colors.grey[600],
       ),
     );
   }
 
   Widget _buildEventList() {
+    if(_selectedEvents == null){
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(7.0))
+        ),
+        margin: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+        child: ListTile(
+          leading: Icon(
+            Icons.info,
+            color: Colors.red[900],
+          ),
+          title: Text('Não tem nenhum serviço agendado',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 19
+            ),
+          ),
+        ),
+      );
+    }
     return Column(
       children: _selectedEvents
       .map((event) {
-        switch (event.toString().substring(0,2)) {
-          case '1 ':
-            _color = Colors.red;
-          break;
-          case '2 ':
-            _color = Colors.lightGreen;
-          break;
-          case '3 ':
-            _color = Colors.blue[300];
-          break;
-          case '4 ':
-            _color = Colors.blue[900];
-          break;
-          case '5 ':
-            _color = Colors.deepPurpleAccent;
-          break;
-          case '6 ':
-            _color = Colors.pink;
-          break;
-          case '7 ':
-            _color = Colors.yellow[600];
-          break;
-          case '8 ':
-            _color = Colors.orange;
-          break;
-          case '9 ':
-            _color = Colors.black;
-          break;
-          case '10':
-            _color = Colors.teal;
-          break;
-          default:
-            _color = Colors.white;
-          break;
-        }
-        var container = Container(
+        _functionColor(event.toString().substring(0,2));
+        
+        return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               stops: [0.11, 0.02],
               colors: [_color, Colors.white]
             ),
-            borderRadius: BorderRadius.all(Radius.circular(10.0))
+            borderRadius: BorderRadius.all(Radius.circular(7.0))
           ),
           margin: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 6.0),
           child: ListTile(
@@ -395,19 +458,18 @@ class DashboardPageState extends State<DashboardPage> {
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 25
+                fontSize: 22
               ),
             ),
             title: Text(
               event.toString().substring(2),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 20
+                fontSize: 19
               ),
             ),
-            onTap: () => print('$event tapped!'),
           ),
-        );return container;
+        );
       })
       .toList(),
     );
@@ -420,6 +482,87 @@ class DashboardPageState extends State<DashboardPage> {
       _setup = true;
     }else{
       _setup = false;
+    }
+  }
+
+  Widget _verifyBusLinha(){
+
+    if(linha != null && bus != null){
+      return Container(
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              height: 5.0,
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Autocarro                    Linha', 
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.white
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text("  $bus                      $linha",
+              textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
+                  color: Colors.white
+                ),  
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    else{
+      return Container();
+    }
+  }
+
+  _functionColor(var expression){
+
+    // if expression tem um numero e depois espaço tira o espaço
+    // if expression não tem espaço meter espaço
+    if(expression.toString().substring(1) == " "){
+      expression = expression.toString().substring(0,1);
+    }
+
+    switch (expression) {
+      case '1':
+        _color = Colors.red[700];
+      break;
+      case '2':
+        _color = Colors.lightGreen;
+      break;
+      case '3':
+        _color = Colors.blue[300];
+      break;
+      case '4':
+        _color = Colors.blue[900];
+      break;
+      case '5':
+        _color = Colors.deepPurpleAccent;
+      break;
+      case '6':
+        _color = Colors.pink[300];
+      break;
+      case '7':
+        _color = Colors.yellow[700];
+      break;
+      case '8':
+        _color = Colors.orange[700];
+      break;
+      case '9':
+        _color = Colors.black;
+      break;
+      default:
+        _color = Colors.teal;
+      break;
     }
   }
 }

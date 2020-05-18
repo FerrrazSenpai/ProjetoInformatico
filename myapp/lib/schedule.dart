@@ -1,12 +1,16 @@
 import 'package:app_condutor/drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:app_condutor/connectivity.dart';
 
 
 class SchedulePage extends StatefulWidget {
+  SchedulePage({Key key, this.color}) : super(key: key);
+
+  final Color color;
   @override
   schedulePageStateState createState() => schedulePageStateState();
 }
@@ -15,8 +19,11 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
   CalendarController _calendarController;
   Map<DateTime, List> _events;
   List _selectedEvents;
-  Color color = Colors.white;
+  Color _color = Colors.teal;
   bool connected;
+
+  String linha;
+  SharedPreferences sharedPreferences;
 
   @override
   void initState() {
@@ -32,31 +39,37 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
       _selectedDay.subtract(Duration(days: 10)): ['10 9h00-10h10', '7 15h00-16h20'],
       _selectedDay.subtract(Duration(days: 4)): ['3 9h00-10h10'],
       _selectedDay.subtract(Duration(days: 2)): ['6 9h00-10h10', '7 15h00-16h20', '8 uma hora qualquer'],
-      _selectedDay: ['1 9h00-10h10', '4 15h00-16h20', '3 uma hora qualquer'],
+      _selectedDay: ['7 9h00-10h10', '8 15h00-16h20', '3 uma hora qualquer'],
       _selectedDay.add(Duration(days: 1)): Set.from(['8 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','5 uma hora qualquer','10 uma hora qualquer']).toList(),
       _selectedDay.add(Duration(days: 3)): Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
       _selectedDay.add(Duration(days: 7)): ['1 9h00-10h10', '5 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 CHUPAMOS'],
+      _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 16h20-17h00'],
       _selectedDay.add(Duration(days: 17)): ['Event A12', 'Event B12', 'Event C12', 'Event D12'],
       _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
       _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
     };
 
     _selectedEvents = _events[_selectedDay] ?? [];
+
+    _getLinha();
+    _functionColor(linha);
   }
 
   void _onDaySelected(DateTime day, List events) {
     setState(() {
       _selectedEvents = events;
-      print(DateTime.now());
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    _functionColor(linha);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Horário'),
+        title: Text('Horário', style: TextStyle(color: widget.color == Colors.black ? Colors.white : Colors.black, fontWeight: FontWeight.bold),),
+        backgroundColor: widget.color,
+        iconTheme: new IconThemeData(color: widget.color == Colors.black ? Colors.white : Colors.black),
       ),
       backgroundColor: Theme.of(context).accentColor,
       body: Container(
@@ -134,7 +147,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
           margin: const EdgeInsets.all(3.0),
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
+            color: widget.color,
             shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(6.0)
           ),
@@ -230,8 +243,8 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(6.0),
         color: _calendarController.isSelected(date)
-            ? Colors.grey[700]
-            : _calendarController.isToday(date) ? Colors.red[300] : Colors.teal[400],
+          ? Colors.grey[700]
+          : _calendarController.isToday(date) ? widget.color == Colors.red[700] ? Colors.teal[400] : Colors. red[400]: widget.color,
       ),
       width: 18.0,
       height: 18.0,
@@ -239,7 +252,9 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
         child: Text(
           '${events.length}',
           style: TextStyle().copyWith(
-            color: Colors.white,
+            color: _calendarController.isSelected(date)
+              ? Colors.white
+              : _calendarController.isToday(date) ? Colors.white : _color == Colors.black ? Colors.white : Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 12.0,
           ),
@@ -252,46 +267,13 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
     return Column(
       children: _selectedEvents
       .map((event) {
-        switch (event.toString().substring(0,2)) {
-          case '1 ':
-            color = Colors.red;
-          break;
-          case '2 ':
-            color = Colors.lightGreen;
-          break;
-          case '3 ':
-            color = Colors.blue[300];
-          break;
-          case '4 ':
-            color = Colors.blue[900];
-          break;
-          case '5 ':
-            color = Colors.deepPurpleAccent;
-          break;
-          case '6 ':
-            color = Colors.pink;
-          break;
-          case '7 ':
-            color = Colors.yellow[600];
-          break;
-          case '8 ':
-            color = Colors.orange;
-          break;
-          case '9 ':
-            color = Colors.black;
-          break;
-          case '10':
-            color = Colors.teal;
-          break;
-          default:
-            color = Colors.white;
-          break;
-        }
+        _functionColor(event.toString().substring(0,2));
+
         var container = Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               stops: [0.11, 0.02],
-              colors: [color, Colors.white]
+              colors: [_color, Colors.white]
             ),
             borderRadius: BorderRadius.all(Radius.circular(10.0))
           ),
@@ -318,5 +300,54 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
       })
       .toList(),
     );
+  }
+
+  _functionColor(var expression){
+
+    if(expression.toString().substring(1) == " "){
+      expression = expression.toString().substring(0,1);
+    }
+
+    switch (expression) {
+      case '1':
+        _color = Colors.red[700];
+      break;
+      case '2':
+        _color = Colors.lightGreen;
+      break;
+      case '3':
+        _color = Colors.blue[300];
+      break;
+      case '4':
+        _color = Colors.blue[900];
+      break;
+      case '5':
+        _color = Colors.deepPurpleAccent;
+      break;
+      case '6':
+        _color = Colors.pink[300];
+      break;
+      case '7':
+        _color = Colors.yellow[700];
+      break;
+      case '8':
+        _color = Colors.orange[700];
+      break;
+      case '9':
+        _color = Colors.black;
+      break;
+      default:
+        _color = Colors.teal;
+      break;
+    }
+  }
+
+  _getLinha() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    setState(() {
+      linha = sharedPreferences.getString("id_linha");
+      print(linha);
+    });
   }
 }

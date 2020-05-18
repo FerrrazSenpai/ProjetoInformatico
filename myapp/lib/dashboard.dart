@@ -8,7 +8,7 @@ import 'package:date_format/date_format.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:app_condutor/connectivity.dart';
-import 'package:intl/intl.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -100,7 +100,7 @@ class DashboardPageState extends State<DashboardPage> {
       _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
     };
 
-    _selectedEvents = _events[_selectedDay.add(Duration(days: 11))] ?? null;
+    _selectedEvents = _events[_selectedDay.add(Duration(days: 2))] ?? null;
 
     print(_selectedEvents);
 
@@ -287,9 +287,12 @@ class DashboardPageState extends State<DashboardPage> {
             child: Column(
               children: <Widget>[
                 Icon(
-                  Icons.person_pin,
+                  FontAwesomeIcons.solidUserCircle,
                   color: _color,
                   size: 65.0,
+                ),
+                SizedBox(
+                  height:5.0
                 ),
                 Text("$nome",
                   textAlign: TextAlign.center,
@@ -324,7 +327,7 @@ class DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 SizedBox(
-                  height: 5.0,
+                  height: 10.0,
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -348,7 +351,7 @@ class DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 SizedBox(
-                  height: 5.0,
+                  height: 10.0,
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -426,7 +429,7 @@ class DashboardPageState extends State<DashboardPage> {
         margin: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
         child: ListTile(
           leading: Icon(
-            Icons.info,
+            FontAwesomeIcons.solidCalendarTimes,
             color: Colors.red[900],
           ),
           title: Text('Não tem nenhum serviço agendado',
@@ -492,7 +495,7 @@ class DashboardPageState extends State<DashboardPage> {
         child: Column(
           children: <Widget>[
             SizedBox(
-              height: 5.0,
+              height: 10.0,
             ),
             Align(
               alignment: Alignment.centerLeft,

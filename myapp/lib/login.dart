@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:app_condutor/driverSetup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_condutor/connectivity.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 Future main() async {
   await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
@@ -32,13 +33,10 @@ class _LoginPageState extends State<LoginPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Icon(
-                Icons.directions_bus,
-                color: Theme.of(context).accentColor,
-                size: 75.0,
-              ),
+            Icon(
+              FontAwesomeIcons.busAlt,
+              color: Theme.of(context).accentColor,
+              size: 60.0,
             ),
           ],
         ),
@@ -86,8 +84,8 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: <Widget>[
             SizedBox(height: 60.0),
-            _formInput("Email", Icons.email),
-            _formInput("Password", Icons.lock),
+            _formInput("Email", FontAwesomeIcons.solidEnvelope),
+            _formInput("Password", FontAwesomeIcons.userLock),
           ],
         )
     );
@@ -109,6 +107,7 @@ class _LoginPageState extends State<LoginPage> {
         hintStyle: TextStyle(color: Colors.white60),
         icon: Icon(iconName, 
           color: Theme.of(context).primaryColor,
+          size: 20,
         ),
         filled: true,
         fillColor: Colors.grey[800]
@@ -155,11 +154,11 @@ class _LoginPageState extends State<LoginPage> {
             child: Row(
               children: <Widget>[
                 Icon(
-                  Icons.error_outline,
+                  FontAwesomeIcons.exclamationCircle,
                   color: Colors.red[700],
-                  size: 20.0,
+                  size: 18.5,
                 ),
-                SizedBox(width: 5.0),
+                SizedBox(width: 7.0),
                 Expanded(
                   child: Text('$_error', 
                     style: TextStyle(
@@ -258,9 +257,9 @@ class _LoginPageState extends State<LoginPage> {
           else{
             sharedPreferences.clear();
             setState(() {
-              _error = "Algo correu muito mal 1!uncaught exception";
+              _error = "Algo correu muito mal";
             });
-            print("Algo correu muito mal 1!uncaught exception");
+            print("Algo correu muito mal");
           }
         }else{
           sharedPreferences.clear();
@@ -279,7 +278,7 @@ class _LoginPageState extends State<LoginPage> {
       else{
         sharedPreferences.clear();
         setState(() {
-            _error = "Algo correu muito mal 2!uncaught exception";
+            _error = "Algo correu muito mal";
           });
         print("uncaught exception \n" + response.body);
       }

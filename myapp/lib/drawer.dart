@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:app_condutor/schedule.dart';
 import 'package:app_condutor/dashboard.dart';
 import 'package:app_condutor/driverSetup.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DrawerPage extends StatefulWidget {
   @override
@@ -39,27 +40,18 @@ class MyDrawer extends State<DrawerPage> {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: <Color>[
-                  Colors.black87,
-                  _color,
-                ]
-              ),
+              color: _color
             ),
             child: Container(
               child: Column(
                 children: <Widget>[
-                  Material(
-                    borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                    color: Colors.white,
-                    child: Icon(
-                      Icons.directions_bus,
-                      color: _color,
-                      size: 80.0,
-                    ),
+                  Icon(
+                    FontAwesomeIcons.busAlt,
+                    color: _color == Colors.black ? Colors.white : Colors.black,
+                    size: 80.0,
                   ),
                   SizedBox(
-                    height: 5.0
+                    height: 10.0
                   ),
                   Expanded(
                     child: Text("$nome",
@@ -75,29 +67,28 @@ class MyDrawer extends State<DrawerPage> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.home, color: Colors.black,),
+            leading: Icon(FontAwesomeIcons.home, color: Colors.black,size: 22.0,),
             title: Text('Página Inicial', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: 'Página inicial')), (Route<dynamic> route) => false);
             },
           ),
           ListTile(
-            leading: Icon(Icons.schedule, color: Colors.black,),
+            leading: Icon(FontAwesomeIcons.solidClock, color: Colors.black,size: 22.0,),
             title: Text('Horário', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SchedulePage(color: _color,)), (Route<dynamic> route) => false);
             },
           ),
           ListTile(
-            leading: Icon(Icons.settings, color: Colors.black,),
+            leading: Icon(FontAwesomeIcons.cog, color: Colors.black,size: 22.0,),
             title: Text('Configurar autocarro e linha', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SetupPage(btnText: 'Voltar à página inicial',)), (Route<dynamic> route) => false);
             },
           ),
-
           ListTile(
-            leading: Icon(Icons.exit_to_app, color: Colors.black,),
+            leading: Icon(FontAwesomeIcons.signOutAlt, color: Colors.black,size: 22.0,),
             title: Text('Terminar Sessão', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
               action =

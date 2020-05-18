@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:app_condutor/connectivity.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SetupPage extends StatefulWidget {
   SetupPage({Key key, this.btnText}) : super(key: key);
@@ -100,13 +101,10 @@ class _SetupPageState extends State<SetupPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Icon(
-                Icons.directions_bus,
-                color: Theme.of(context).accentColor,
-                size: 75.0,
-              ),
+            Icon(
+              FontAwesomeIcons.busAlt,
+              color: Theme.of(context).accentColor,
+              size: 60.0,
             ),
           ],
         ),
@@ -287,13 +285,13 @@ class _SetupPageState extends State<SetupPage> {
             child: Row(
               children: <Widget>[
                 Icon(
-                  Icons.error_outline,
+                  FontAwesomeIcons.exclamationCircle,
                   color: Colors.red[700],
                   size: 20.0,
                 ),
-                SizedBox(width: 5.0),
+                SizedBox(width: 7.0),
                 Expanded(
-                  child: Text('  $_error', 
+                  child: Text('$_error', 
                     style: TextStyle(
                       color: Colors.red[700],
                       fontSize: 15.0,

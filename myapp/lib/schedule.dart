@@ -50,9 +50,6 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
     };
 
     _selectedEvents = _events[_selectedDay] ?? [];
-
-    _getLinha();
-    _functionColor(linha);
   }
 
   void _onDaySelected(DateTime day, List events) {
@@ -63,7 +60,6 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    _functionColor(linha);
 
     return Scaffold(
       appBar: AppBar(
@@ -244,7 +240,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
         borderRadius: BorderRadius.circular(6.0),
         color: _calendarController.isSelected(date)
           ? Colors.grey[700]
-          : _calendarController.isToday(date) ? widget.color == Colors.red[700] ? Colors.teal[400] : Colors. red[400]: widget.color,
+          : _calendarController.isToday(date) ? (widget.color == Colors.red[700] ? Colors.teal[400] : Colors. red[400]) : widget.color,
       ),
       width: 18.0,
       height: 18.0,
@@ -254,7 +250,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
           style: TextStyle().copyWith(
             color: _calendarController.isSelected(date)
               ? Colors.white
-              : _calendarController.isToday(date) ? Colors.white : _color == Colors.black ? Colors.white : Colors.black,
+              : _calendarController.isToday(date) ? Colors.white : (widget.color == Colors.black ? Colors.white : Colors.black),
             fontWeight: FontWeight.bold,
             fontSize: 12.0,
           ),
@@ -304,50 +300,37 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
 
   _functionColor(var expression){
 
-    if(expression.toString().substring(1) == " "){
-      expression = expression.toString().substring(0,1);
-    }
-
     switch (expression) {
-      case '1':
+      case '1 ':
         _color = Colors.red[700];
       break;
-      case '2':
+      case '2 ':
         _color = Colors.lightGreen;
       break;
-      case '3':
+      case '3 ':
         _color = Colors.blue[300];
       break;
-      case '4':
+      case '4 ':
         _color = Colors.blue[900];
       break;
-      case '5':
+      case '5 ':
         _color = Colors.deepPurpleAccent;
       break;
-      case '6':
+      case '6 ':
         _color = Colors.pink[300];
       break;
-      case '7':
+      case '7 ':
         _color = Colors.yellow[700];
       break;
-      case '8':
+      case '8 ':
         _color = Colors.orange[700];
       break;
-      case '9':
+      case '9 ':
         _color = Colors.black;
       break;
       default:
         _color = Colors.teal;
       break;
     }
-  }
-
-  _getLinha() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-
-    setState(() {
-      linha = sharedPreferences.getString("id_linha");
-      print(linha);
-    });
   }
 }

@@ -5,8 +5,13 @@ import 'package:app_condutor/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:app_condutor/connectivity.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SetupPage extends StatefulWidget {
+  SetupPage({Key key, this.btnText}) : super(key: key);
+
+  final String btnText;
   @override
   _SetupPageState createState()=> _SetupPageState();
 }
@@ -20,6 +25,7 @@ class _SetupPageState extends State<SetupPage> {
   int _idCondutor;
   var _defaultLine=0;
   var _defaultBus=0;
+  bool checkBoxValue = false;
 
   final TextEditingController __selectedLineController = new TextEditingController();
   final TextEditingController __selectedBusController = new TextEditingController();
@@ -47,7 +53,7 @@ class _SetupPageState extends State<SetupPage> {
       if(response.body[1]=="]"){ //ou seja a resposta é só []
         print("EMPTY RESPONSE");
         setState(() {
-          _error="Sem infos no server";
+          _error="Sem informação no servidor";
         });
         return; //nao ha nada para fazer nesta funcao entao
       }
@@ -74,11 +80,9 @@ class _SetupPageState extends State<SetupPage> {
 
         });
       }
-      
-
     }catch(e){
       setState(() {
-        _error= e.toString();
+        _error= "Houve um problema ao estabelecer conexão";
       });
       print(e.toString());
     }
@@ -89,78 +93,106 @@ class _SetupPageState extends State<SetupPage> {
   
 
   Widget build(BuildContext context) {
-      return Scaffold(
-        body: new Container(
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 0.0, 
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              FontAwesomeIcons.busAlt,
+              color: Theme.of(context).accentColor,
+              size: 60.0,
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Theme.of(context).primaryColor,
+      body: new ConnectivityPage(
+        widget: Container(
+          margin: EdgeInsets.only(top: 20.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).accentColor,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15.0),
+              topRight: Radius.circular(15.0),
+            ),
+          ),
           child: ListView(
             children: <Widget>[
-              Padding(padding: EdgeInsets.only(top: 75.0)),
-              costumLabel("Numero do autocarro:"),
+              Padding(
+                padding: EdgeInsets.only(top: 75.0, left:  25.0),
+                child: costumLabel("Numero do autocarro:"),
+              ),
               //dropDownNrBus(),
-              new Container(
-                  child: new TextField(
-                    decoration: const InputDecoration(hintText: "Numero do autocarro"),
-                    autocorrect: false,
-                    controller: __selectedBusController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                        WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (String value) {
-                      _selectedBus = int.parse(value);
-                    },
-                  ),
-                ),
-              Padding(padding: EdgeInsets.only(top: 30.0)),
-              costumLabel("Numero da linha:"),
+              _formInput('Autocarro'),
+              Padding(
+                padding: EdgeInsets.only(top: 15.0, left:  25.0),
+                child: costumLabel("Numero da linha:"),
+              ),
               //dropDownLinhas(),
-              new Container(
-                  child: new TextField(
-                    decoration: const InputDecoration(hintText: "Linha"),
-                    autocorrect: false,
-                    controller: __selectedLineController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                        WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    onChanged: (String value) {
-                      _selectedLine = int.parse(value);
-                    },
-                  ),
-                ),
-              errorSection(),
-              buttonSection(),
+              _formInput('Linha'),
+              _checkBoxSection(),
+              _errorSection(),
+              _buttonSection(),
             ],
-        )
+          ),
+        ),          
       )
     );
   }
 
-  Container buttonSection(){
+  Container _buttonSection(){
     return Container(
-      padding: EdgeInsets.only(top: 20.0),
+      padding: EdgeInsets.only(top: 20.0, bottom: 15.0),
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
-          if(_selectedLine!=null && _selectedBus!=null ){
-            print("bus: " + _selectedBus.toString()); //debug
-            print("linha: " + _selectedLine.toString()); //debug
 
-            if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
-            {
-              //fazer o post para corrigir 
-              //
-              //correctInfo();
-              //confirmar se o pedido é com id horario ou condutor
-            }
+          // print("bus: " + __selectedBusController.text); //debug
+          // print("linha: " + __selectedLineController.text); //debug
+          // print("btnText = " + widget.btnText);
+
+          // if(_selectedLine!=null && _selectedBus!=null ){
+          //   print("bus: " + _selectedBus.toString()); //debug
+          //   print("linha: " + _selectedLine.toString()); //debug
+
+          //   if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
+          //   {
+          //     //fazer o post para corrigir 
+          //     //
+          //     //correctInfo();
+          //     //confirmar se o pedido é com id horario ou condutor
+          //   }
             
-            sharedPreferences.setString("id_autocarro", _selectedBus.toString());
-            sharedPreferences.setString("id_linha", _selectedLine.toString());
+          // }
 
+          if((__selectedBusController.text == "" || __selectedLineController.text == "") && widget.btnText == 'Avançar'){
+            sharedPreferences.setString("id_autocarro", null);
+            sharedPreferences.setString("id_linha", null);
+            // print("Vem do login e nao preencheu tudo");
+          }else if((__selectedBusController.text == "" || __selectedLineController.text == "") && widget.btnText == 'Voltar à página inicial'){
+            // print("Nada é alterado");
           }else{
-            setState(() {
-              _error="Por favor preencha ambos os campos.";
-           });
-          }       
+            sharedPreferences.setString("id_autocarro", __selectedBusController.text);
+            sharedPreferences.setString("id_linha", __selectedLineController.text);
+            // print("Correu tudo bem");
+          }
+
+          if(checkBoxValue){
+            sharedPreferences.setString("id_autocarro", null);
+            sharedPreferences.setString("id_linha", null);   
+            // print("Checkbox ativada delete all");         
+          }
+          // if(sharedPreferences.getString('id_autocarro') != null && sharedPreferences.getString('id_linha') != null){
+          //   print("autocarro corrente: " + sharedPreferences.getString('id_autocarro'));
+          //   print("linha atual: " + sharedPreferences.getString('id_linha'));
+          // }else{
+          //   print("ta null");
+          // }
+
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: 'Página inicial')), (Route<dynamic> route) => false);
         },
 
@@ -173,7 +205,7 @@ class _SetupPageState extends State<SetupPage> {
         ),
         splashColor: Colors.black54,
         colorBrightness: Brightness.light,
-        child: Text("Iniciar Sessão",
+        child: Text(widget.btnText,
           style: new TextStyle(
             color: Colors.white,
             letterSpacing: 2.0,
@@ -209,10 +241,14 @@ class _SetupPageState extends State<SetupPage> {
 
   Container costumLabel(String text){
     return Container(
-      child: Text(text, 
+      child: Text(
+        text, 
         style: TextStyle(
           fontSize: 19.0,
-          fontWeight: FontWeight.bold)),
+          fontWeight: FontWeight.bold,
+          color: Colors.white
+        ),
+      ),
     );
 
   }
@@ -239,22 +275,31 @@ class _SetupPageState extends State<SetupPage> {
     );
   }
 
-  Container errorSection(){
+  Container _errorSection(){
     return Container(
-      padding: EdgeInsets.only(left: 70.0, top: 12.0),
+      padding: EdgeInsets.only(left: 40.0, top: 12.0),
       child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
       Row(
         children: <Widget>[
-          Icon(
-            Icons.error_outline,
-            color: Colors.red[700],
-            size: 20.0,
-          ),
-          Text('  $_error', 
-            style: TextStyle(
-              color: Colors.red[700],
-              fontSize: 15.0,
-              fontWeight: FontWeight.w600,
+          Flexible(
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  FontAwesomeIcons.exclamationCircle,
+                  color: Colors.red[700],
+                  size: 20.0,
+                ),
+                SizedBox(width: 7.0),
+                Expanded(
+                  child: Text('$_error', 
+                    style: TextStyle(
+                      color: Colors.red[700],
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -288,4 +333,67 @@ class _SetupPageState extends State<SetupPage> {
     }
   }
 
+  Padding _formInput(String hint){
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+      child: TextFormField(
+        cursorColor: Colors.white,
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+        controller: hint == "Autocarro" ? __selectedBusController : __selectedLineController,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: TextStyle(color: Colors.white60),
+          filled: true,
+          fillColor: Colors.grey[800]
+        ),
+        autocorrect: false,
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+            WhitelistingTextInputFormatter.digitsOnly
+        ],
+        onChanged: (String value) {
+          _selectedBus = int.parse(value);
+        },
+      ),
+    );
+  }
+
+  Padding _checkBoxSection(){
+    return Padding(
+      padding: const EdgeInsets.only(left: 15.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Theme(
+            data: Theme.of(context).copyWith(
+              unselectedWidgetColor: Theme.of(context).primaryColor,
+            ),
+            child: Checkbox(
+              value: checkBoxValue,
+              hoverColor: Colors.red,
+              activeColor: Theme.of(context).primaryColor,
+              checkColor: Theme.of(context).accentColor,
+              onChanged: (bool value){
+                setState(() {
+                  checkBoxValue = value;
+                });
+              }
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(right: 15.0),
+            child: Text(
+              "Avançar sem autocarro", 
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 16 
+              ),
+              textAlign: TextAlign.start,
+            )
+          ),
+        ],
+      ),
+    );
+  }
 }

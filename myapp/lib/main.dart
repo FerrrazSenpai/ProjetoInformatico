@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.teal[500],
+        primaryColor: Colors.teal,
         accentColor: Colors.grey[900],
       ),
       home: new MyHomePage(
@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
     sharedPreferences = await SharedPreferences.getInstance();
     if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")){
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
-    }else if (sharedPreferences.getString("access_token") == null || sharedPreferences.getString("id_condutor")==null || sharedPreferences.getString("id_linha")==null || sharedPreferences.getString("id_autocarro")==null) {
+    }else if (sharedPreferences.getString("access_token") == null) {
       sharedPreferences.remove("access_token");
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
     }
@@ -70,9 +70,35 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.teal[500],
-        title: Text(widget.title),
+      backgroundColor: Theme.of(context).accentColor,
+      body: Padding(
+        padding: const EdgeInsets.only(top: 250),
+        child: Center(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: 70,
+                  height: 70,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 5.0,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(
+                  height: 20
+                ),
+                Text("A carregar ...", 
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w700
+                )
+                ),
+              ]
+            )
+          ),
+        ),
       ),
     );
   }

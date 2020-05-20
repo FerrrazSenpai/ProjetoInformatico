@@ -55,11 +55,13 @@ class DashboardPageState extends State<DashboardPage> {
   
   _functionActive() async{
     sharedPreferences = await SharedPreferences.getInstance();
-    print('SHARED PREFERENCES = ' + sharedPreferences.getBool("ativo").toString());
     if(sharedPreferences.getBool("ativo") != null){
       isActive = sharedPreferences.getBool("ativo");
+      print('SHARED PREFERENCES = ' + sharedPreferences.getBool("ativo").toString());
     }else{
+      sharedPreferences.setBool("ativo", false);
       isActive = false;
+      print('SHARED PREFERENCES = ' + sharedPreferences.getBool("ativo").toString());
     }
   }
 
@@ -75,7 +77,7 @@ class DashboardPageState extends State<DashboardPage> {
 
   void handleTick() async{
     sharedPreferences = await SharedPreferences.getInstance();
-    if (sharedPreferences.getBool("ativo")) {
+    if (isActive) {
       _getLocation().then((value) {
         userLocation = value;
         // 1m/s -> 3.6km/h  speed -> speedkmh

@@ -49,9 +49,19 @@ class DashboardPageState extends State<DashboardPage> {
   String dataNascimento;
   String linha;
   String bus;
+  bool isActive = false;
 
   static const duration = const Duration(minutes: 1);
-  bool isActive = false;
+  
+  _functionActive() async{
+    sharedPreferences = await SharedPreferences.getInstance();
+    print('SHARED PREFERENCES = ' + sharedPreferences.getBool("ativo").toString());
+    if(sharedPreferences.getBool("ativo") != null){
+      isActive = sharedPreferences.getBool("ativo");
+    }else{
+      isActive = false;
+    }
+  }
 
   Timer timer;
 
@@ -63,16 +73,15 @@ class DashboardPageState extends State<DashboardPage> {
 
   String _selectedDay;
 
-  void handleTick() {
-    if (isActive) {
+  void handleTick() async{
+    sharedPreferences = await SharedPreferences.getInstance();
+    if (sharedPreferences.getBool("ativo")) {
       _getLocation().then((value) {
-        setState(() {
-          userLocation = value;
-          // 1m/s -> 3.6km/h  speed -> speedkmh
-          speedkmh = userLocation.speed.toDouble() * 3.600;
-          time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
-          _postLocation();
-        });
+        userLocation = value;
+        // 1m/s -> 3.6km/h  speed -> speedkmh
+        speedkmh = userLocation.speed.toDouble() * 3.600;
+        time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
+        _postLocation();  
       });
     }
   }
@@ -85,6 +94,7 @@ class DashboardPageState extends State<DashboardPage> {
     _setupVerification();
     _functionColor(linha);
     _getSchedule();
+    _functionActive();
   }
 
   @override
@@ -177,7 +187,6 @@ class DashboardPageState extends State<DashboardPage> {
         body: body,
       );
     print(response.body);
-    //print(body);
     return response.body;
     
   }
@@ -366,13 +375,29 @@ class DashboardPageState extends State<DashboardPage> {
     _functionColor(linha);
 
     if(_setup){
-      _onPressed = (){
+      _onPressed = () async {
+        sharedPreferences = await SharedPreferences.getInstance();
+
         setState(() {
           isActive = !isActive;
+          sharedPreferences.setBool("ativo", isActive);
+          if(isActive){
+            _getLocation().then((value) {
+              setState(() {
+                userLocation = value;
+                // 1m/s -> 3.6km/h  speed -> speedkmh
+                speedkmh = userLocation.speed.toDouble() * 3.600;
+                time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
+                _postLocation();
+              });
+            });
+          }else{
+            print("Parou o envio");
+          }
         });
       };
     }
-    return Container(
+    return Container (
       padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 20.0),
       child: RaisedButton(
         focusElevation: 30,
@@ -441,11 +466,18 @@ class DashboardPageState extends State<DashboardPage> {
                 fontSize: 25
               ),
             ),
-            title: Text(event.toString().substring(2),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20
-              ),
+            title: Row(
+              children: <Widget>[
+                Icon(
+                  FontAwesomeIcons.busAlt
+                ),
+                Text(event.toString().substring(2),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -560,8 +592,8 @@ class DashboardPageState extends State<DashboardPage> {
     sharedPreferences = await SharedPreferences.getInstance();
     
     var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/getHorarios/' + sharedPreferences.getString("id_condutor");
-
     String linha;
+    String autocarro;
     String horaInicio;
     String horaFim;
 
@@ -580,11 +612,18 @@ class DashboardPageState extends State<DashboardPage> {
         }else{
           _events = new List.generate(dados.length, (i) => i + 1);
           for (var i=0; i<dados.length; i++) {
+            autocarro = (dados[i]['id_autocarro']).toString();
             linha = (dados[i]['id_linha']).toString();
             horaInicio = dados[i]['hora_inicio'].toString().substring(0,2) + 'h' + dados[i]['hora_inicio'].toString().substring(3,5);
             horaFim = dados[i]['hora_fim'].toString().substring(0,2) + 'h' + dados[i]['hora_fim'].toString().substring(3,5);
 
-            _events[i] = linha + ' ' + horaInicio + " - " + horaFim;
+            if(autocarro.length > 2){
+              _events[i] = linha + '  ' + autocarro + '     ' + horaInicio + " - " + horaFim;
+            }else if(autocarro.length == 2){
+              _events[i] = linha + '  ' + autocarro + '       ' + horaInicio + " - " + horaFim;
+            }else{
+              _events[i] = linha + '  ' + autocarro + '         ' + horaInicio + " - " + horaFim;
+            }
             
             setState(() {
               _selectedEvents = _events;

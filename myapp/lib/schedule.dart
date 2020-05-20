@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:app_condutor/connectivity.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SchedulePage extends StatefulWidget {
   SchedulePage({Key key, this.color}) : super(key: key);
@@ -284,12 +284,18 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
                 fontSize: 25
               ),
             ),
-            title: Text(
-              event.toString().substring(2),
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20
-              ),
+            title: Row(
+              children: <Widget>[
+                Icon(
+                  FontAwesomeIcons.busAlt
+                ),
+                Text(event.toString().substring(2),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20
+                  ),
+                ),
+              ],
             ),
             onTap: () => print('$event tapped!'),
           ),
@@ -356,6 +362,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
     var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/getHorariosTodos/' + sharedPreferences.getString('id_condutor');
 
     String linha;
+    String autocarro;
     String horaInicio;
     String horaFim;
     DateTime dia;
@@ -378,8 +385,8 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
         }else{
           for (var i=0; i<dados.length; i++) {
             _selectedDay = DateTime.parse(dados[i]['data']);
-            print(_selectedDay);
             count2 = 0;
+            count = 0;
 
             if(!_events.containsKey(_selectedDay)){
               for(var j=0; j<dados.length; j++) {
@@ -392,16 +399,21 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
               }
               _eventsDaily = new List.generate(count, (i) => i + 1);
               while(count2 != count){
-                for (var x=0; x<dados.length; x++) {
-                  if(dados[i]['data'] == dados[x]['data']){
-                    print(dados[i]['data'] + '   ' + dados[x]['data']);
-                    print(i.toString() + '   ' + x.toString());
-                    linha = (dados[x]['id_linha']).toString();
-                    horaInicio = dados[x]['hora_inicio'].toString().substring(0,2) + 'h' + dados[x]['hora_inicio'].toString().substring(3,5);
-                    horaFim = dados[x]['hora_fim'].toString().substring(0,2) + 'h' + dados[x]['hora_fim'].toString().substring(3,5);
+                for (var k=0; k<dados.length; k++) {
+                  if(dados[i]['data'] == dados[k]['data']){
+                    autocarro = (dados[k]['id_autocarro']).toString();
+                    linha = (dados[k]['id_linha']).toString();
+                    horaInicio = dados[k]['hora_inicio'].toString().substring(0,2) + 'h' + dados[k]['hora_inicio'].toString().substring(3,5);
+                    horaFim = dados[k]['hora_fim'].toString().substring(0,2) + 'h' + dados[k]['hora_fim'].toString().substring(3,5);
+                    
+                    if(autocarro.length > 2){
+                      _eventsDaily[count2] = linha + '  ' + autocarro + '     ' + horaInicio + " - " + horaFim;
+                    }else if(autocarro.length == 2){
+                      _eventsDaily[count2] = linha + '  ' + autocarro + '       ' + horaInicio + " - " + horaFim;
+                    }else{
+                      _eventsDaily[count2] = linha + '  ' + autocarro + '         ' + horaInicio + " - " + horaFim;
+                    }
 
-                    _eventsDaily[count2] = linha + ' ' + horaInicio + " - " + horaFim;
-                    print(_eventsDaily);
                     count2++;
                   }
                 }
@@ -412,8 +424,6 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
             }
           }
         }
-
-        print(_events);
       }
     }catch(e){
       print(e);

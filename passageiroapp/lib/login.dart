@@ -247,29 +247,25 @@ class _LoginPageState extends State<LoginPage> {
       "email" : email,
       "password" : password,
     };
-    print(DotEnv().env['IP_ADDRESS']);
-    //var jsonResponse = null;
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/login";
-    //final response = null;
-    print(url);
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/loginCliente";
     try {      
       final response = await http.post(url, body: body).timeout(const Duration(seconds: 5));
       print(response.statusCode);
       if(response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
-        sharedPreferences.setBool("checkBox", checkBoxValue);
-        if(jsonResponse.containsKey('access_token')) {
-          sharedPreferences.setString("access_token", jsonResponse['access_token']);
+        if(jsonResponse['token'].containsKey('access_token')) {
+          sharedPreferences.setBool("checkBox", checkBoxValue);
+          sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
           sharedPreferences.setString("email", email);
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'App Passageiro')), (Route<dynamic> route) => false);
-          print(jsonResponse['access_token']);
-          print(sharedPreferences.getBool("checkBox"));
+          //print(jsonResponse['access_token']);
+          //print(sharedPreferences.getBool("checkBox"));
         }
         else{
           setState(() {
-            _error = "Algo correu muito mal!uncaught exception";
+            _error = "Algo correu muito mal2!uncaught exception";
           });
-          print("Algo correu muito mal!uncaught exception");
+          print("Algo correu muito mal2!uncaught exception");
         }
       }
       else if(response.statusCode == 400){
@@ -280,9 +276,9 @@ class _LoginPageState extends State<LoginPage> {
       }
       else{
         setState(() {
-            _error = "Algo correu muito mal!uncaught exception";
+            _error = "Algo correu muito mal1!uncaught exception";
           });
-        print("uncaught exception \n" + response.body);
+        print("uncaught exception1 \n" + response.body);
       }
     }
     catch(e){

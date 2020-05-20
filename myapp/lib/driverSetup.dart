@@ -43,7 +43,6 @@ class _SetupPageState extends State<SetupPage> {
     sharedPreferences = await SharedPreferences.getInstance();
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horarioCondutor/" + sharedPreferences.getString("id_condutor");
     //var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
-    print(url + "Bearer " +sharedPreferences.getString("access_token"));
     try {      
       final response = await http.get(
         url,

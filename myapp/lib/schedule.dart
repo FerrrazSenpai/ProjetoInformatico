@@ -4,7 +4,10 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 import 'package:app_condutor/connectivity.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
 
 
 class SchedulePage extends StatefulWidget {
@@ -24,32 +27,21 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
 
   String linha;
   SharedPreferences sharedPreferences;
+  DateTime _selectedDay;
+  List _eventsDaily;
 
   @override
   void initState() {
     super.initState();
     initializeDateFormatting();
     _calendarController = CalendarController();
-    final _selectedDay = DateTime.now();
-    _events = {
-      _selectedDay.subtract(Duration(days: 30)): ['Event A0', 'Event B0', 'Event C0'],
-      _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
-      _selectedDay.subtract(Duration(days: 20)): ['Event A2', 'Event B2', 'Event C2', 'Event D2'],
-      _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
-      _selectedDay.subtract(Duration(days: 10)): ['10 9h00-10h10', '7 15h00-16h20'],
-      _selectedDay.subtract(Duration(days: 4)): ['3 9h00-10h10'],
-      _selectedDay.subtract(Duration(days: 2)): ['6 9h00-10h10', '7 15h00-16h20', '8 uma hora qualquer'],
-      _selectedDay: ['7 9h00-10h10', '8 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 1)): Set.from(['8 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','5 uma hora qualquer','10 uma hora qualquer']).toList(),
-      _selectedDay.add(Duration(days: 3)): Set.from(['Event A9', 'Event A9', 'Event B9']).toList(),
-      _selectedDay.add(Duration(days: 7)): ['1 9h00-10h10', '5 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 16h20-17h00'],
-      _selectedDay.add(Duration(days: 17)): ['Event A12', 'Event B12', 'Event C12', 'Event D12'],
-      _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
-      _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
-    };
+    _selectedDay = DateTime.now();
 
+    _events = {};
+
+    _getSchedule();
     _selectedEvents = _events[_selectedDay] ?? [];
+    
   }
 
   void _onDaySelected(DateTime day, List events) {
@@ -63,24 +55,33 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Horário', style: TextStyle(color: widget.color == Colors.black ? Colors.white : Colors.black, fontWeight: FontWeight.bold),),
+        title: Text('Horário',
+        style: TextStyle(
+          color: widget.color == Colors.black ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22
+          ),
+        ),
         backgroundColor: widget.color,
         iconTheme: new IconThemeData(color: widget.color == Colors.black ? Colors.white : Colors.black),
       ),
       backgroundColor: Theme.of(context).accentColor,
-      body: Container(
-        child: new ConnectivityPage(
-          widget: ListView(
-          children: <Widget>[
-            _buildTableCalendar(),
-            Divider(
-              color: Colors.transparent,
-              height: 20,
-            ),
-            _buildEventList(),
-          ],
+      body: RefreshIndicator(
+        child: Container(
+          child: new ConnectivityPage(
+            widget: ListView(
+            children: <Widget>[
+              _buildTableCalendar(),
+              Divider(
+                color: Colors.transparent,
+                height: 20,
+              ),
+              _buildEventList(),
+            ],
+          ),
+          )
         ),
-        )
+        onRefresh: _handleRefresh,
       ),
       drawer: new DrawerPage(),
     );
@@ -268,7 +269,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
         var container = Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              stops: [0.11, 0.02],
+              stops: MediaQuery.of(context).orientation == Orientation.portrait ? [0.12, 0.02] : [0.07,0.02],
               colors: [_color, Colors.white]
             ),
             borderRadius: BorderRadius.all(Radius.circular(10.0))
@@ -300,37 +301,123 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
 
   _functionColor(var expression){
 
+    if(expression.toString().substring(1) == " "){
+      expression = expression.toString().substring(0,1);
+    }
+
     switch (expression) {
-      case '1 ':
+      case '1':
         _color = Colors.red[700];
       break;
-      case '2 ':
+      case '2':
         _color = Colors.lightGreen;
       break;
-      case '3 ':
-        _color = Colors.blue[300];
+      case '3':
+        _color = Colors.lightBlue;
       break;
-      case '4 ':
-        _color = Colors.blue[900];
+      case '4':
+        _color = Colors.blue[800];
       break;
-      case '5 ':
-        _color = Colors.deepPurpleAccent;
+      case '5':
+        _color = Colors.green[800];
       break;
-      case '6 ':
+      case '6':
         _color = Colors.pink[300];
       break;
-      case '7 ':
-        _color = Colors.yellow[700];
+      case '7':
+        _color = Colors.yellow[600];
       break;
-      case '8 ':
+      case '8':
         _color = Colors.orange[700];
       break;
-      case '9 ':
+      case '9':
         _color = Colors.black;
       break;
       default:
         _color = Colors.teal;
       break;
     }
+  }
+
+  Future<Null> _handleRefresh() async {
+
+    await new Future.delayed(new Duration(seconds: 2));
+
+    setState(() {
+      _getSchedule();
+    });
+
+    return null;
+  }
+
+  _getSchedule() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    
+    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/getHorariosTodos/' + sharedPreferences.getString('id_condutor');
+
+    String linha;
+    String horaInicio;
+    String horaFim;
+    DateTime dia;
+    var count = 0;
+    var count2;
+
+    try {      
+      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      
+      if(response.statusCode==200){
+        _events = {};
+        var dados = jsonDecode(response.body);
+
+        if(response.body[1]=="]"){ //ou seja a resposta é só []
+          print("Não há nada agendado para hoje");
+          setState(() {
+            _selectedEvents = [];
+          });
+          return; //nao ha nada para fazer nesta funcao entao
+        }else{
+          for (var i=0; i<dados.length; i++) {
+            _selectedDay = DateTime.parse(dados[i]['data']);
+            print(_selectedDay);
+            count2 = 0;
+
+            if(!_events.containsKey(_selectedDay)){
+              for(var j=0; j<dados.length; j++) {
+                // linha = (dados[j]['id_linha']).toString();
+                // horaInicio = dados[j]['hora_inicio'].toString().substring(0,2) + 'h' + dados[j]['hora_inicio'].toString().substring(3,5);
+                // horaFim = dados[j]['hora_fim'].toString().substring(0,2) + 'h' + dados[j]['hora_fim'].toString().substring(3,5);
+                if(dados[i]['data'] == dados[j]['data']){
+                  count++;
+                }
+              }
+              _eventsDaily = new List.generate(count, (i) => i + 1);
+              while(count2 != count){
+                for (var x=0; x<dados.length; x++) {
+                  if(dados[i]['data'] == dados[x]['data']){
+                    print(dados[i]['data'] + '   ' + dados[x]['data']);
+                    print(i.toString() + '   ' + x.toString());
+                    linha = (dados[x]['id_linha']).toString();
+                    horaInicio = dados[x]['hora_inicio'].toString().substring(0,2) + 'h' + dados[x]['hora_inicio'].toString().substring(3,5);
+                    horaFim = dados[x]['hora_fim'].toString().substring(0,2) + 'h' + dados[x]['hora_fim'].toString().substring(3,5);
+
+                    _eventsDaily[count2] = linha + ' ' + horaInicio + " - " + horaFim;
+                    print(_eventsDaily);
+                    count2++;
+                  }
+                }
+              }
+              _events[_selectedDay] = _eventsDaily;
+              _eventsDaily = [];
+
+            }
+          }
+        }
+
+        print(_events);
+      }
+    }catch(e){
+      print(e);
+    }
+
   }
 }

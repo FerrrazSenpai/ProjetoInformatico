@@ -264,8 +264,8 @@ class _LoginPageState extends State<LoginPage> {
         }else{
           sharedPreferences.clear();
           setState(() {
-              _error = "Tem de utilizar uma conta de condutor!";
-            });
+            _error = "Credenciais inválidas";
+          });
         }
       }
       else if(response.statusCode == 400){

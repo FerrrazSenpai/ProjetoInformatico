@@ -56,10 +56,12 @@ class DashboardPageState extends State<DashboardPage> {
   Timer timer;
 
   Color _color = Colors.teal;
-  Map<DateTime, List> _events;
+  List _events;
   List _selectedEvents;
 
   bool _setup = false;
+
+  String _selectedDay;
 
   void handleTick() {
     if (isActive) {
@@ -80,33 +82,9 @@ class DashboardPageState extends State<DashboardPage> {
     super.initState();
     //_getUserData();
     _getUserData2();
-
-    final _selectedDay = DateTime.now();
-    _events = {
-      _selectedDay.subtract(Duration(days: 30)): ['Event A0', 'Event B0', 'Event C0'],
-      _selectedDay.subtract(Duration(days: 27)): ['Event A1'],
-      _selectedDay.subtract(Duration(days: 20)): ['Event A2', 'Event B2', 'Event C2', 'Event D2'],
-      _selectedDay.subtract(Duration(days: 16)): ['Event A3', 'Event B3'],
-      _selectedDay.subtract(Duration(days: 10)): ['10 9h00-10h10', '7 15h00-16h20'],
-      _selectedDay.subtract(Duration(days: 4)): ['3 9h00-10h10'],
-      _selectedDay.subtract(Duration(days: 2)): ['6 9h00-10h10', '7 15h00-16h20', '8 uma hora qualquer'],
-      _selectedDay: ['7 9h00-10h10', '8 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 1)): Set.from(['8 9h00-10h10', '9 15h00-16h20', '2 uma hora qualquer','10 uma hora qualquer']).toList(),
-      _selectedDay.add(Duration(days: 3)): Set.from(['5 uma hora qualquer']).toList(),
-      _selectedDay.add(Duration(days: 7)): ['1 9h00-10h10', '5 15h00-16h20', '3 uma hora qualquer'],
-      _selectedDay.add(Duration(days: 11)): ['7 9h00-10h10', '2 15h00-16h20','4 16h20-17h00'],
-      _selectedDay.add(Duration(days: 17)): ['Event A12', 'Event B12', 'Event C12', 'Event D12'],
-      _selectedDay.add(Duration(days: 22)): ['Event A13', 'Event B13'],
-      _selectedDay.add(Duration(days: 26)): ['Event A14', 'Event B14', 'Event C14'],
-    };
-
-    _selectedEvents = _events[_selectedDay.add(Duration(days: 2))] ?? null;
-
-    print(_selectedEvents);
-
     _setupVerification();
-
     _functionColor(linha);
+    _getSchedule();
   }
 
   @override
@@ -122,33 +100,43 @@ class DashboardPageState extends State<DashboardPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title, style: TextStyle(color: _color == Colors.black ? Colors.white : Colors.black, fontWeight: FontWeight.bold),),
+        elevation: 0,
+        title: Text(widget.title, 
+          style: TextStyle(
+            color: _color == Colors.black ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22
+          ),
+        ),
         backgroundColor: _color,
         iconTheme: new IconThemeData(color: _color == Colors.black ? Colors.white : Colors.black),
       ),
       backgroundColor: Theme.of(context).accentColor,
-      body: Container(
-        child: new ConnectivityPage(
-          widget: ListView(        
-            children: <Widget>[
-              _getProfile(),
-              //_buildEventList(),
-              Text("Meus serviços para o dia de hoje",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold
+      body: RefreshIndicator(
+        child: Container(
+          child: new ConnectivityPage(
+            widget: ListView(        
+              children: <Widget>[
+                _getProfile(),
+                //_buildEventList(),
+                Text("Meus serviços para o dia de hoje",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 6.0,
-              ),
-              _buildEventList(),
-              _getLocationButton(),
-            ],
+                SizedBox(
+                  height: 6.0,
+                ),
+                _buildEventList(),
+                _getLocationButton(),
+              ],
+            ),
           ),
         ),
+        onRefresh: _handleRefresh,
       ),
       drawer: new DrawerPage(),
     );
@@ -180,70 +168,62 @@ class DashboardPageState extends State<DashboardPage> {
     };
 
     var response = 
-        await 
-        http.post(
-          url,
-          headers: {
-            'Accept' : 'application/json',
-            'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
-          },
-          body: body,
-        );
+      await 
+      http.post(url,
+        headers: {
+          'Accept' : 'application/json',
+          'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
+        },
+        body: body,
+      );
     print(response.body);
     //print(body);
     return response.body;
     
   }
 
-  _getUserData() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    String dia;
-    String ano;
-    String mes;
-    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/profile';
-    try {      
-      final response = 
-      await 
-      http.get(
-        url, 
-        headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},
-      ).timeout(const Duration(seconds: 15));
-      print("status code: " + response.statusCode.toString() );
-      if(response.statusCode==200){
-        var dados = jsonDecode(response.body);
-        print(dados);
-        setState(() {
-          nome = dados['name'];
-          email = dados['email'];
-          dataNascimento = dados['data_nascimento'];
-          localidade = dados['localidade'];
+  // _getUserData() async {
+  //   sharedPreferences = await SharedPreferences.getInstance();
+  //   String dia;
+  //   String ano;
+  //   String mes;
+  //   var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/profile';
+  //   try {      
+  //     final response = 
+  //     await 
+  //     http.get(
+  //       url, 
+  //       headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},
+  //     ).timeout(const Duration(seconds: 15));
+  //     print("status code: " + response.statusCode.toString() );
+  //     if(response.statusCode==200){
+  //       var dados = jsonDecode(response.body);
+  //       print(dados);
+  //       setState(() {
+  //         nome = dados['name'];
+  //         email = dados['email'];
+  //         dataNascimento = dados['data_nascimento'];
+  //         localidade = dados['localidade'];
 
-          if(dataNascimento != null ){
-            ano = dataNascimento.substring(0,4);
-            dia = dataNascimento.substring(8,10);
-            mes = dataNascimento.substring(5,7);
-            dataNascimento = dia + '-' + mes + '-' + ano;
-            print(dataNascimento);
-          }else{
-            dataNascimento = 'Desconhecida';
-          }
+  //         if(dataNascimento != null ){
+  //           ano = dataNascimento.substring(0,4);
+  //           dia = dataNascimento.substring(8,10);
+  //           mes = dataNascimento.substring(5,7);
+  //           dataNascimento = dia + '-' + mes + '-' + ano;
+  //         }else{
+  //           dataNascimento = 'Desconhecida';
+  //         }
 
-          if (localidade != null ){
-            print(localidade);
-          }else{
-            localidade = 'Desconhecida';
-          }
-          print(nome);
-          print(email);
-          print(dataNascimento);
-          print(localidade);
+  //         if (localidade == null ){
+  //           localidade = 'Desconhecida';
+  //         }
           
-        });
-      }
-    }catch(e){
-      print(e);
-    }
-  }
+  //       });
+  //     }
+  //   }catch(e){
+  //     print(e);
+  //   }
+  // }
 
   _getUserData2() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -265,14 +245,11 @@ class DashboardPageState extends State<DashboardPage> {
         dia = dataNascimento.substring(8,10);
         mes = dataNascimento.substring(5,7);
         dataNascimento = dia + '-' + mes + '-' + ano;
-        print(dataNascimento);
       }else{
         dataNascimento = 'Desconhecida';
       }
 
-      if (localidade != null ){
-        print(localidade);
-      }else{
+      if (localidade == null ){
         localidade = 'Desconhecida';
       }
     });
@@ -280,7 +257,7 @@ class DashboardPageState extends State<DashboardPage> {
 
   Widget _getProfile(){
     return Container(
-      margin: EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 25.0),
+      margin: EdgeInsets.fromLTRB(30.0, 15.0, 30.0, 25.0),
       child: Row(
         children: <Widget>[
           Flexible(
@@ -292,7 +269,7 @@ class DashboardPageState extends State<DashboardPage> {
                   size: 65.0,
                 ),
                 SizedBox(
-                  height:5.0
+                  height:9.0
                 ),
                 Text("$nome",
                   textAlign: TextAlign.center,
@@ -331,7 +308,7 @@ class DashboardPageState extends State<DashboardPage> {
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Data de nascimento', 
+                  child: Text('Localidade', 
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 15,
@@ -341,7 +318,7 @@ class DashboardPageState extends State<DashboardPage> {
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(" $dataNascimento",
+                  child: Text(" $localidade",
                   textAlign: TextAlign.left,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -355,7 +332,7 @@ class DashboardPageState extends State<DashboardPage> {
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Localidade', 
+                  child: Text('Data de nascimento', 
                     textAlign: TextAlign.left,
                     style: TextStyle(
                       fontSize: 15,
@@ -365,7 +342,7 @@ class DashboardPageState extends State<DashboardPage> {
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(" $localidade",
+                  child: Text(" $dataNascimento",
                   textAlign: TextAlign.left,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -449,7 +426,7 @@ class DashboardPageState extends State<DashboardPage> {
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              stops: [0.11, 0.02],
+              stops: MediaQuery.of(context).orientation == Orientation.portrait ? [0.12, 0.02] : [0.07,0.02],
               colors: [_color, Colors.white]
             ),
             borderRadius: BorderRadius.all(Radius.circular(7.0))
@@ -461,14 +438,13 @@ class DashboardPageState extends State<DashboardPage> {
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 22
+                fontSize: 25
               ),
             ),
-            title: Text(
-              event.toString().substring(2),
+            title: Text(event.toString().substring(2),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 19
+                fontSize: 20
               ),
             ),
           ),
@@ -543,19 +519,19 @@ class DashboardPageState extends State<DashboardPage> {
         _color = Colors.lightGreen;
       break;
       case '3':
-        _color = Colors.blue[300];
+        _color = Colors.lightBlue;
       break;
       case '4':
-        _color = Colors.blue[900];
+        _color = Colors.blue[800];
       break;
       case '5':
-        _color = Colors.deepPurpleAccent;
+        _color = Colors.green[800];
       break;
       case '6':
         _color = Colors.pink[300];
       break;
       case '7':
-        _color = Colors.yellow[700];
+        _color = Colors.yellow[600];
       break;
       case '8':
         _color = Colors.orange[700];
@@ -568,4 +544,58 @@ class DashboardPageState extends State<DashboardPage> {
       break;
     }
   }
+
+  Future<Null> _handleRefresh() async {
+
+    await new Future.delayed(new Duration(seconds: 2));
+
+    setState(() {
+      _getSchedule();
+    });
+
+    return null;
+  }
+
+  _getSchedule() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    
+    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/getHorarios/' + sharedPreferences.getString("id_condutor");
+
+    String linha;
+    String horaInicio;
+    String horaFim;
+
+    try {      
+      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      
+      if(response.statusCode==200){
+        var dados = jsonDecode(response.body);
+
+        if(response.body[1]=="]"){ //ou seja a resposta é só []
+          print("Não há nada agendado para hoje");
+          setState(() {
+            _selectedEvents = null;
+          });
+          return; //nao ha nada para fazer nesta funcao entao
+        }else{
+          _events = new List.generate(dados.length, (i) => i + 1);
+          for (var i=0; i<dados.length; i++) {
+            linha = (dados[i]['id_linha']).toString();
+            horaInicio = dados[i]['hora_inicio'].toString().substring(0,2) + 'h' + dados[i]['hora_inicio'].toString().substring(3,5);
+            horaFim = dados[i]['hora_fim'].toString().substring(0,2) + 'h' + dados[i]['hora_fim'].toString().substring(3,5);
+
+            _events[i] = linha + ' ' + horaInicio + " - " + horaFim;
+            
+            setState(() {
+              _selectedEvents = _events;
+            });
+          }
+        }
+      }
+    }catch(e){
+      print(e);
+    }
+
+  }
+
 }

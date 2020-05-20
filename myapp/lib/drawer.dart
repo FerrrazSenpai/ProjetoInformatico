@@ -162,19 +162,19 @@ class MyDrawer extends State<DrawerPage> {
         _color = Colors.lightGreen;
       break;
       case '3':
-        _color = Colors.blue[300];
+        _color = Colors.lightBlue;
       break;
       case '4':
-        _color = Colors.blue[900];
+        _color = Colors.blue[800];
       break;
       case '5':
-        _color = Colors.deepPurpleAccent;
+        _color = Colors.green[800];
       break;
       case '6':
         _color = Colors.pink[300];
       break;
       case '7':
-        _color = Colors.yellow[700];
+        _color = Colors.yellow[600];
       break;
       case '8':
         _color = Colors.orange[700];

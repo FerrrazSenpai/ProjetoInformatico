@@ -16,41 +16,61 @@ class Dialogs {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          title: Text(title, 
-            textAlign: TextAlign.center, 
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white
-            ),
-          ),
-          backgroundColor: Colors.black87,
-          content: Text(body,
-            style: TextStyle(
-              color: Colors.white
-            ),
-          ),
-          actions: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                ButtonTheme(
-                  minWidth: 163.0,
-                  child: FlatButton(
-                  onPressed: () => Navigator.of(context).pop(DialogAction.cancel),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 18.0),),
+          backgroundColor: Theme.of(context).accentColor,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SizedBox(
+                height: 20.0
+              ),
+              Container(
+                child: Text("Pretende realmente sair desta aplicação? ",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 19.0
                   ),
                 ),
-                ButtonTheme(
-                  minWidth: 163.0,
-                  child: FlatButton(
-                  onPressed: () => Navigator.of(context).pop(DialogAction.confirm),
-                  child: const Text('Confirmar', style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 18.0),),
-                  ),
+              ),
+              SizedBox(
+                height: 20.0
+              ),
+              Flexible(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      child: ButtonTheme(
+                        child: FlatButton(
+                          onPressed: () => Navigator.of(context).pop(DialogAction.cancel),
+                          child: const Text('Cancelar',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ButtonTheme(
+                        child: FlatButton(
+                          onPressed: () => Navigator.of(context).pop(DialogAction.confirm),
+                          child: const Text('Confirmar',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         );
       },
     );

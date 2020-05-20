@@ -47,6 +47,16 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   SharedPreferences sharedPreferences;
+  // Timer timer;
+  // static const duration = const Duration(seconds: 1);
+  // bool counter = false;
+
+  // void handleTick() {
+  //   if(!counter)
+  //   setState(() {
+  //     counter = true;
+  //   });
+  // }
 
   @override
   void initState() {
@@ -69,37 +79,44 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    // if (timer == null) {
+    //   timer = Timer.periodic(duration, (Timer t) {
+    //     handleTick();
+    //   });
+    // }
+
     return Scaffold(
-      backgroundColor: Theme.of(context).accentColor,
-      body: Padding(
-        padding: const EdgeInsets.only(top: 250),
-        child: Center(
-          child: Container(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: 70,
-                  height: 70,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 5.0,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-                SizedBox(
-                  height: 20
-                ),
-                Text("A carregar ...", 
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w700
-                )
-                ),
-              ]
-            )
-          ),
-        ),
-      ),
+      backgroundColor: Colors.black,
+      // body: Padding(
+      //   padding: const EdgeInsets.only(top: 275),
+      //   child: Center(
+      //     child: Container(
+      //       child: Column(
+      //         children: <Widget>[
+      //           Container(
+      //             width: 40,
+      //             height: 40,
+      //             child: CircularProgressIndicator(
+      //               strokeWidth: 5.0,
+      //               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      //             ),
+      //           ),
+      //           SizedBox(
+      //             height: 20
+      //           ),
+      //           Text("A carregar ...", 
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 20,
+      //             fontWeight: FontWeight.w700
+      //           )
+      //           ),
+      //         ]
+      //       )
+      //     ),
+      //   ),
+      // ),
     );
   }
 }

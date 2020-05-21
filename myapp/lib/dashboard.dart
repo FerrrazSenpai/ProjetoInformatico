@@ -57,11 +57,9 @@ class DashboardPageState extends State<DashboardPage> {
     sharedPreferences = await SharedPreferences.getInstance();
     if(sharedPreferences.getBool("ativo") != null){
       isActive = sharedPreferences.getBool("ativo");
-      print('SHARED PREFERENCES = ' + sharedPreferences.getBool("ativo").toString());
     }else{
       sharedPreferences.setBool("ativo", false);
       isActive = false;
-      print('SHARED PREFERENCES = ' + sharedPreferences.getBool("ativo").toString());
     }
   }
 
@@ -74,6 +72,8 @@ class DashboardPageState extends State<DashboardPage> {
   bool _setup = false;
 
   String _selectedDay;
+
+  String _status;
 
   void handleTick() async{
     sharedPreferences = await SharedPreferences.getInstance();
@@ -105,8 +105,10 @@ class DashboardPageState extends State<DashboardPage> {
     _functionColor(linha);
 
     if (timer == null) {
-      timer = Timer.periodic(duration, (Timer t) {
-        handleTick();
+      setState(() {
+        timer = Timer.periodic(duration, (Timer t) {
+          handleTick();
+        });
       });
     }
 
@@ -188,8 +190,11 @@ class DashboardPageState extends State<DashboardPage> {
         },
         body: body,
       );
-    print(response.body);
-    return response.body;
+    setState(() {
+      _status = response.statusCode.toString();
+      print(response.body);
+      return response.body;
+    });
     
   }
 
@@ -385,13 +390,12 @@ class DashboardPageState extends State<DashboardPage> {
           sharedPreferences.setBool("ativo", isActive);
           if(isActive){
             _getLocation().then((value) {
-              setState(() {
-                userLocation = value;
-                // 1m/s -> 3.6km/h  speed -> speedkmh
-                speedkmh = userLocation.speed.toDouble() * 3.600;
-                time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
-                _postLocation();
-              });
+              userLocation = value;
+              // 1m/s -> 3.6km/h  speed -> speedkmh
+              speedkmh = userLocation.speed.toDouble() * 3.600;
+              time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
+              _postLocation();
+              print(_status);
             });
           }else{
             print("Parou o envio");
@@ -399,27 +403,53 @@ class DashboardPageState extends State<DashboardPage> {
         });
       };
     }
-    return Container (
-      padding: EdgeInsets.symmetric(horizontal: 30.0,vertical: 20.0),
-      child: RaisedButton(
-        focusElevation: 30,
-        padding: EdgeInsets.all(15.0),
-        elevation: 15,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-        child: Text(isActive ? 'Parar o envio de localização' : 'Começar o envio de localização',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 19,
-            color: _color == Colors.black ? Colors.white : Colors.black
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Container (
+          padding: EdgeInsets.only(top: 20.0, bottom: 10.0, right: 30.0, left: 30.0),
+          child: RaisedButton(
+            focusElevation: 30,
+            padding: EdgeInsets.all(15.0),
+            elevation: 15,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+            child: Text(isActive ? 'Parar o envio de localização' : 'Começar o envio de localização',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 19,
+                color: _color == Colors.black ? Colors.white : Colors.black
+              ),
+            ),
+            color: _color,
+            onPressed: _onPressed,
+            disabledColor: Colors.grey[600],
           ),
         ),
-        color: _color,
-        onPressed: _onPressed,
-        disabledColor: Colors.grey[600],
-      ),
+        isActive ? Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              FontAwesomeIcons.solidDotCircle,
+              color: _status == "201" ? Colors.green[600] : Colors.red[600],
+              size: 17.5,
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 5.0),
+              child: Text(
+                _status == "201" ? 'Último envio às ' + formatDate(time, [HH,":",nn]) : 'Erro no envio',
+                style: TextStyle(
+                  color: _status == "201" ? Colors.green[600] : Colors.red[600],
+                  fontSize: 15.0
+                ),
+              ),
+            )
+          ],
+        )
+        : SizedBox.shrink(),
+      ],
     );
   }
 
@@ -509,7 +539,7 @@ class DashboardPageState extends State<DashboardPage> {
             ),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('Autocarro                    Linha', 
+              child: Text('Linha                   Autocarro', 
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 15,
@@ -519,7 +549,7 @@ class DashboardPageState extends State<DashboardPage> {
             ),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text("  $bus                      $linha",
+              child: Text("  $linha                 $bus",
               textAlign: TextAlign.left,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,

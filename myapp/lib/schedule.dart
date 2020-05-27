@@ -9,16 +9,17 @@ import 'package:app_condutor/connectivity.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:date_format/date_format.dart';
 
 class SchedulePage extends StatefulWidget {
   SchedulePage({Key key, this.color}) : super(key: key);
 
   final Color color;
   @override
-  schedulePageStateState createState() => schedulePageStateState();
+  SchedulePageStateState createState() => SchedulePageStateState();
 }
 
-class schedulePageStateState extends State<SchedulePage> with TickerProviderStateMixin{
+class SchedulePageStateState extends State<SchedulePage> with TickerProviderStateMixin{
   CalendarController _calendarController;
   Map<DateTime, List> _events;
   List _selectedEvents;
@@ -35,11 +36,11 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
     super.initState();
     initializeDateFormatting();
     _calendarController = CalendarController();
-    _selectedDay = DateTime.now();
 
     _events = {};
 
     _getSchedule();
+
     _selectedEvents = _events[_selectedDay] ?? [];
     
   }
@@ -83,7 +84,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
         ),
         onRefresh: _handleRefresh,
       ),
-      drawer: new DrawerPage(),
+      drawer: new DrawerPage(page: "schedule"),
     );
   }
 
@@ -297,7 +298,6 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
                 ),
               ],
             ),
-            onTap: () => print('$event tapped!'),
           ),
         );return container;
       })
@@ -365,7 +365,6 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
     String autocarro;
     String horaInicio;
     String horaFim;
-    DateTime dia;
     var count = 0;
     var count2;
 
@@ -377,7 +376,7 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
         var dados = jsonDecode(response.body);
 
         if(response.body[1]=="]"){ //ou seja a resposta é só []
-          print("Não há nada agendado para hoje");
+          print("Não há nada agendado");
           setState(() {
             _selectedEvents = [];
           });
@@ -423,6 +422,12 @@ class schedulePageStateState extends State<SchedulePage> with TickerProviderStat
 
             }
           }
+
+          setState(() {
+            DateTime now = DateTime.parse(formatDate(DateTime.now(), [yyyy,"-",mm,"-",dd]));
+            _selectedEvents = _events[now] ?? [];
+          });
+
         }
       }
     }catch(e){

@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:connectivity/connectivity.dart';
 import 'main.dart';
-
+import 'package:passageiroapp/drawer.dart';
 
 Future main() async {
   await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
@@ -26,8 +26,12 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 0.0,
+      ),
       backgroundColor: Theme.of(context).primaryColor,
-      
       body: Builder(
         builder: (BuildContext context){
           return OfflineBuilder(
@@ -67,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
               );
             },
             child: Container(
-              padding: EdgeInsets.only(top: 40, left: 30, right: 30),
+              padding: EdgeInsets.only(left: 30, right: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -96,6 +100,7 @@ class _LoginPageState extends State<LoginPage> {
           );
         },
       ),
+      drawer: DrawerPage(),
     );
   }
 
@@ -257,7 +262,8 @@ class _LoginPageState extends State<LoginPage> {
           sharedPreferences.setBool("checkBox", checkBoxValue);
           sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
           sharedPreferences.setString("email", email);
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'App Passageiro')), (Route<dynamic> route) => false);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: "Página inicial",)), (Route<dynamic> route) => false);
+
           //print(jsonResponse['access_token']);
           //print(sharedPreferences.getBool("checkBox"));
         }

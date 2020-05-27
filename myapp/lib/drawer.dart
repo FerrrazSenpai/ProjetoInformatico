@@ -10,6 +10,10 @@ import 'package:app_condutor/driverSetup.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class DrawerPage extends StatefulWidget {
+  DrawerPage({Key key, this.page}) : super(key: key);
+
+  final String page;
+  
   @override
   MyDrawer createState() => MyDrawer();
 }
@@ -70,6 +74,9 @@ class MyDrawer extends State<DrawerPage> {
             leading: Icon(FontAwesomeIcons.home, color: Colors.black,size: 22.0,),
             title: Text('Página Inicial', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
+              if(widget.page == "dashboard"){
+                Navigator.of(context).pop();
+              }
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: 'Página inicial')), (Route<dynamic> route) => false);
             },
           ),
@@ -77,6 +84,9 @@ class MyDrawer extends State<DrawerPage> {
             leading: Icon(FontAwesomeIcons.solidClock, color: Colors.black,size: 22.0,),
             title: Text('Horário', style: TextStyle(fontSize: 17.0),),
             onTap: () async {
+              if(widget.page == "schedule"){
+                Navigator.of(context).pop();
+              }
               Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => SchedulePage(color: _color,)), (Route<dynamic> route) => false);
             },
           ),
@@ -127,7 +137,7 @@ class MyDrawer extends State<DrawerPage> {
     sharedPreferences = await SharedPreferences.getInstance();
 
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/userid";
-    final response = await http.get(url,headers: {
+    /* final response =  */await http.get(url,headers: {
         'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
     },).timeout(const Duration(seconds: 6));
 

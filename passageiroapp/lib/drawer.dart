@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:passageiroapp/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:passageiroapp/dialogs.dart';
 import 'package:passageiroapp/login.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:passageiroapp/map.dart';
+import 'package:passageiroapp/lines.dart';
+import 'package:passageiroapp/favorites.dart';
 
 class DrawerPage extends StatefulWidget {
+  DrawerPage({Key key, this.loginStatus}) : super(key: key);
+
+  final bool loginStatus;
   
   @override
   MyDrawer createState() => MyDrawer();
@@ -18,7 +23,6 @@ class MyDrawer extends State<DrawerPage> {
   var action;
   int code;
   String nome;
-  bool _loginStatus = true;
   
   String linha;
   Color _color;
@@ -26,18 +30,12 @@ class MyDrawer extends State<DrawerPage> {
   @override
   void initState() {
     super.initState();
-    checkLoginStatus();
   }
 
   @override
   Widget build(BuildContext context) {
 
-    if(_loginStatus != null){
-      checkLoginStatus();
-    }
-
-    print(_loginStatus.toString());
-    if(_loginStatus){
+    if(widget.loginStatus){
       return Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -62,12 +60,22 @@ class MyDrawer extends State<DrawerPage> {
               leading: Icon(FontAwesomeIcons.home, color: Colors.black,size: 22.0,),
               title: Text('Página Inicial', style: TextStyle(fontSize: 17.0),),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: "Página inicial",)), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
               },
             ),
             ListTile(
               leading: Icon(Icons.linear_scale, color: Colors.black,size: 22.0,),
               title: Text('Linhas', style: TextStyle(fontSize: 17.0),),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LinesPage()), (Route<dynamic> route) => false);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.favorite, color: Colors.black,size: 22.0,),
+              title: Text('Favoritos', style: TextStyle(fontSize: 17.0),),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => FavoritesPage()), (Route<dynamic> route) => false);
+              },
             ),
             ListTile(
               leading: Icon(FontAwesomeIcons.signOutAlt, color: Colors.black,size: 22.0,),
@@ -106,12 +114,15 @@ class MyDrawer extends State<DrawerPage> {
               leading: Icon(FontAwesomeIcons.home, color: Colors.black,size: 22.0,),
               title: Text('Página Inicial', style: TextStyle(fontSize: 17.0),),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: "Página inicial",)), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
               },
             ),
             ListTile(
               leading: Icon(Icons.linear_scale, color: Colors.black,size: 22.0,),
               title: Text('Linhas', style: TextStyle(fontSize: 17.0),),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LinesPage()), (Route<dynamic> route) => false);
+              },
             ),
             ListTile(
               leading: Icon(FontAwesomeIcons.signInAlt, color: Colors.black,size: 22.0,),
@@ -132,6 +143,8 @@ class MyDrawer extends State<DrawerPage> {
   }
 
   void _logout() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
     try{
       final response = await http.post(url,headers: {
@@ -139,6 +152,8 @@ class MyDrawer extends State<DrawerPage> {
       },).timeout(const Duration(seconds: 3));
 
       print(response.statusCode);  
+      sharedPreferences.setBool("loginStatus", false);
+      sharedPreferences.clear();
     }catch(e){
       print("Erro de conexão ao servidor, Access não eliminado");
     }
@@ -151,24 +166,23 @@ class MyDrawer extends State<DrawerPage> {
       // _logout();
       setState(() {
         _logout();
-        sharedPreferences.clear();
-        Navigator.pop(context);
+        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
       });
     }
   }
 
   
 
-  checkLoginStatus() async {
-    sharedPreferences = await SharedPreferences.getInstance();
+  // checkLoginStatus() async {
+  //   sharedPreferences = await SharedPreferences.getInstance();
 
-    if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")){
-      _loginStatus = false;
-    }else if (sharedPreferences.getString("access_token") == null) {
-      sharedPreferences.remove("access_token");
-      _loginStatus = false;
-    }else{
-      _loginStatus = true;
-    }
-  }
+  //   if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")){
+  //     _loginStatus = false;
+  //   }else if (sharedPreferences.getString("access_token") == null) {
+  //     sharedPreferences.remove("access_token");
+  //     _loginStatus = false;
+  //   }else{
+  //     _loginStatus = true;
+  //   }
+  // }
 }

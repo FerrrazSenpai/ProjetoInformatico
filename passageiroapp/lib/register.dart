@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:passageiroapp/map.dart';
+import 'drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_offline/flutter_offline.dart';
 import 'package:connectivity/connectivity.dart';
@@ -17,13 +19,28 @@ class _RegisterPageState extends State<RegisterPage> {
   bool connected;
   var _error = "";
   var dataNascimento;
+  SharedPreferences sharedPreferences;  
+  bool _loginStatus = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  bool _absorbing = false;
 
+
+  @override
   Widget build(BuildContext context) {
+
+    _checkLoginStatus();
+
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Theme.of(context).primaryColor,
-      
-      body: Builder(
-        builder: (BuildContext context){
+      appBar: AppBar(
+        title: Text("Registo"),
+        backgroundColor: Colors.black,
+      ),
+      body: AbsorbPointer(
+        absorbing: _absorbing,
+        child: Builder(
+        builder: (context){
           return OfflineBuilder(
             connectivityBuilder: (
               BuildContext context,
@@ -61,13 +78,10 @@ class _RegisterPageState extends State<RegisterPage> {
               );
             },
             child: Container(
-              padding: EdgeInsets.only(top: 40, left: 30, right: 30),
+              //padding: EdgeInsets.only(top: 10, left: 30, right: 30),
+              padding: EdgeInsets.symmetric(vertical: 10,horizontal: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15.0),
-                  topRight: Radius.circular(15.0),
-                ),
               ),
               child: ListView(
                 children: <Widget>[
@@ -82,15 +96,29 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           );
         },
-      ),
+      )),
+      drawer: DrawerPage(loginStatus: _loginStatus,),
     );
   }
+
+  _checkLoginStatus() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    setState(() {
+      if(sharedPreferences.getBool("loginStatus") == null || !sharedPreferences.getBool("loginStatus")){
+        _loginStatus = false;
+      }else{
+        _loginStatus = true;
+      }
+    });
+  }
+  
 
   Container  formSection(){
     return Container(
         child: Column(
           children: <Widget>[
-            SizedBox(height: 60.0),
+            SizedBox(height: 40.0),
             formInputWControler("Nome", FontAwesomeIcons.userAlt, nameControler),
             SizedBox(height: 10.0),
             formInput("Email", FontAwesomeIcons.solidEnvelope),
@@ -402,19 +430,19 @@ class _RegisterPageState extends State<RegisterPage> {
     print(body);
 
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/utilizadores/registerClient";
-    print(url);
-    var response;
     try {      
-      response = await http.post(url, body: body).timeout(const Duration(seconds: 7));
+      var response = await http.post(url, body: body).timeout(const Duration(seconds: 7));
       print(response.statusCode);
       var jsonResponse = json.decode(response.body);
       if(response.statusCode == 201) {
         print(jsonResponse);
-        Scaffold.of(context).showSnackBar(SnackBar(
-          content: Text("Conta criada com sucesso"),
-        ));
+        _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Conta criada com sucesso"),));
+        setState(() {
+          _absorbing = true; //nao permitir ao user fazer alterações
+        });
+        Timer( Duration(seconds: 2), () => Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => MapPage(title: "Página inicial")),));
+
         //TODO: Fazer o redirect
-        //Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => MapPage()),);
 
       }
       else{

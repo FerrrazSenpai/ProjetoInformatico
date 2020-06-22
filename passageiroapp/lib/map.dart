@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
+import 'package:passageiroapp/drawer.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:passageiroapp/connectivity.dart';
 import 'dart:convert';
 
+
+class MyMap extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: Colors.black,
+        accentColor: Colors.white,
+      ),
+      home: MapPage(title: 'App Passageiro'),
+    );
+  }
+}
 
 class MapPage extends StatefulWidget {
   MapPage({Key key, this.title}) : super(key: key);
@@ -21,19 +37,20 @@ class _MapPageState extends State<MapPage> {
   
   BitmapDescriptor _sourceIcon;
   double _markerToastPosition = -200;
-
+  bool _loginStatus = false;
 
   void _setSourceIcon() async {
     _sourceIcon = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(devicePixelRatio: 2.5), 'assets/icon_bus.png');
   }
+  
   @override
   void initState() {
     super.initState();
     //fillMarkers();
     _setSourceIcon();
-    getMarkers(); //Server testes
- }
+    _getMarkers(); //Server testes
+  }
 
   String timeRecord="Clique na linha para obter a previsão";
   GoogleMapController mapController;
@@ -45,55 +62,61 @@ class _MapPageState extends State<MapPage> {
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-  
   }
-  
+
   @override
   Widget build(BuildContext context) {
+    
+    _checkLoginStatus();
+
     return Scaffold(
-      
-      body: Stack(
-        children: <Widget>[
-          _mapWidget(),
-          AnimatedPositioned(
-          bottom: _markerToastPosition,
-          right: 0,
-          left: 0,
-          duration: Duration(milliseconds: 200),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              //margin: EdgeInsets.all(20),
-              margin: EdgeInsets.symmetric(vertical: 25, horizontal:10),
-              height: 100,
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(32)),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      blurRadius: 50,
-                      offset: Offset.zero,
-                      color: Colors.grey.withOpacity(0.50),
-                    )
-                  ]),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _buildLocationInfo(),
-                  //_buildMarkerType(),
-                ],
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: ConnectivityPage(
+        widget: Stack(
+          children: <Widget>[
+            _mapWidget(),
+            AnimatedPositioned(
+            bottom: _markerToastPosition,
+            right: 0,
+            left: 0,
+            duration: Duration(milliseconds: 200),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                //margin: EdgeInsets.all(20),
+                margin: EdgeInsets.symmetric(vertical: 25, horizontal:10),
+                height: 100,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(32)),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        blurRadius: 50,
+                        offset: Offset.zero,
+                        color: Colors.grey.withOpacity(0.50),
+                      )
+                    ]),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    _buildLocationInfo(),
+                    //_buildMarkerType(),
+                  ],
+                ),
               ),
             ),
-          ),
+          )
+          ],
         )
-        ],
-      )
+      ),
+      drawer: DrawerPage(loginStatus: _loginStatus,),
     );
   }
 
-
-  getMarkers() async {
+  _getMarkers() async {
     final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
     try {      
       final response = await http.get(url).timeout(const Duration(seconds: 7));
@@ -217,4 +240,17 @@ class _MapPageState extends State<MapPage> {
       print(e);
     }
   }
+
+  _checkLoginStatus() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    setState(() {
+      if(sharedPreferences.getBool("loginStatus") == null || !sharedPreferences.getBool("loginStatus")){
+        _loginStatus = false;
+      }else{
+        _loginStatus = true;
+      }
+    });
+  }
+  
 }

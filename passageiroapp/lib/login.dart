@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_offline/flutter_offline.dart';
-import 'package:connectivity/connectivity.dart';
-import 'main.dart';
-
+import 'package:passageiroapp/map.dart';
+import 'package:passageiroapp/drawer.dart';
+import 'package:passageiroapp/connectivity.dart';
 
 Future main() async {
   await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
@@ -26,76 +25,42 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      
-      body: Builder(
-        builder: (BuildContext context){
-          return OfflineBuilder(
-            connectivityBuilder: (
-              BuildContext context,
-              ConnectivityResult connectivity,
-              Widget child
-            ){
-              connected = connectivity != ConnectivityResult.none;
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  child,
-                  Positioned(
-                    left: 0.00,
-                    right: 0.00,
-                    height: 30.00,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      color: connected ? null : Colors.black,
-                      child: connected ? null :
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text("The device is disconnected", style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold),),
-                          SizedBox(width: 8.0,),
-                          SizedBox(width: 12.0, height: 12.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.red[800]),
-                          ),),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              );
-            },
-            child: Container(
-              padding: EdgeInsets.only(top: 40, left: 30, right: 30),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(15.0),
-                  topRight: Radius.circular(15.0),
-                ),
-              ),
-              child: ListView(
-                children: <Widget>[
-                  titleSection(),
-                  formSection(),
-                  errorSection(),
-                  buttonSection(),
-                  checkBoxSection(),
-                  /*Container(
-                    child: RaisedButton(
-                    child: Text('Continuar sem autenticação'),
-                    onPressed: () {
-                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'App Passageiro')), (Route<dynamic> route) => false);
-                    },
-                  ),
-                  )*/
-                ],
-              )
-            ),
-          );
-        },
+      appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 0.0,
       ),
+      backgroundColor: Theme.of(context).primaryColor,
+      body: ConnectivityPage(
+        widget: Container(
+          padding: EdgeInsets.only(left: 30, right: 30),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(15.0),
+              topRight: Radius.circular(15.0),
+            ),
+          ),
+          child: ListView(
+            children: <Widget>[
+              titleSection(),
+              formSection(),
+              errorSection(),
+              buttonSection(),
+              checkBoxSection(),
+              /*Container(
+                child: RaisedButton(
+                child: Text('Continuar sem autenticação'),
+                onPressed: () {
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'App Passageiro')), (Route<dynamic> route) => false);
+                },
+              ),
+              )*/
+            ],
+          )
+        ),
+      ),
+      drawer: DrawerPage(loginStatus: false,),
     );
   }
 
@@ -257,7 +222,9 @@ class _LoginPageState extends State<LoginPage> {
           sharedPreferences.setBool("checkBox", checkBoxValue);
           sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
           sharedPreferences.setString("email", email);
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'App Passageiro')), (Route<dynamic> route) => false);
+          sharedPreferences.setBool("loginStatus", true);
+          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
+
           //print(jsonResponse['access_token']);
           //print(sharedPreferences.getBool("checkBox"));
         }

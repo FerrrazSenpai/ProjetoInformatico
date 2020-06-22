@@ -44,7 +44,7 @@ class Connectivity extends State<ConnectivityPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text("O dispositivo está desconetado", style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold),),
+                        Text("O dispositivo está disconetado", style: TextStyle(color: Colors.red[800], fontWeight: FontWeight.bold),),
                         SizedBox(width: 8.0,),
                         SizedBox(width: 12.0, height: 12.0,
                           child: CircularProgressIndicator(

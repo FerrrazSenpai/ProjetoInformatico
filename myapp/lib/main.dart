@@ -66,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
    checkLoginStatus() async {
     sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setBool("ativo", null);
     if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")){
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
     }else if (sharedPreferences.getString("access_token") == null) {

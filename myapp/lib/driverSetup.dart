@@ -22,9 +22,9 @@ class _SetupPageState extends State<SetupPage> {
   var _error = "";
   int _selectedBus;
   int _selectedLine;
-  int _idCondutor;
-  var _defaultLine=0;
-  var _defaultBus=0;
+  // int _idCondutor;
+  // var _defaultLine = 0;
+  // var _defaultBus = 0;
   bool checkBoxValue = false;
 
   final TextEditingController __selectedLineController = new TextEditingController();
@@ -43,7 +43,7 @@ class _SetupPageState extends State<SetupPage> {
     sharedPreferences = await SharedPreferences.getInstance();
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horarioCondutor/" + sharedPreferences.getString("id_condutor");
     //var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
-    try {      
+    try {
       final response = await http.get(
         url,
         headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},
@@ -52,7 +52,7 @@ class _SetupPageState extends State<SetupPage> {
       if(response.body[1]=="]"){ //ou seja a resposta é só []
         print("EMPTY RESPONSE");
         setState(() {
-          _error="Sem informação no servidor";
+          _error="Nenhum serviço está agendado para as próximas horas";
         });
         return; //nao ha nada para fazer nesta funcao entao
       }
@@ -67,7 +67,7 @@ class _SetupPageState extends State<SetupPage> {
         setState(() {
           _selectedLine = int.parse(list['id_linha'].toString());
           __selectedLineController.text = _selectedLine.toString();
-          _defaultLine=_selectedLine;
+          // _defaultLine=_selectedLine;
         });
       }
 
@@ -75,7 +75,7 @@ class _SetupPageState extends State<SetupPage> {
         setState(() {
           _selectedBus = int.parse(list['id_autocarro'].toString());
           __selectedBusController.text = _selectedBus.toString();
-          _defaultBus=_selectedBus;
+          // _defaultBus=_selectedBus;
 
         });
       }

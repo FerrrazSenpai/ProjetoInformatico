@@ -67,11 +67,9 @@ class DashboardPageState extends State<DashboardPage> {
 
   Color _color = Colors.teal;
   List _events;
-  List _selectedEvents;
+  List _selectedEvents = [];
 
   bool _setup = false;
-
-  String _selectedDay;
 
   String _status;
 
@@ -152,7 +150,7 @@ class DashboardPageState extends State<DashboardPage> {
         ),
         onRefresh: _handleRefresh,
       ),
-      drawer: new DrawerPage(),
+      drawer: new DrawerPage(page: "dashboard"),
     );
   }
 
@@ -167,7 +165,7 @@ class DashboardPageState extends State<DashboardPage> {
   }
 
   
-  Future<String> _postLocation() async {
+  _postLocation() async {
     sharedPreferences = await SharedPreferences.getInstance();
     
     var url = 'http://'+DotEnv().env['IP_ADDRESS']+'/api/tempos';
@@ -395,10 +393,7 @@ class DashboardPageState extends State<DashboardPage> {
               speedkmh = userLocation.speed.toDouble() * 3.600;
               time = DateTime.fromMillisecondsSinceEpoch(userLocation.time.toInt());
               _postLocation();
-              print(_status);
             });
-          }else{
-            print("Parou o envio");
           }
         });
       };
@@ -433,13 +428,13 @@ class DashboardPageState extends State<DashboardPage> {
           children: <Widget>[
             Icon(
               FontAwesomeIcons.solidDotCircle,
-              color: _status == "201" ? Colors.green[600] : Colors.red[600],
+              color: _status == "201" ? Colors.green[600] : _status == null ? Colors.transparent : Colors.red[600],
               size: 17.5,
             ),
             Padding(
               padding: const EdgeInsets.only(left: 5.0),
               child: Text(
-                _status == "201" ? 'Último envio às ' + formatDate(time, [HH,":",nn]) : 'Erro no envio',
+                _status == "201" ? 'Último envio às ' + formatDate(time, [HH,":",nn]) : _status == null ? "" : 'Erro no envio',
                 style: TextStyle(
                   color: _status == "201" ? Colors.green[600] : Colors.red[600],
                   fontSize: 15.0
@@ -449,12 +444,27 @@ class DashboardPageState extends State<DashboardPage> {
           ],
         )
         : SizedBox.shrink(),
+        SizedBox(
+          height: 10.0,
+        )
       ],
     );
   }
 
   Widget _buildEventList() {
-    if(_selectedEvents == null){
+    if(_selectedEvents != null){
+      if(_selectedEvents.isEmpty){
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircularProgressIndicator(
+              strokeWidth: 5.0,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          ),
+        );
+      }
+    }else if(_selectedEvents == null){
       return Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -471,6 +481,16 @@ class DashboardPageState extends State<DashboardPage> {
               fontWeight: FontWeight.bold,
               fontSize: 19
             ),
+          ),
+        ),
+      );
+    }else if(_selectedEvents.isEmpty){
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircularProgressIndicator(
+            strokeWidth: 5.0,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
           ),
         ),
       );
@@ -615,6 +635,7 @@ class DashboardPageState extends State<DashboardPage> {
 
     setState(() {
       _getSchedule();
+      _getUserData2();
     });
 
     return null;
@@ -635,8 +656,7 @@ class DashboardPageState extends State<DashboardPage> {
       if(response.statusCode==200){
         var dados = jsonDecode(response.body);
 
-        if(response.body[1]=="]"){ //ou seja a resposta é só []
-          print("Não há nada agendado para hoje");
+        if(response.body[1]=="]"){
           setState(() {
             _selectedEvents = null;
           });

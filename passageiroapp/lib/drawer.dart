@@ -79,13 +79,6 @@ class MyDrawer extends State<DrawerPage> {
               },
             ),
             ListTile(
-              leading: Icon(Icons.person_add, color: Colors.black,size: 22.0,),
-              title: Text('Criar conta', style: TextStyle(fontSize: 17.0),),
-              onTap: () async {
-                Navigator.push(context,MaterialPageRoute(builder: (context) => RegisterPage()));
-              },
-            ),
-            ListTile(
               leading: Icon(FontAwesomeIcons.signOutAlt, color: Colors.black,size: 22.0,),
               title: Text('Terminar Sessão', style: TextStyle(fontSize: 17.0),),
               onTap: () async {
@@ -142,6 +135,10 @@ class MyDrawer extends State<DrawerPage> {
             ListTile(
               leading: Icon(FontAwesomeIcons.userPlus, color: Colors.black,size: 22.0,),
               title: Text('Criar Conta', style: TextStyle(fontSize: 17.0),),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder:  (BuildContext context) => RegisterPage()), (Route<dynamic> route) => false);
+              },
+
             ),
           ],
         ),

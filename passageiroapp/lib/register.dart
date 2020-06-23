@@ -24,10 +24,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool _absorbing = false;
 
-
   @override
   Widget build(BuildContext context) {
-
     _checkLoginStatus();
 
     return Scaffold(
@@ -78,19 +76,15 @@ class _RegisterPageState extends State<RegisterPage> {
               );
             },
             child: Container(
-              //padding: EdgeInsets.only(top: 10, left: 30, right: 30),
               padding: EdgeInsets.symmetric(vertical: 10,horizontal: 30),
               decoration: BoxDecoration(
                 color: Colors.white,
               ),
               child: ListView(
                 children: <Widget>[
-                  //titleSection(),
                   formSection(),
                   _errorSection(),
-                  buttonSection(),
-                  //checkBoxSection(),
-                  
+                  buttonSection(),                 
                 ],
               )
             ),
@@ -112,7 +106,6 @@ class _RegisterPageState extends State<RegisterPage> {
       }
     });
   }
-  
 
   Container  formSection(){
     return Container(
@@ -418,16 +411,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
   register() async {
     //SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
     Map body = {
       "nome" : nameControler.text.trim(),
       "email" : emailControler.text.trim(),
       "password" : passwordControler.text.trim(),
       "data" : dataNascimento.trim(),
       "localidade" : localidadeControler.text.trim(),
-
     };
-    print(body);
 
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/utilizadores/registerClient";
     try {      
@@ -436,14 +426,12 @@ class _RegisterPageState extends State<RegisterPage> {
       var jsonResponse = json.decode(response.body);
       if(response.statusCode == 201) {
         print(jsonResponse);
+        
         _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Conta criada com sucesso"),));
         setState(() {
           _absorbing = true; //nao permitir ao user fazer alterações
         });
         Timer( Duration(seconds: 2), () => Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => MapPage(title: "Página inicial")),));
-
-        //TODO: Fazer o redirect
-
       }
       else{
         setState(() {

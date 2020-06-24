@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:passageiroapp/drawer.dart';
+import 'package:passageiroapp/stops.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class FavoritesPage extends StatefulWidget {
       //const UmPage({Key key}) : super(key: key);
@@ -11,13 +15,14 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage>{
   SharedPreferences sharedPreferences;
 
-  List _events = ["1"];
+  List _events = [];
   Color _color = Colors.teal;
   bool favorite = true;
 
   @override
   void initState() {
     super.initState();
+    _getLines();
   }
 
   @override
@@ -50,49 +55,62 @@ class _FavoritesPageState extends State<FavoritesPage>{
           
           return Container(
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Colors.black38
-              ),
-              gradient: LinearGradient(
-                stops: [0.35, 0.02],
-                colors: [_color, Colors.white]
-              ),
-              borderRadius: BorderRadius.all(Radius.circular(7.0))
+            border: Border.all(
+              color: Colors.black54,
+              width: 2.0
             ),
+            gradient: LinearGradient(
+              stops: MediaQuery.of(context).orientation == Orientation.portrait ? [0.14, 0.02] : [0.06,0.02],
+              colors: [_color, Colors.grey[200]]
+            ),
+            borderRadius: BorderRadius.all(Radius.circular(7.0))
+          ),
             margin: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 6.0),
             child: GestureDetector(
               child: ListTile(
                 leading: Text(
-                  " Linha " + event.toString().substring(0,1),
+                  event.toString().substring(0,1),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 25
+                    fontSize: 20
                   ),
+                ),
+                title: Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(event.toString().substring(1),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 19.0
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                      child: IconButton(
-                        icon: Icon(
-                          favorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                          color: favorite ? Colors.red[700] : Colors.black,
-                        ),
-                        onPressed: (){
-                          setState(() {
-                            favorite = false;
-                          });
-                        },
+                    IconButton(
+                      icon: Icon(
+                        favorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                        color: favorite ? Colors.red[700] : Colors.black,
                       ),
+                      onPressed: (){
+                        setState(() {
+                          favorite = false;
+                        });
+                      },
                     ),
                     Icon(
-                      FontAwesomeIcons.chevronDown,
+                      FontAwesomeIcons.chevronRight,
                       color: Colors.black87,
                     ),
                   ],
                 ),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => StopsPage(line: event.toString().substring(0,1),)));
+                },
               ),
             ),
           );
@@ -134,17 +152,47 @@ class _FavoritesPageState extends State<FavoritesPage>{
 
     switch (expression) {
       case '1':
-        _color = Colors.red[700];
+        _color = Colors.lightGreen;
       break;
       case '2':
-        _color = Colors.lightGreen;
+        _color = Colors.red[700];
       break;
       case '3':
         _color = Colors.lightBlue;
       break;
+      case '4':
+        _color = Colors.black;
+      break;
       default:
         _color = Colors.teal;
       break;
+    }
+  }
+
+  _getLines() async {
+
+    String id;
+    String nomeLinha;
+
+    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
+
+    try {      
+      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      
+      if(response.statusCode==200){
+        var dados = jsonDecode(response.body);
+        
+        _events = new List.generate(1, (i) => i + 1);
+
+        id = dados['data'][2]['id_linha'].toString();
+        nomeLinha = dados['data'][2]['nome'].toString();
+
+        setState(() {
+          _events[0] = id + nomeLinha;
+        });
+      }
+    }catch(e){
+      print(e);
     }
   }
 }

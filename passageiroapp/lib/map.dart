@@ -120,7 +120,6 @@ class _MapPageState extends State<MapPage> {
     final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
     try {      
       final response = await http.get(url).timeout(const Duration(seconds: 7));
-      print("status code: " + response.statusCode.toString() );
       if(response.statusCode==200){
         var markers =jsonDecode(response.body);
         for (var i=0; i<markers.length; i++){

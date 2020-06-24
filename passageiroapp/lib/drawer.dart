@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:passageiroapp/map.dart';
 import 'package:passageiroapp/lines.dart';
 import 'package:passageiroapp/favorites.dart';
+import 'package:passageiroapp/test.dart';
 
 class DrawerPage extends StatefulWidget {
   DrawerPage({Key key, this.loginStatus}) : super(key: key);
@@ -78,6 +79,13 @@ class MyDrawer extends State<DrawerPage> {
               },
             ),
             ListTile(
+              leading: Icon(Icons.theaters, color: Colors.black,size: 22.0,),
+              title: Text('Teste', style: TextStyle(fontSize: 17.0),),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => TestPage()), (Route<dynamic> route) => false);
+              },
+            ),
+            ListTile(
               leading: Icon(FontAwesomeIcons.signOutAlt, color: Colors.black,size: 22.0,),
               title: Text('Terminar Sessão', style: TextStyle(fontSize: 17.0),),
               onTap: () async {
@@ -142,22 +150,22 @@ class MyDrawer extends State<DrawerPage> {
     
   }
 
-  void _logout() async {
-    sharedPreferences = await SharedPreferences.getInstance();
+  // void _logout() async {
+  //   sharedPreferences = await SharedPreferences.getInstance();
 
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
-    try{
-      final response = await http.post(url,headers: {
-        'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
-      },).timeout(const Duration(seconds: 3));
+  //   var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
+  //   try{
+  //     final response = await http.post(url,headers: {
+  //       'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
+  //     },).timeout(const Duration(seconds: 3));
 
-      print(response.statusCode);  
-      sharedPreferences.setBool("loginStatus", false);
-      sharedPreferences.clear();
-    }catch(e){
-      print("Erro de conexão ao servidor, Access não eliminado");
-    }
-  }
+  //     print(response.statusCode);  
+  //     sharedPreferences.setBool("loginStatus", false);
+  //     sharedPreferences.clear();
+  //   }catch(e){
+  //     print("Erro de conexão ao servidor, Access não eliminado");
+  //   }
+  // }
 
   _onPressLogout() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -165,7 +173,7 @@ class MyDrawer extends State<DrawerPage> {
     if (action == DialogAction.confirm) {
       // _logout();
       setState(() {
-        _logout();
+        sharedPreferences.setBool("loginStatus", false);
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
       });
     }

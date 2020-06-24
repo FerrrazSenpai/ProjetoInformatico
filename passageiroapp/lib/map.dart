@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:passageiroapp/connectivity.dart';
 import 'dart:convert';
-
+import 'package:geolocator/geolocator.dart';
 
 class MyMap extends StatelessWidget {
   @override
@@ -38,6 +38,7 @@ class _MapPageState extends State<MapPage> {
   BitmapDescriptor _sourceIcon;
   double _markerToastPosition = -200;
   bool _loginStatus = false;
+  var _userPosition;
 
   void _setSourceIcon() async {
     _sourceIcon = await BitmapDescriptor.fromAssetImage(
@@ -47,9 +48,9 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    //fillMarkers();
+     _userLocation();
     _setSourceIcon();
-    _getMarkers(); //Server testes
+    _getMarkers();
   }
 
   String timeRecord="Clique na linha para obter a previsão";
@@ -58,7 +59,9 @@ class _MapPageState extends State<MapPage> {
   Set<Marker> markersAPI = Set();
   List linhasParagem = List();
   var _selectedParagemID;
-  final LatLng _center = const LatLng(39.733222, -8.821096);
+  final LatLng _center = const LatLng(39.733222, -8.821096); //coordenadas estg
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -70,13 +73,32 @@ class _MapPageState extends State<MapPage> {
     _checkLoginStatus();
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: ConnectivityPage(
+      body: _userPosition == null ? Container(child: Center(child:Text('loading map..', style: TextStyle(fontFamily: 'Avenir-Medium', color: Colors.grey[400]),),),) : Container(
+       child: ConnectivityPage(
         widget: Stack(
           children: <Widget>[
-            _mapWidget(),
+            GoogleMap(
+              onMapCreated: _onMapCreated,
+              myLocationButtonEnabled: false,
+              myLocationEnabled: true,
+              initialCameraPosition: CameraPosition(
+                //target: _center, //Centar na estg
+                target:  _userPosition,
+                zoom: 17.0,
+              ),
+
+              onTap: (LatLng location) {
+                    setState(() {
+                    _markerToastPosition = -200;
+                    timeRecord="Clique na linha para obter a previsão";
+                });
+              },
+              markers: Set.from(markersAPI),
+            ),
             AnimatedPositioned(
             bottom: _markerToastPosition,
             right: 0,
@@ -111,7 +133,7 @@ class _MapPageState extends State<MapPage> {
           )
           ],
         )
-      ),
+      )),
       drawer: DrawerPage(loginStatus: _loginStatus,),
     );
   }
@@ -148,22 +170,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Widget _mapWidget() {
-    return GoogleMap(
-        onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(
-          target: _center,
-          zoom: 17.0,
-        ),
-        onTap: (LatLng location) {
-              setState(() {
-              _markerToastPosition = -200;
-              timeRecord="Clique na linha para obter a previsão";
-          });
-        },
-        markers: Set.from(markersAPI),
-      );
-  }
+  
 
 
   Widget _buildLocationInfo() {
@@ -178,7 +185,12 @@ class _MapPageState extends State<MapPage> {
               minWidth: 110,
               height: 30.0,
               child: RaisedButton(
-              onPressed: ()=> getTime(linha['id_linha'].toString(), _selectedParagemID),
+              onPressed: (){
+                getTime(linha['id_linha'].toString(), _selectedParagemID);
+                setState(() {
+                  timeRecord="A carregar ...";
+                });
+              },
               color: Colors.red,
               padding: EdgeInsets.all(2.0),
               shape: StadiumBorder(),
@@ -225,18 +237,44 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  getTime(String linha, String paragemID) async {
-    //final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/usedid';
-    print("paragemID: " + paragemID);
-    try {      
-     // final response = await http.get(url).timeout(const Duration(seconds: 7));
-     // print("status code: " + response.statusCode.toString() );
+  void _userLocation() async {
+    try{
+      Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+      print(usrCurrentPosition);
       setState(() {
-        timeRecord = "Tempo até chegar: " + linha + " min.";
+        _userPosition = LatLng(usrCurrentPosition.latitude, usrCurrentPosition.longitude);
       });
+      }catch(e){
+          _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Ao não aceitar as permissões vai perder algumas funcionalidades!"),));
+      }
+  }
+  
+  getTime(String linha, String paragemID) async {
+    String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
+    print("url tempo: " + url);
+    try {      
+      final response = await http.get(url).timeout(const Duration(seconds: 7));
+      print("status code: " + response.statusCode.toString() );
+      if(response.statusCode==200){
+        setState(() {
+          timeRecord = response.toString();
+        });
+      }else if(response.statusCode==500){
+        setState(() {
+          timeRecord = "Sem autocarros a circular";
+        });
+      }
+      else{
+        setState(() {
+          timeRecord = "Erro: " + response.statusCode.toString();
+        }); 
+      }
     }
     catch(e){
       print(e);
+      setState(() {
+          timeRecord = "Sem previsão atual";
+        }); 
     }
   }
 

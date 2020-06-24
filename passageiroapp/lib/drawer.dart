@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:passageiroapp/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:passageiroapp/dialogs.dart';
 import 'package:passageiroapp/login.dart';
@@ -142,6 +143,10 @@ class MyDrawer extends State<DrawerPage> {
             ListTile(
               leading: Icon(FontAwesomeIcons.userPlus, color: Colors.black,size: 22.0,),
               title: Text('Criar Conta', style: TextStyle(fontSize: 17.0),),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder:  (BuildContext context) => RegisterPage()), (Route<dynamic> route) => false);
+              },
+
             ),
           ],
         ),

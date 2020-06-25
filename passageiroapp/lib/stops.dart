@@ -31,14 +31,9 @@ class _StopsPageState extends State<StopsPage>{
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
-          onPressed: (){
-            Navigator.of(context).pop();
-          },
+        elevation: 0.0,
+        leading: BackButton(
+          
         ),
         title: Text("Paragens linha " + widget.line.toString()),
         backgroundColor: _color,

@@ -75,7 +75,9 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
+        elevation: 0.0,
         title: Text(widget.title),
+        backgroundColor: Colors.black
       ),
       body: _userPosition == null ? Container(child: Center(child:Text('loading map..', style: TextStyle(fontFamily: 'Avenir-Medium', color: Colors.grey[400]),),),) : Container(
        child: ConnectivityPage(
@@ -111,15 +113,16 @@ class _MapPageState extends State<MapPage> {
                 margin: EdgeInsets.symmetric(vertical: 25, horizontal:10),
                 height: 100,
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(32)),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        blurRadius: 50,
-                        offset: Offset.zero,
-                        color: Colors.grey.withOpacity(0.50),
-                      )
-                    ]),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(32)),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      blurRadius: 50,
+                      offset: Offset.zero,
+                      color: Colors.grey.withOpacity(0.50),
+                    )
+                  ]
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -177,30 +180,33 @@ class _MapPageState extends State<MapPage> {
     List<Widget> widgets = [];
     
     for(var linha in linhasParagem){
-      widgets.add(Padding(
-        padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
-        child: Row(
-           children: <Widget>[
-          ButtonTheme(
-              minWidth: 110,
-              height: 30.0,
-              child: RaisedButton(
-              onPressed: (){
-                getTime(linha['id_linha'].toString(), _selectedParagemID);
-                setState(() {
-                  timeRecord="A carregar ...";
-                });
-              },
-              color: Colors.red,
-              padding: EdgeInsets.all(2.0),
-              shape: StadiumBorder(),
-              
-              child: Row(
-                children: [ Text("Linha "+linha['id_linha'].toString())],
-              )
-            )),
-           ])
-       )
+      widgets.add(
+        Padding(
+          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+          child: Row(
+            children: <Widget>[
+              ButtonTheme(
+                  minWidth: 110,
+                  height: 30.0,
+                  child: RaisedButton(
+                  onPressed: (){
+                    getTime(linha['id_linha'].toString(), _selectedParagemID);
+                    setState(() {
+                      timeRecord="A carregar ...";
+                    });
+                  },
+                  color: Colors.red,
+                  padding: EdgeInsets.all(2.0),
+                  shape: StadiumBorder(),
+                  
+                  child: Row(
+                    children: [ Text("Linha "+linha['id_linha'].toString())],
+                  )
+                )
+              ),
+            ],
+          ),
+        ),
       );
     }
     return Expanded(
@@ -223,7 +229,8 @@ class _MapPageState extends State<MapPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
                Text(timeRecord),
-              ]),
+              ]
+            ),
           ],
         ),
       ),

@@ -19,6 +19,8 @@ class _FavoritesPageState extends State<FavoritesPage>{
   Color _color = Colors.teal;
   bool favorite = true;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -28,20 +30,25 @@ class _FavoritesPageState extends State<FavoritesPage>{
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Favoritos"),
-        backgroundColor: Colors.black,
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          elevation: 0.0,
+          title: Text("Favoritos"),
+          backgroundColor: Colors.black,
+        ),
+        body: ListView(
+          children: <Widget>[
+            SizedBox(
+              height: 15.0,
+            ),
+            _listLines(),
+          ],
+        ),
+        drawer: DrawerPage(loginStatus: true,),
       ),
-      body: ListView(
-        children: <Widget>[
-          SizedBox(
-            height: 15.0,
-          ),
-          _listLines(),
-        ],
-      ),
-      drawer: DrawerPage(loginStatus: true,),
     );
   }   
 
@@ -55,17 +62,17 @@ class _FavoritesPageState extends State<FavoritesPage>{
           
           return Container(
             decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.black54,
-              width: 2.0
+              border: Border.all(
+                color: Colors.black54,
+                width: 2.0
+              ),
+              gradient: LinearGradient(
+                stops: MediaQuery.of(context).orientation == Orientation.portrait ? [0.14, 0.02] : [0.06,0.02],
+                colors: [_color, Colors.grey[200]]
+              ),
+              borderRadius: BorderRadius.all(Radius.circular(7.0))
             ),
-            gradient: LinearGradient(
-              stops: MediaQuery.of(context).orientation == Orientation.portrait ? [0.14, 0.02] : [0.06,0.02],
-              colors: [_color, Colors.grey[200]]
-            ),
-            borderRadius: BorderRadius.all(Radius.circular(7.0))
-          ),
-            margin: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 6.0),
+            margin: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
             child: GestureDetector(
               child: ListTile(
                 leading: Text(
@@ -96,15 +103,25 @@ class _FavoritesPageState extends State<FavoritesPage>{
                         favorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                         color: favorite ? Colors.red[700] : Colors.black,
                       ),
+                      tooltip: "Remover favorito",
                       onPressed: (){
+                        _showSnackBar();
                         setState(() {
                           favorite = false;
                         });
                       },
                     ),
-                    Icon(
-                      FontAwesomeIcons.chevronRight,
-                      color: Colors.black87,
+                    IconButton(
+                      icon: Icon(
+                        FontAwesomeIcons.chevronRight,
+                        color: Colors.black87,
+                      ),
+                      tooltip: "Ver paragens",
+                      onPressed: (){
+                        setState(() {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => StopsPage(line: event.toString().substring(0,1),)));
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -139,7 +156,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
             ),
           ),
         ),
-      );;
+      );
     }
   }
   _functionColor(var expression){
@@ -176,7 +193,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
 
     var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
 
-    try {      
+    try {
       final response = await http.get(url).timeout(const Duration(seconds: 15));
       
       if(response.statusCode==200){
@@ -194,5 +211,36 @@ class _FavoritesPageState extends State<FavoritesPage>{
     }catch(e){
       print(e);
     }
+  }
+
+  _showSnackBar() {
+    final snackBar = new SnackBar(
+      content: Container(
+        margin: const EdgeInsets.symmetric(vertical: 2.5),
+        child: Row(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: Icon(
+                Icons.delete_outline,
+                color: Colors.red[700],
+                size: 30.0
+              ),
+            ),
+            Text('Favorito removido',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 19,
+                color: Colors.red[700]
+              ),
+            ),
+          ],
+        ),
+      ),
+      duration: Duration(seconds: 3),
+      backgroundColor: Colors.grey[300],
+
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 }

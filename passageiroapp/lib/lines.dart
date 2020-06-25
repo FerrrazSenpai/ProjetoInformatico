@@ -21,6 +21,8 @@ class _LinesPageState extends State<LinesPage>{
   bool _loginStatus = false;
   bool favorite = true;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     super.initState();
@@ -39,20 +41,25 @@ class _LinesPageState extends State<LinesPage>{
     
     _checkLoginStatus();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Linhas"),
-        backgroundColor: Colors.black,
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          elevation: 0.0,
+          title: Text("Linhas"),
+          backgroundColor: Colors.black,
+        ),
+        body: ListView(
+          children: <Widget>[
+            SizedBox(
+              height: 15.0,
+            ),
+            _listLines(),
+          ],
+        ),
+        drawer: DrawerPage(loginStatus: _loginStatus,),
       ),
-      body: ListView(
-        children: <Widget>[
-          SizedBox(
-            height: 15.0,
-          ),
-          _listLines(),
-        ],
-      ),
-      drawer: DrawerPage(loginStatus: _loginStatus,),
     );
   }   
 
@@ -62,7 +69,7 @@ class _LinesPageState extends State<LinesPage>{
       children: _events
       .map((event) {
         _functionColor(event.toString().substring(0,1));
-        return Container(
+        return AnimatedContainer(
           decoration: BoxDecoration(
             border: Border.all(
               color: Colors.black54,
@@ -110,15 +117,25 @@ class _LinesPageState extends State<LinesPage>{
                       favorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                       color: favorite ? Colors.red[700] : Colors.black,
                     ),
+                    tooltip: favorite ? "Remover favorito" : "Adicionar favorito",
                     onPressed: (){
                       setState(() {
-                        favorite = favorite ? false : true;
+                        favorite = !favorite;
+                        _showSnackBar();
                       });
                     },
                   ) : SizedBox(),
-                  Icon(
-                    FontAwesomeIcons.chevronRight,
-                    color: Colors.black87,
+                  IconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.chevronRight,
+                      color: Colors.black87,
+                    ),
+                    tooltip: "Ver paragens",
+                    onPressed: (){
+                      setState(() {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => StopsPage(line: event.toString().substring(0,1),)));
+                      });
+                    },
                   ),
                 ],
               ),
@@ -127,6 +144,7 @@ class _LinesPageState extends State<LinesPage>{
               },
             ),
           ),
+          duration: Duration(seconds: 3),
         );
       })
       .toList(),
@@ -196,5 +214,41 @@ class _LinesPageState extends State<LinesPage>{
     }catch(e){
       print(e);
     }
+  }
+
+  _showSnackBar() {
+    final snackBar = new SnackBar(
+      content: Container(
+        margin: const EdgeInsets.symmetric(vertical: 2.5),
+        child: Row(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 20.0),
+              child: Icon(
+                favorite ? Icons.check_circle_outline 
+                : Icons.delete_outline,
+                color: favorite ? Colors.lightGreen[700]
+                : Colors.red[700],
+                size: 30.0,
+              ),
+            ),
+            Text(
+              favorite ? 'Favorito adicionado' 
+              : 'Favorito removido',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 19,
+                color: favorite ? Colors.lightGreen[700]
+                : Colors.red[700],
+              ),
+            )
+          ],
+        ),
+      ),
+      duration: Duration(seconds: 1),
+      backgroundColor: Colors.grey[300],
+
+    );
+    _scaffoldKey.currentState.showSnackBar(snackBar);
   }
 }

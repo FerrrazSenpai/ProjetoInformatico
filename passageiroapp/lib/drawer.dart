@@ -23,15 +23,14 @@ class DrawerPage extends StatefulWidget {
 class MyDrawer extends State<DrawerPage> {
   SharedPreferences sharedPreferences;
   var action;
-  int code;
   String nome;
   
-  String linha;
   Color _color;
   
   @override
   void initState() {
     super.initState();
+    _getData();
   }
 
   @override
@@ -52,7 +51,19 @@ class MyDrawer extends State<DrawerPage> {
                     Icon(
                       FontAwesomeIcons.busAlt,
                       color: _color == Colors.black ? Colors.white : Colors.black,
-                      size: 100.0,
+                      size: 85.0,
+                    ),
+                    SizedBox(
+                      height: 15.0
+                    ),
+                    Expanded(
+                      child: Text("$nome",
+                        style: TextStyle(
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.bold,
+                          color: _color == Colors.black ? Colors.white : Colors.black
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -184,7 +195,13 @@ class MyDrawer extends State<DrawerPage> {
     }
   }
 
-  
+  Future<SharedPreferences> _getData() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      nome = sharedPreferences.getString("nome");
+    });
+    return sharedPreferences;
+  }  
 
   // checkLoginStatus() async {
   //   sharedPreferences = await SharedPreferences.getInstance();

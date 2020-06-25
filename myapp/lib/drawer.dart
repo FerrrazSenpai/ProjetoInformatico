@@ -21,7 +21,6 @@ class DrawerPage extends StatefulWidget {
 class MyDrawer extends State<DrawerPage> {
   SharedPreferences sharedPreferences;
   var action;
-  int code;
   String nome;
   
   String linha;

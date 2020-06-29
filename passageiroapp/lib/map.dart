@@ -87,7 +87,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
+        elevation: 0.0,
         title: Text(widget.title),
+        backgroundColor: Colors.black
       ),
       body: _userPosition == null ? Container(
         child: Center(
@@ -141,15 +143,16 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                 margin: EdgeInsets.symmetric(vertical: 25, horizontal:10),
                 height: 100,
                 decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.all(Radius.circular(32)),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        blurRadius: 50,
-                        offset: Offset.zero,
-                        color: Colors.grey.withOpacity(0.50),
-                      )
-                    ]),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.all(Radius.circular(32)),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      blurRadius: 50,
+                      offset: Offset.zero,
+                      color: Colors.grey.withOpacity(0.50),
+                    )
+                  ]
+                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -172,7 +175,6 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
     try {      
       final response = await http.get(url).timeout(const Duration(seconds: 7));
-      print("status code: " + response.statusCode.toString() );
       if(response.statusCode==200){
         var markers =jsonDecode(response.body);
         for (var i=0; i<markers.length; i++){
@@ -208,30 +210,33 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     List<Widget> widgets = [];
     
     for(var linha in linhasParagem){
-      widgets.add(Padding(
-        padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
-        child: Row(
-           children: <Widget>[
-          ButtonTheme(
-              minWidth: 110,
-              height: 30.0,
-              child: RaisedButton(
-              onPressed: (){
-                getTime(linha['id_linha'].toString(), _selectedParagemID);
-                setState(() {
-                  timeRecord="A carregar ...";
-                });
-              },
-              color: Colors.red,
-              padding: EdgeInsets.all(2.0),
-              shape: StadiumBorder(),
-              
-              child: Row(
-                children: [ Text("Linha "+linha['id_linha'].toString())],
-              )
-            )),
-           ])
-       )
+      widgets.add(
+        Padding(
+          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+          child: Row(
+            children: <Widget>[
+              ButtonTheme(
+                  minWidth: 110,
+                  height: 30.0,
+                  child: RaisedButton(
+                  onPressed: (){
+                    getTime(linha['id_linha'].toString(), _selectedParagemID);
+                    setState(() {
+                      timeRecord="A carregar ...";
+                    });
+                  },
+                  color: Colors.red,
+                  padding: EdgeInsets.all(2.0),
+                  shape: StadiumBorder(),
+                  
+                  child: Row(
+                    children: [ Text("Linha "+linha['id_linha'].toString())],
+                  )
+                )
+              ),
+            ],
+          ),
+        ),
       );
     }
     return Expanded(
@@ -254,7 +259,8 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
                Text(timeRecord),
-              ]),
+              ]
+            ),
           ],
         ),
       ),

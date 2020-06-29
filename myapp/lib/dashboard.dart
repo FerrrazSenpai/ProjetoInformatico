@@ -597,32 +597,32 @@ class DashboardPageState extends State<DashboardPage> {
 
     switch (expression) {
       case '1':
-        _color = Colors.red[700];
+        _color = Colors.lightGreen;        
       break;
       case '2':
-        _color = Colors.lightGreen;
+        _color = Colors.red[700];
       break;
       case '3':
         _color = Colors.lightBlue;
       break;
       case '4':
-        _color = Colors.blue[800];
-      break;
-      case '5':
-        _color = Colors.green[800];
-      break;
-      case '6':
-        _color = Colors.pink[300];
-      break;
-      case '7':
-        _color = Colors.yellow[600];
-      break;
-      case '8':
-        _color = Colors.orange[700];
-      break;
-      case '9':
         _color = Colors.black;
       break;
+      // case '5':
+      //   _color = Colors.green[800];
+      // break;
+      // case '6':
+      //   _color = Colors.pink[300];
+      // break;
+      // case '7':
+      //   _color = Colors.yellow[600];
+      // break;
+      // case '8':
+      //   _color = Colors.orange[700];
+      // break;
+      // case '9':
+      //   _color = Colors.black;
+      // break;
       default:
         _color = Colors.teal;
       break;

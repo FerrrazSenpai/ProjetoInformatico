@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:passageiroapp/map.dart';
 import 'package:passageiroapp/lines.dart';
 import 'package:passageiroapp/favorites.dart';
+import 'package:passageiroapp/test.dart';
 
 class DrawerPage extends StatefulWidget {
   DrawerPage({Key key, this.loginStatus}) : super(key: key);
@@ -22,15 +23,14 @@ class DrawerPage extends StatefulWidget {
 class MyDrawer extends State<DrawerPage> {
   SharedPreferences sharedPreferences;
   var action;
-  int code;
   String nome;
   
-  String linha;
   Color _color;
   
   @override
   void initState() {
     super.initState();
+    _getData();
   }
 
   @override
@@ -51,7 +51,19 @@ class MyDrawer extends State<DrawerPage> {
                     Icon(
                       FontAwesomeIcons.busAlt,
                       color: _color == Colors.black ? Colors.white : Colors.black,
-                      size: 100.0,
+                      size: 85.0,
+                    ),
+                    SizedBox(
+                      height: 15.0
+                    ),
+                    Expanded(
+                      child: Text("$nome",
+                        style: TextStyle(
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.bold,
+                          color: _color == Colors.black ? Colors.white : Colors.black
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -76,6 +88,13 @@ class MyDrawer extends State<DrawerPage> {
               title: Text('Favoritos', style: TextStyle(fontSize: 17.0),),
               onTap: () async {
                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => FavoritesPage()), (Route<dynamic> route) => false);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.theaters, color: Colors.black,size: 22.0,),
+              title: Text('Teste', style: TextStyle(fontSize: 17.0),),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => TestPage()), (Route<dynamic> route) => false);
               },
             ),
             ListTile(
@@ -147,22 +166,22 @@ class MyDrawer extends State<DrawerPage> {
     
   }
 
-  void _logout() async {
-    sharedPreferences = await SharedPreferences.getInstance();
+  // void _logout() async {
+  //   sharedPreferences = await SharedPreferences.getInstance();
 
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
-    try{
-      final response = await http.post(url,headers: {
-        'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
-      },).timeout(const Duration(seconds: 3));
+  //   var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
+  //   try{
+  //     final response = await http.post(url,headers: {
+  //       'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
+  //     },).timeout(const Duration(seconds: 3));
 
-      print(response.statusCode);  
-      sharedPreferences.setBool("loginStatus", false);
-      sharedPreferences.clear();
-    }catch(e){
-      print("Erro de conexão ao servidor, Access não eliminado");
-    }
-  }
+  //     print(response.statusCode);  
+  //     sharedPreferences.setBool("loginStatus", false);
+  //     sharedPreferences.clear();
+  //   }catch(e){
+  //     print("Erro de conexão ao servidor, Access não eliminado");
+  //   }
+  // }
 
   _onPressLogout() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -170,13 +189,19 @@ class MyDrawer extends State<DrawerPage> {
     if (action == DialogAction.confirm) {
       // _logout();
       setState(() {
-        _logout();
+        sharedPreferences.setBool("loginStatus", false);
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
       });
     }
   }
 
-  
+  Future<SharedPreferences> _getData() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      nome = sharedPreferences.getString("nome");
+    });
+    return sharedPreferences;
+  }  
 
   // checkLoginStatus() async {
   //   sharedPreferences = await SharedPreferences.getInstance();

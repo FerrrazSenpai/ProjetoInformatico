@@ -32,23 +32,35 @@ class MapPage extends StatefulWidget {
   _MapPageState createState() => _MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   SharedPreferences sharedPreferences;
   
   BitmapDescriptor _sourceIcon;
   double _markerToastPosition = -200;
   bool _loginStatus = false;
   var _userPosition;
+  AnimationController _controller;
+  Animation _myAnimation;
+
 
   void _setSourceIcon() async {
     _sourceIcon = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(devicePixelRatio: 2.5), 'assets/icon_bus.png');
   }
+
+  void _initForAnimation(){
+    //preparar as coisas para a animação
+    _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 2000),);
+    _myAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _controller.forward();
+
+  }
   
   @override
   void initState() {
     super.initState();
-     _userLocation();
+    _initForAnimation();
+    _userLocation();
     _setSourceIcon();
     _getMarkers();
   }
@@ -79,13 +91,31 @@ class _MapPageState extends State<MapPage> {
         title: Text(widget.title),
         backgroundColor: Colors.black
       ),
-      body: _userPosition == null ? Container(child: Center(child:Text('loading map..', style: TextStyle(fontFamily: 'Avenir-Medium', color: Colors.grey[400]),),),) : Container(
+      body: _userPosition == null ? Container(
+        child: Center(
+          child: FadeTransition(
+            opacity: _myAnimation,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                  image: new DecorationImage(
+                      image: new AssetImage(
+                        'assets/maps_logo.png',
+                      )
+                  )
+              ),
+            ),
+          )
+        )
+      )
+      : Container(
        child: ConnectivityPage(
         widget: Stack(
           children: <Widget>[
             GoogleMap(
               onMapCreated: _onMapCreated,
-              myLocationButtonEnabled: false,
+              myLocationButtonEnabled: true,
               myLocationEnabled: true,
               initialCameraPosition: CameraPosition(
                 //target: _center, //Centar na estg
@@ -252,7 +282,10 @@ class _MapPageState extends State<MapPage> {
         _userPosition = LatLng(usrCurrentPosition.latitude, usrCurrentPosition.longitude);
       });
       }catch(e){
-          _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Ao não aceitar as permissões vai perder algumas funcionalidades!"),));
+        _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Ao não aceitar as permissões vai perder algumas funcionalidades!"),));
+        setState(() {
+          _userPosition = const LatLng(39.733222, -8.821096); //ao nao ter permissoes de localização vai centar na estg
+        });
       }
   }
   
@@ -264,7 +297,7 @@ class _MapPageState extends State<MapPage> {
       print("status code: " + response.statusCode.toString() );
       if(response.statusCode==200){
         setState(() {
-          timeRecord = response.toString();
+          timeRecord = response.body;
         });
       }else if(response.statusCode==500){
         setState(() {

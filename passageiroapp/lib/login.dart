@@ -80,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
             formInput("Email", Icons.email),
             SizedBox(height: 10.0),
             formInput("Password", Icons.lock),
+            SizedBox(height: 20.0),
           ],
         )
     );
@@ -140,21 +141,25 @@ class _LoginPageState extends State<LoginPage> {
 
   Container errorSection(){
     return Container(
-      padding: EdgeInsets.only(left: 70.0, top: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 15.0),
       child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
       Row(
+        
         children: <Widget>[
           Icon(
             Icons.error_outline,
             color: Colors.red[700],
             size: 20.0,
           ),
-          Text('  $_error', 
+          SizedBox(width: 5.0),
+          Expanded(
+            child:Text('$_error', 
             style: TextStyle(
               color: Colors.red[700],
               fontSize: 15.0,
               fontWeight: FontWeight.w600,
-            ),
+              ),
+            )
           ),
         ],
       ),
@@ -217,8 +222,27 @@ class _LoginPageState extends State<LoginPage> {
       final response = await http.post(url, body: body).timeout(const Duration(seconds: 5));
       print(response.statusCode);
       if(response.statusCode == 200) {
+        if(response.body.trim()=="{\"msg\":\"Not authorized\"}"){ 
+          setState(() {
+            _error = "Email ou password incorretos";
+          });
+          print("Email ou password incorretos");
+          return;
+        }
+
         var jsonResponse = json.decode(response.body);
+
+        if(jsonResponse['token'].containsKey('user') && jsonResponse['user']['tipo'] != "c"){ 
+          // tipo c é utilizadores da app de passageiros - quero garantir que nao permitimos login com credencias da app condutor
+          setState(() {
+            _error = "Email ou password incorretos";
+          });
+          print("Email ou password incorretos");
+          return;
+        }
+
         if(jsonResponse['token'].containsKey('access_token')) {
+          sharedPreferences.setInt("id", jsonResponse['user']['id']);
           sharedPreferences.setBool("checkBox", checkBoxValue);
           sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
           sharedPreferences.setString("email", email);
@@ -226,15 +250,12 @@ class _LoginPageState extends State<LoginPage> {
           sharedPreferences.setString("idCliente", jsonResponse['user']['id']);
           sharedPreferences.setBool("loginStatus", true);
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
-
-          //print(jsonResponse['access_token']);
-          //print(sharedPreferences.getBool("checkBox"));
         }
         else{
           setState(() {
-            _error = "Algo correu muito mal2!uncaught exception";
+            _error = "Erro a receber a informação do servidor";
           });
-          print("Algo correu muito mal2!uncaught exception");
+          print("A resposta não tem a estrutura certa");
         }
       }
       else if(response.statusCode == 400){
@@ -245,16 +266,16 @@ class _LoginPageState extends State<LoginPage> {
       }
       else{
         setState(() {
-            _error = "Algo correu muito mal1!uncaught exception";
+            _error = "Resposta inesperada do servidor, tente novamente!";
           });
-        print("uncaught exception1 \n" + response.body);
+        print("Erro, a resposta não é 200 nem 400 ... \n" + response.body);
       }
     }
     catch(e){
       setState(() {
         _error="Erro de conexão ao servidor";
       });
-      print("Erro de conexão ao servidor");
+      print("Erro de conexão ao servidor" + e.toString());
     }
   }
 

@@ -41,25 +41,22 @@ class _LinesPageState extends State<LinesPage>{
     
     _checkLoginStatus();
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          elevation: 0.0,
-          title: Text("Linhas"),
-          backgroundColor: Colors.black,
-        ),
-        body: ListView(
-          children: <Widget>[
-            SizedBox(
-              height: 15.0,
-            ),
-            _listLines(),
-          ],
-        ),
-        drawer: DrawerPage(loginStatus: _loginStatus,),
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        elevation: 0.0,
+        title: Text("Linhas"),
+        backgroundColor: Colors.black,
       ),
+      body: ListView(
+        children: <Widget>[
+          SizedBox(
+            height: 15.0,
+          ),
+          _listLines(),
+        ],
+      ),
+      drawer: DrawerPage(loginStatus: _loginStatus,),
     );
   }   
 

@@ -18,6 +18,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
   List _events = [];
   Color _color = Colors.teal;
   bool favorite = true;
+  List _favorites;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -25,30 +26,28 @@ class _FavoritesPageState extends State<FavoritesPage>{
   void initState() {
     super.initState();
     _getLines();
+    _getFavorites();
   }
 
   @override
   Widget build(BuildContext context) {
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          elevation: 0.0,
-          title: Text("Favoritos"),
-          backgroundColor: Colors.black,
-        ),
-        body: ListView(
-          children: <Widget>[
-            SizedBox(
-              height: 15.0,
-            ),
-            _listLines(),
-          ],
-        ),
-        drawer: DrawerPage(loginStatus: true,),
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        elevation: 0.0,
+        title: Text("Favoritos"),
+        backgroundColor: Colors.black,
       ),
+      body: ListView(
+        children: <Widget>[
+          SizedBox(
+            height: 15.0,
+          ),
+          _listLines(),
+        ],
+      ),
+      drawer: DrawerPage(loginStatus: true,),
     );
   }   
 
@@ -159,6 +158,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
       );
     }
   }
+
   _functionColor(var expression){
 
     // if expression tem um numero e depois espaço tira o espaço
@@ -242,5 +242,51 @@ class _FavoritesPageState extends State<FavoritesPage>{
 
     );
     _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
+  _getFavorites() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String _idLinha;
+    String _idFavorito;
+    String _idCliente;
+    int _count = 0;
+    int _count2 = 0;
+
+    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
+
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      
+      if(response.statusCode==200){
+        var dados = jsonDecode(response.body);
+
+        if(!dados['data'] == []){
+
+          for(var i = 0; dados.length; i++){
+            if(dados['data'][i]['id_cliente'] == sharedPreferences.getString("idCliente")){
+              _count ++;
+            }
+          }
+
+          for(var i = 0; dados.length; i++){
+            if(dados['data'][i]['id_cliente'] == sharedPreferences.getString("idCliente")){
+              _favorites = new List.generate(_count, (i) => i + 1);
+              _idLinha = dados['data'][i]['id_linha'].toString();
+              _idFavorito = dados['data'][i]['id_favorito'].toString();
+              _idCliente = dados['data'][i]['id_cliente'].toString();
+
+              _favorites[_count2] = _idLinha + _idFavorito;
+              _count2++;
+            }
+          }
+
+          print(_favorites);
+        }
+        
+      }
+    }catch(e){
+      print(e);
+    }
   }
 }

@@ -15,9 +15,8 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage>{
   SharedPreferences sharedPreferences;
 
-  List _events = [];
+  List _ = [];
   Color _color = Colors.teal;
-  bool favorite = true;
   List _favorites;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -25,8 +24,8 @@ class _FavoritesPageState extends State<FavoritesPage>{
   @override
   void initState() {
     super.initState();
-    _getLines();
     _getFavorites();
+    // _getLines();
   }
 
   @override
@@ -186,32 +185,40 @@ class _FavoritesPageState extends State<FavoritesPage>{
     }
   }
 
-  _getLines() async {
+  // _getLines() async {
 
-    String id;
-    String nomeLinha;
 
-    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
+  //   var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
 
-    try {
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+  //   try {
+  //     final response = await http.get(url).timeout(const Duration(seconds: 15));
       
-      if(response.statusCode==200){
-        var dados = jsonDecode(response.body);
+  //     if(response.statusCode==200){
+  //       var dados = jsonDecode(response.body);
         
-        _events = new List.generate(1, (i) => i + 1);
+  //       print(_favorites);
+  //       _events = new List.generate(_favorites.length, (i) => i + 1);
 
-        id = dados['data'][2]['id_linha'].toString();
-        nomeLinha = dados['data'][2]['nome'].toString();
+  //       for(var i = 0; i < _favorites.length; i++){
+  //         id = _favorites[i].toString();
+  //         print(id);
+  //         for(var j = 0; j < dados['data'].length; j++){
+  //           if(dados['data'][j]['id_linha'].toString() == id){
+  //             nomeLinha = dados['data'][j]['nome'].toString();
+  //             _events[i] = id + nomeLinha;
+  //           }
+  //         }
+  //       }
 
-        setState(() {
-          _events[0] = id + nomeLinha;
-        });
-      }
-    }catch(e){
-      print(e);
-    }
-  }
+  //       setState(() {
+  //         print(_events);
+  //       });
+
+  //     }
+  //   }catch(e){
+  //     print(e);
+  //   }
+  // }
 
   _showSnackBar() {
     final snackBar = new SnackBar(
@@ -252,39 +259,64 @@ class _FavoritesPageState extends State<FavoritesPage>{
     String _idCliente;
     int _count = 0;
     int _count2 = 0;
+    
+    String id;
+    String nomeLinha;
 
-    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
+    var urlFavoritos = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
+    var urlLinhas = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
 
     try {
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 15));
       
-      if(response.statusCode==200){
-        var dados = jsonDecode(response.body);
+      if(responseFav.statusCode==200){
+        var dados = jsonDecode(responseFav.body);
 
-        if(!dados['data'] == []){
-
-          for(var i = 0; dados.length; i++){
-            if(dados['data'][i]['id_cliente'] == sharedPreferences.getString("idCliente")){
+        if(dados['data'] != []){
+          for(var i = 0; i < dados['data'].length; i++){
+            if(dados['data'][i]['id_cliente'] == sharedPreferences.getInt("idCliente")){
               _count ++;
-            }
+            } 
           }
 
-          for(var i = 0; dados.length; i++){
-            if(dados['data'][i]['id_cliente'] == sharedPreferences.getString("idCliente")){
+          for(var i = 0; i < dados['data'].length; i++){
+            if(dados['data'][i]['id_cliente'] == sharedPreferences.getInt("idCliente")){
               _favorites = new List.generate(_count, (i) => i + 1);
               _idLinha = dados['data'][i]['id_linha'].toString();
               _idFavorito = dados['data'][i]['id_favorito'].toString();
               _idCliente = dados['data'][i]['id_cliente'].toString();
 
-              _favorites[_count2] = _idLinha + _idFavorito;
+              _favorites[_count2] = _idLinha;
               _count2++;
             }
           }
-
-          print(_favorites);
         }
-        
+
+        final responseLin = await http.get(urlLinhas).timeout(const Duration(seconds: 15));
+      
+        if(responseLin.statusCode==200){
+          var dados = jsonDecode(responseLin.body);
+          
+          _events = new List.generate(_favorites.length, (i) => i + 1);
+
+          for(var i = 0; i < _favorites.length; i++){
+            id = _favorites[i].toString();
+            for(var j = 0; j < dados['data'].length; j++){
+              if(dados['data'][j]['id_linha'].toString() == id){
+                nomeLinha = dados['data'][j]['nome'].toString();
+                _events[i] = id + nomeLinha;
+              }
+            }
+          }
+
+          setState(() {
+
+          });
+
+        }
+
       }
+
     }catch(e){
       print(e);
     }

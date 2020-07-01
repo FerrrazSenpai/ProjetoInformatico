@@ -247,7 +247,7 @@ class _LoginPageState extends State<LoginPage> {
           sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
           sharedPreferences.setString("email", email);
           sharedPreferences.setString("nome", jsonResponse['user']['nome']);
-          sharedPreferences.setString("idCliente", jsonResponse['user']['id']);
+          sharedPreferences.setInt("idCliente", jsonResponse['user']['id']);
           sharedPreferences.setBool("loginStatus", true);
           Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
         }

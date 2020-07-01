@@ -232,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
 
         var jsonResponse = json.decode(response.body);
 
-        if(jsonResponse['token'].containsKey('user') && jsonResponse['user']['tipo'] != "c"){ 
+        if(jsonResponse.containsKey('user') && jsonResponse['user']['tipo'] != "c"){ 
           // tipo c é utilizadores da app de passageiros - quero garantir que nao permitimos login com credencias da app condutor
           setState(() {
             _error = "Email ou password incorretos";
@@ -244,6 +244,7 @@ class _LoginPageState extends State<LoginPage> {
         if(jsonResponse['token'].containsKey('access_token')) {
           sharedPreferences.setInt("id", jsonResponse['user']['id']);
           sharedPreferences.setBool("checkBox", checkBoxValue);
+          sharedPreferences.setBool("update_notifications", true);
           sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
           sharedPreferences.setString("email", email);
           sharedPreferences.setString("nome", jsonResponse['user']['nome']);

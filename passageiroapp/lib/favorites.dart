@@ -15,7 +15,7 @@ class FavoritesPage extends StatefulWidget {
 class _FavoritesPageState extends State<FavoritesPage>{
   SharedPreferences sharedPreferences;
 
-  List _ = [];
+  List _events = null;
   Color _color = Colors.teal;
   List _favorites;
 
@@ -52,7 +52,17 @@ class _FavoritesPageState extends State<FavoritesPage>{
 
   Widget _listLines(){
 
-    if(favorite){
+    if(_events == null){
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircularProgressIndicator(
+            strokeWidth: 5.0,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+          ),
+        ),
+      );
+    }else if(_events.length != 0){
       return Column(
         children: _events
         .map((event) {
@@ -98,14 +108,15 @@ class _FavoritesPageState extends State<FavoritesPage>{
                   children: <Widget>[
                     IconButton(
                       icon: Icon(
-                        favorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                        color: favorite ? Colors.red[700] : Colors.black,
+                        FontAwesomeIcons.solidHeart,
+                        color: Colors.red[700]
                       ),
                       tooltip: "Remover favorito",
                       onPressed: (){
                         _showSnackBar();
+                        _removeFavorite(event.toString().substring(0,1));
                         setState(() {
-                          favorite = false;
+                          _events.remove(event.toString());
                         });
                       },
                     ),
@@ -279,9 +290,18 @@ class _FavoritesPageState extends State<FavoritesPage>{
             } 
           }
 
+          if(_count == 0 ){
+            setState(() {
+              _events = [];
+            });
+            return;
+          }
+
+          _favorites = new List.generate(_count, (i) => i + 1);
+
+
           for(var i = 0; i < dados['data'].length; i++){
             if(dados['data'][i]['id_cliente'] == sharedPreferences.getInt("idCliente")){
-              _favorites = new List.generate(_count, (i) => i + 1);
               _idLinha = dados['data'][i]['id_linha'].toString();
               _idFavorito = dados['data'][i]['id_favorito'].toString();
               _idCliente = dados['data'][i]['id_cliente'].toString();
@@ -290,29 +310,67 @@ class _FavoritesPageState extends State<FavoritesPage>{
               _count2++;
             }
           }
-        }
 
-        final responseLin = await http.get(urlLinhas).timeout(const Duration(seconds: 15));
-      
-        if(responseLin.statusCode==200){
-          var dados = jsonDecode(responseLin.body);
-          
-          _events = new List.generate(_favorites.length, (i) => i + 1);
+          _favorites.sort();
 
-          for(var i = 0; i < _favorites.length; i++){
-            id = _favorites[i].toString();
-            for(var j = 0; j < dados['data'].length; j++){
-              if(dados['data'][j]['id_linha'].toString() == id){
-                nomeLinha = dados['data'][j]['nome'].toString();
-                _events[i] = id + nomeLinha;
+          final responseLin = await http.get(urlLinhas).timeout(const Duration(seconds: 15));
+        
+          if(responseLin.statusCode==200){
+            var dadosLin = jsonDecode(responseLin.body);
+            
+            _events = new List.generate(_favorites.length, (i) => i + 1);
+
+            for(var i = 0; i < _favorites.length; i++){
+              id = _favorites[i].toString();
+              for(var j = 0; j < dadosLin['data'].length; j++){
+                if(dadosLin['data'][j]['id_linha'].toString() == id){
+                  nomeLinha = dadosLin['data'][j]['nome'].toString();
+                  _events[i] = id + nomeLinha;
+                }
               }
             }
+
+            setState(() {
+            });
+
           }
 
-          setState(() {
+        }
+      }
 
-          });
+    }catch(e){
+      print(e);
+    }
+  }
 
+  void _removeFavorite(String id) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String idCliente = sharedPreferences.getInt("idCliente").toString();
+    int idFavorito;
+    
+    var urlFavoritos = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
+
+    try {
+      final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 15));
+      
+      if(responseFav.statusCode==200){
+        var dados = jsonDecode(responseFav.body);
+
+        for(var i = 0; i < dados['data'].length; i++){
+          if(dados['data'][i]['id_cliente'].toString() == idCliente && dados['data'][i]['id_linha'].toString() == id) {
+            idFavorito = dados['data'][i]['id_favorito'];
+          }
+        }
+
+        var urlRemoverFavorito = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos/' + idFavorito.toString();
+
+        final responseRemoveFav = await http.delete(urlRemoverFavorito).timeout(const Duration(seconds: 15));
+
+        if(responseRemoveFav.statusCode == 200){
+          var dados = jsonDecode(responseRemoveFav.body);
+
+          print(dados);
         }
 
       }
@@ -320,5 +378,6 @@ class _FavoritesPageState extends State<FavoritesPage>{
     }catch(e){
       print(e);
     }
+
   }
 }

@@ -452,18 +452,16 @@ class DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildEventList() {
-    if(_selectedEvents != null){
-      if(_selectedEvents.isEmpty){
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircularProgressIndicator(
-              strokeWidth: 5.0,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
+    if(_selectedEvents != null && _selectedEvents.isEmpty){
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircularProgressIndicator(
+            strokeWidth: 5.0,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
           ),
-        );
-      }
+        ),
+      );
     }else if(_selectedEvents == null){
       return Container(
         decoration: BoxDecoration(

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:passageiroapp/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:passageiroapp/dialogs.dart';
 import 'package:passageiroapp/login.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:passageiroapp/map.dart';
 import 'package:passageiroapp/lines.dart';
 import 'package:passageiroapp/favorites.dart';
-import 'package:passageiroapp/test.dart';
 
 class DrawerPage extends StatefulWidget {
   DrawerPage({Key key, this.loginStatus}) : super(key: key);
@@ -88,13 +85,6 @@ class MyDrawer extends State<DrawerPage> {
               title: Text('Favoritos', style: TextStyle(fontSize: 17.0),),
               onTap: () async {
                 Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => FavoritesPage()), (Route<dynamic> route) => false);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.theaters, color: Colors.black,size: 22.0,),
-              title: Text('Teste', style: TextStyle(fontSize: 17.0),),
-              onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => TestPage()), (Route<dynamic> route) => false);
               },
             ),
             ListTile(

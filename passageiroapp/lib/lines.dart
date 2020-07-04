@@ -15,23 +15,15 @@ class LinesPage extends StatefulWidget {
 class _LinesPageState extends State<LinesPage>{
   SharedPreferences sharedPreferences;
 
-  List _events = [];
-  // Map<String, bool> _events;
+  List _events = null;
   Color _color = Colors.teal;
   bool _loginStatus = false;
-  bool favorite = true;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-
-    // _events = {
-    //   "1": true,
-    //   "2": false,
-    //   "3": true,
-    // };
     _checkLoginStatus();
     _getLines();
   }
@@ -48,13 +40,15 @@ class _LinesPageState extends State<LinesPage>{
         title: Text("Linhas"),
         backgroundColor: Colors.black,
       ),
-      body: ListView(
-        children: <Widget>[
-          SizedBox(
-            height: 15.0,
-          ),
-          _listLines(),
-        ],
+      body: Scrollbar(
+        child: ListView(
+          children: <Widget>[
+            SizedBox(
+              height: 15.0,
+            ),
+            _listLines(),
+          ],
+        ),
       ),
       drawer: DrawerPage(loginStatus: _loginStatus,),
     );
@@ -62,91 +56,118 @@ class _LinesPageState extends State<LinesPage>{
 
   Widget _listLines(){
 
-    return Column(
-      children: _events
-      .map((event) {
-        _functionColor(event.toString().substring(0,1));
-        return AnimatedContainer(
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.black54,
-              width: 2.0
-            ),
-            gradient: LinearGradient(
-              stops: MediaQuery.of(context).orientation == Orientation.portrait ? [0.14, 0.02] : [0.06,0.02],
-              colors: [_color, Colors.grey[200]]
-            ),
-            borderRadius: BorderRadius.all(Radius.circular(7.0))
+    if(_events == null){
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CircularProgressIndicator(
+            strokeWidth: 5.0,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
           ),
-          margin: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
-          child: GestureDetector(
-            onDoubleTap: (){
-              setState(() {
-                favorite = true;
-              });
-            },
-            child: ListTile(
-              leading: Text(
-                event.toString().substring(0,1),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20
-                ),
+        ),
+      );
+    }else if(_events.length != 0){
+      return Column(
+        children: _events
+        .map((event) {
+          int tamanho = event.toString().length;
+          _functionColor(event.toString().substring(0,1));
+          return AnimatedContainer(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.black54,
+                width: 2.0
               ),
-              title: Row(
-                children: <Widget>[
-                  Flexible(
-                    child: Text(event.toString().substring(1),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 19.0
+              gradient: LinearGradient(
+                stops: MediaQuery.of(context).orientation == Orientation.portrait ? [0.14, 0.02] : [0.06,0.02],
+                colors: [_color, Colors.grey[200]]
+              ),
+              borderRadius: BorderRadius.all(Radius.circular(7.0))
+            ),
+            margin: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 6.0),
+            child: GestureDetector(
+              onDoubleTap: (){
+                _addFavorite(event.toString().substring(0,1));
+                _events.replaceRange(_events.indexOf(event.toString()), _events.indexOf(event.toString()) + 1, [event.substring(0, tamanho -1) + "1"]);
+                setState(() {
+                  _showSnackBar(false);
+                });
+              },
+              child: ListTile(
+                leading: Text(
+                  event.toString().substring(0,1),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20
+                  ),
+                ),
+                title: Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Text(event.toString().substring(1, tamanho - 1),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 19.0
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _loginStatus ? IconButton(
-                    icon: Icon(
-                      favorite ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                      color: favorite ? Colors.red[700] : Colors.black,
+                  ],
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _loginStatus ? IconButton(
+                      icon: Icon(
+                        event.toString().substring(tamanho - 1) == "1" ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                        color: event.toString().substring(tamanho - 1) == "1" ? Colors.red[700] : Colors.black,
+                      ),
+                      tooltip: event.toString().substring(tamanho - 1) == "1" ? "Remover favorito" : "Adicionar favorito",
+                      onPressed: (){
+                        setState(() {
+                          if(event.toString().substring(event.length - 1) == "1"){
+                            _removeFavorite(event.toString().substring(0,1));
+                            _events.replaceRange(_events.indexOf(event.toString()), _events.indexOf(event.toString()) + 1, [event.substring(0, tamanho -1) + "0"]);
+                            setState(() {
+                              _showSnackBar(true);
+                            });
+                          }else{
+                            _addFavorite(event.toString().substring(0,1));
+                            _events.replaceRange(_events.indexOf(event.toString()), _events.indexOf(event.toString()) + 1, [event.substring(0, tamanho -1) + "1"]);
+                            setState(() {
+                              _showSnackBar(false);
+                            });
+                          }
+                        });
+                      },
+                    ) : SizedBox(),
+                    IconButton(
+                      icon: Icon(
+                        FontAwesomeIcons.chevronRight,
+                        color: Colors.black87,
+                      ),
+                      tooltip: "Ver paragens",
+                      onPressed: (){
+                        setState(() {
+                          Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => StopsPage(line: event.toString().substring(0,1),)));
+                        });
+                      },
                     ),
-                    tooltip: favorite ? "Remover favorito" : "Adicionar favorito",
-                    onPressed: (){
-                      setState(() {
-                        favorite = !favorite;
-                        _showSnackBar();
-                      });
-                    },
-                  ) : SizedBox(),
-                  IconButton(
-                    icon: Icon(
-                      FontAwesomeIcons.chevronRight,
-                      color: Colors.black87,
-                    ),
-                    tooltip: "Ver paragens",
-                    onPressed: (){
-                      setState(() {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => StopsPage(line: event.toString().substring(0,1),)));
-                      });
-                    },
-                  ),
-                ],
+                  ],
+                ),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => StopsPage(line: event.toString().substring(0,1),)));
+                },
               ),
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => StopsPage(line: event.toString().substring(0,1),)));
-              },
             ),
-          ),
-          duration: Duration(seconds: 3),
-        );
-      })
-      .toList(),
-    );
+            duration: Duration(seconds: 3),
+          );
+        })
+        .toList(),
+      );
+    }
   }
+  
   _functionColor(var expression){
 
     // if expression tem um numero e depois espaço tira o espaço
@@ -187,25 +208,89 @@ class _LinesPageState extends State<LinesPage>{
   }
 
   _getLines() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String idCliente = sharedPreferences.getInt("idCliente").toString();
 
     String id;
     String nomeLinha;
+    int _count = 0;
 
-    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
+    List _favorites;
 
-    try {      
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+    var urlLinhas = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
+    var urlFavoritos = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
+
+    try {
+      final responseLin = await http.get(urlLinhas).timeout(const Duration(seconds: 5));
       
-      if(response.statusCode==200){
-        var dados = jsonDecode(response.body);
+      if(responseLin.statusCode==200){
+        var dadosLin = jsonDecode(responseLin.body);
         
-        _events = new List.generate(dados['data'].length, (i) => i + 1);
-        for (var i=0; i<dados['data'].length; i++) {
+        _events = new List.generate(dadosLin['data'].length, (i) => (i + 1).toString() + " " );
 
-          id = dados['data'][i]['id_linha'].toString();
-          nomeLinha = dados['data'][i]['nome'].toString();
+        final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 5));
 
-          _events[i] = id + nomeLinha;
+        
+        if(responseFav.statusCode == 200){
+          var dadosFav = jsonDecode(responseFav.body);
+
+          if(dadosFav['data'] != []){
+            for(var i = 0; i < dadosFav['data'].length; i++){
+              if(dadosFav['data'][i]['id_cliente'] == sharedPreferences.getInt("idCliente")){
+                _count ++;
+              } 
+            }
+
+            if(_count == 0 ){
+
+              for (var i=0; i < dadosLin['data'].length; i++) {
+
+                id = dadosLin['data'][i]['id_linha'].toString();  //1
+                nomeLinha = dadosLin['data'][i]['nome'].toString(); // estação
+                
+                _events[i] = id + nomeLinha + "0";
+              }
+              return;
+            }
+
+            _favorites = new List.generate(_count, (i) => i + 1);
+
+            _count = 0;
+
+            for(var i = 0; i < dadosFav['data'].length; i++){
+              if(dadosFav['data'][i]['id_cliente'] == sharedPreferences.getInt("idCliente")){
+                _favorites[_count] = dadosFav['data'][i]['id_linha'];
+                _count++;
+              } 
+            }
+
+            _favorites.sort();
+            
+            int _count2 = 0;
+
+            for (var i=0; i < dadosLin['data'].length; i++) {
+
+              id = dadosLin['data'][i]['id_linha'].toString();
+              nomeLinha = dadosLin['data'][i]['nome'].toString();
+              
+              // for(var j = 0; j < dadosFav['data'].length; j++){
+              //   if(dadosFav['data'][j]['id_cliente'].toString() == idCliente && dadosFav['data'][j]['id_linha'].toString() == id) {
+              //     _events[i] = id + nomeLinha + "1";
+              //   }else{
+              //     _events[i] = id + nomeLinha + "0";
+              //   }
+              // }
+
+              if(id == _favorites[_count2].toString()){
+                _events[i] = id + nomeLinha + "1";
+                if(_count2 != _count - 1){
+                  _count2++;
+                }
+              }else{
+                _events[i] = id + nomeLinha + "0";
+              }
+            }
+          }
         }
       }
     }catch(e){
@@ -213,7 +298,7 @@ class _LinesPageState extends State<LinesPage>{
     }
   }
 
-  _showSnackBar() {
+  _showSnackBar(bool remfavorite) {
     final snackBar = new SnackBar(
       content: Container(
         margin: const EdgeInsets.symmetric(vertical: 2.5),
@@ -222,21 +307,21 @@ class _LinesPageState extends State<LinesPage>{
             Padding(
               padding: const EdgeInsets.only(right: 20.0),
               child: Icon(
-                favorite ? Icons.check_circle_outline 
-                : Icons.delete_outline,
-                color: favorite ? Colors.lightGreen[700]
-                : Colors.red[700],
+                remfavorite ? Icons.delete_outline
+                : Icons.check_circle_outline,
+                color: remfavorite ? Colors.red[700]
+                : Colors.lightGreen[700],
                 size: 30.0,
               ),
             ),
             Text(
-              favorite ? 'Favorito adicionado' 
-              : 'Favorito removido',
+              remfavorite ? 'Favorito removido' 
+              : 'Favorito adicionado',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 19,
-                color: favorite ? Colors.lightGreen[700]
-                : Colors.red[700],
+                color: remfavorite ? Colors.red[700]
+                : Colors.lightGreen[700],
               ),
             )
           ],
@@ -247,5 +332,69 @@ class _LinesPageState extends State<LinesPage>{
 
     );
     _scaffoldKey.currentState.showSnackBar(snackBar);
+  }
+
+  void _removeFavorite(String id) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String idCliente = sharedPreferences.getInt("idCliente").toString();
+    String idFavorito;
+    
+    var urlFavoritos = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
+
+    try {
+      final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 15));
+      
+      if(responseFav.statusCode==200){
+        var dados = jsonDecode(responseFav.body);
+
+        for(var i = 0; i < dados['data'].length; i++){
+          if(dados['data'][i]['id_cliente'].toString() == idCliente && dados['data'][i]['id_linha'].toString() == id) {
+            idFavorito = dados['data'][i]['id_favorito'].toString();
+          }
+        }
+
+        var urlRemoverFavorito = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos/' + idFavorito;
+
+        final responseRemoveFav = await http.delete(urlRemoverFavorito).timeout(const Duration(seconds: 15));
+
+        if(responseRemoveFav.statusCode == 200){
+          var dados = jsonDecode(responseRemoveFav.body);
+
+        }
+
+      }
+
+    }catch(e){
+      print(e);
+    }
+
+  }
+
+  _addFavorite(String id) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String idCliente = sharedPreferences.getInt("idCliente").toString();
+    
+    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/favoritos";
+
+    Map body = {
+      "id_cliente" : idCliente,
+      "id_linha" : id,
+    };
+
+    try {      
+      final response = await http.post(url, body: body).timeout(const Duration(seconds: 5));
+
+      if(response.statusCode == 200){
+        var dados = jsonDecode(response.body);
+
+        print(dados);
+      }
+
+    }catch(e){
+      print(e);
+    }
+
   }
 }

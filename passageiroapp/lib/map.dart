@@ -155,38 +155,42 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
               markers: Set.from(markersAPI),
             ),
             AnimatedPositioned(
-            bottom: _markerToastPosition,
-            right: 0,
-            left: 0,
-            duration: Duration(milliseconds: 200),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                //margin: EdgeInsets.all(20),
-                margin: EdgeInsets.symmetric(vertical: 25, horizontal:10),
-                height: 110,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(32)),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      blurRadius: 50,
-                      offset: Offset.zero,
-                      color: Colors.grey.withOpacity(0.50),
-                    )
-                  ]
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    _buildLocationInfo(),
-                    //_buildMarkerType(),
-                  ],
+              bottom: _markerToastPosition,
+              right: 0,
+              left: 0,
+              duration: Duration(milliseconds: 200),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  //margin: EdgeInsets.all(20),
+                  margin: EdgeInsets.symmetric(vertical: 25, horizontal:10),
+                  height: 125,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black45,
+                      width: 2.0
+                    ),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(25)),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        blurRadius: 30,
+                        offset: Offset.zero,
+                        color: Colors.grey.withOpacity(0.50),
+                      )
+                    ]
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      _buildLocationInfo(),
+                      //_buildMarkerType(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          )
+            )
           ],
         )
       )),
@@ -242,9 +246,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
           child: Row(
             children: <Widget>[
               ButtonTheme(
-                  minWidth: 110,
-                  height: 30.0,
-                  child: RaisedButton(
+                minWidth: 110,
+                height: 30.0,
+                child: RaisedButton(
                   onPressed: (){
                     getTime(linha['id_linha'].toString(), _selectedParagemID);
                     setState(() {
@@ -254,11 +258,21 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                   },
                   color: _color,
                   padding: EdgeInsets.all(2.0),
-                  shape: StadiumBorder(),
-                  
+                  shape: StadiumBorder(
+                    side: BorderSide(
+                      color: Colors.black45,
+                      width: 1.5
+                    )
+                  ),
                   child: Row(
-                    children: [ Text("Linha "+linha['id_linha'].toString(), 
-                      style: TextStyle(color: _color.computeLuminance() > 0.1 ? Colors.black : Colors.white,))],
+                    children: [ 
+                      Text("Linha "+linha['id_linha'].toString(), 
+                        style: TextStyle(
+                          color: _color.computeLuminance() > 0.1 ? Colors.black : Colors.white,
+                          fontSize: 15.5
+                        )
+                      )
+                    ],
                   )
                 )
               ),
@@ -275,7 +289,15 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
           mainAxisAlignment: MainAxisAlignment.center,
           
           children: <Widget>[
-            Center(child: Text(_selectedParagemName,  style: TextStyle(fontWeight: FontWeight.bold),)),
+            Center(
+              child: Text(
+                _selectedParagemName,  
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0
+                ),
+              )
+            ),
             SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(

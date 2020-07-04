@@ -120,13 +120,13 @@ class _StopsPageState extends State<StopsPage>{
   }
 
   _getStops() async {
-
+    sharedPreferences = await SharedPreferences.getInstance();
     String nomeParagem;
 
     var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/paragens/' + widget.line.toString();
 
     try {      
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 15));
       
       if(response.statusCode==200){
         var dados = jsonDecode(response.body);

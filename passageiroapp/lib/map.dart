@@ -199,9 +199,10 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   }
 
   _getMarkers() async {
+    sharedPreferences = await SharedPreferences.getInstance();
     final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
     try {      
-      final response = await http.get(url).timeout(const Duration(seconds: 7));
+      final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 7));
       if(response.statusCode==200){
         var markers =jsonDecode(response.body);
         for (var i=0; i<markers.length; i++){
@@ -340,10 +341,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   }
   
   getTime(String linha, String paragemID) async {
+    sharedPreferences = await SharedPreferences.getInstance();
     String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
     print("url tempo: " + url);
     try {      
-      final response = await http.get(url).timeout(const Duration(seconds: 7));
+      final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 7));
       print("status code: " + response.statusCode.toString() );
   
       if(response.statusCode==200){

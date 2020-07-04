@@ -95,9 +95,9 @@ class LocalNotifications {
     sharedPreferences = await SharedPreferences.getInstance();
     final userId = sharedPreferences.getInt("id");
     var startId = 1;
-    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos/' + userId.toString();
+    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
     try {      
-      final response = await http.get(url).timeout(const Duration(seconds: 8));
+      final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 8));
       if(response.statusCode==200){
         var dados = jsonDecode(response.body);
         
@@ -105,7 +105,7 @@ class LocalNotifications {
           url= 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/horariosLinha/'+fav['id_linha'].toString();
           
           try {
-            final response = await http.get(url).timeout(const Duration(seconds: 8));
+            final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 8));
             if(response.statusCode==200){
               var dados = jsonDecode(response.body);
               for(var hora in dados){

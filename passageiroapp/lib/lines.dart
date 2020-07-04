@@ -221,14 +221,14 @@ class _LinesPageState extends State<LinesPage>{
     var urlFavoritos = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
 
     try {
-      final responseLin = await http.get(urlLinhas).timeout(const Duration(seconds: 5));
+      final responseLin = await http.get(urlLinhas,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 5));
       
       if(responseLin.statusCode==200){
         var dadosLin = jsonDecode(responseLin.body);
         
         _events = new List.generate(dadosLin['data'].length, (i) => (i + 1).toString() + " " );
 
-        final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 5));
+        final responseFav = await http.get(urlFavoritos,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 5));
 
         
         if(responseFav.statusCode == 200){
@@ -343,7 +343,7 @@ class _LinesPageState extends State<LinesPage>{
     var urlFavoritos = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
 
     try {
-      final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 15));
+      final responseFav = await http.get(urlFavoritos,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 15));
       
       if(responseFav.statusCode==200){
         var dados = jsonDecode(responseFav.body);
@@ -356,8 +356,8 @@ class _LinesPageState extends State<LinesPage>{
 
         var urlRemoverFavorito = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos/' + idFavorito;
 
-        final responseRemoveFav = await http.delete(urlRemoverFavorito).timeout(const Duration(seconds: 15));
-
+        final responseRemoveFav = await http.delete(urlRemoverFavorito,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 15));
+        print(responseRemoveFav.body);
         if(responseRemoveFav.statusCode == 200){
           var dados = jsonDecode(responseRemoveFav.body);
 
@@ -384,7 +384,7 @@ class _LinesPageState extends State<LinesPage>{
     };
 
     try {      
-      final response = await http.post(url, body: body).timeout(const Duration(seconds: 5));
+      final response = await http.post(url, body: body, headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 5));
 
       if(response.statusCode == 200){
         var dados = jsonDecode(response.body);

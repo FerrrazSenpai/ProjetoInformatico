@@ -278,7 +278,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
     var urlLinhas = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
 
     try {
-      final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 15));
+      final responseFav = await http.get(urlFavoritos,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 15));
       
       if(responseFav.statusCode==200){
         var dados = jsonDecode(responseFav.body);
@@ -313,7 +313,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
 
           _favorites.sort();
 
-          final responseLin = await http.get(urlLinhas).timeout(const Duration(seconds: 15));
+          final responseLin = await http.get(urlLinhas,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 15));
         
           if(responseLin.statusCode==200){
             var dadosLin = jsonDecode(responseLin.body);
@@ -352,7 +352,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
     var urlFavoritos = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
 
     try {
-      final responseFav = await http.get(urlFavoritos).timeout(const Duration(seconds: 15));
+      final responseFav = await http.get(urlFavoritos,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 15));
       
       if(responseFav.statusCode==200){
         var dados = jsonDecode(responseFav.body);
@@ -365,7 +365,7 @@ class _FavoritesPageState extends State<FavoritesPage>{
 
         var urlRemoverFavorito = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos/' + idFavorito.toString();
 
-        final responseRemoveFav = await http.delete(urlRemoverFavorito).timeout(const Duration(seconds: 15));
+        final responseRemoveFav = await http.delete(urlRemoverFavorito,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 15));
 
         if(responseRemoveFav.statusCode == 200){
           var dados = jsonDecode(responseRemoveFav.body);

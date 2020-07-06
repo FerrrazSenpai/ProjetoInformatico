@@ -255,6 +255,10 @@ class MyDrawer extends State<DrawerPage> {
     if (action == DialogAction.confirm) {
       setState(() {
         sharedPreferences.setBool("loginStatus", false);
+        sharedPreferences.remove("access_token");
+        sharedPreferences.remove("email");
+        sharedPreferences.remove("nome");
+        sharedPreferences.remove("idCliente");
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (BuildContext context) => MapPage(

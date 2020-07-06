@@ -120,7 +120,9 @@ class _LinesPageState extends State<LinesPage> {
                   children: <Widget>[
                     Flexible(
                       child: Text(
-                        event.toString().substring(1, tamanho - 1),
+                        _loginStatus
+                            ? event.toString().substring(1, tamanho - 1)
+                            : event.toString().substring(1),
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 19.0),
                       ),
@@ -261,13 +263,11 @@ class _LinesPageState extends State<LinesPage> {
         'http://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
 
     try {
-      final responseLin = await http.get(
-        urlLinhas,
-        headers: {
-          'Authorization':
-              "Bearer " + sharedPreferences.getString("access_token")
-        },
-      ).timeout(const Duration(seconds: 5));
+      final responseLin = await http
+          .get(
+            urlLinhas,
+          )
+          .timeout(const Duration(seconds: 5));
 
       if (responseLin.statusCode == 200) {
         var dadosLin = jsonDecode(responseLin.body);
@@ -297,8 +297,8 @@ class _LinesPageState extends State<LinesPage> {
 
               if (_count == 0) {
                 for (var i = 0; i < dadosLin['data'].length; i++) {
-                  id = dadosLin['data'][i]['id_linha'].toString();
-                  nomeLinha = dadosLin['data'][i]['nome'].toString();
+                  id = dadosLin['data'][i]['id_linha'].toString(); //1
+                  nomeLinha = dadosLin['data'][i]['nome'].toString(); // estação
 
                   _events[i] = id + nomeLinha + "0";
                 }
@@ -338,10 +338,10 @@ class _LinesPageState extends State<LinesPage> {
           }
         } else {
           for (var i = 0; i < dadosLin['data'].length; i++) {
-            id = dadosLin['data'][i]['id_linha'].toString();
-            nomeLinha = dadosLin['data'][i]['nome'].toString();
+            id = dadosLin['data'][i]['id_linha'].toString(); //1
+            nomeLinha = dadosLin['data'][i]['nome'].toString(); // estação
 
-            _events[i] = id + nomeLinha + "0";
+            _events[i] = id + nomeLinha;
           }
         }
       }

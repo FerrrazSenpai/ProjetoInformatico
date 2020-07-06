@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 
-
 class LocalNotifications {
   FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
   SharedPreferences sharedPreferences;
@@ -16,7 +15,8 @@ class LocalNotifications {
 
   void _initializeNotifications() {
     _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    final initializationSettingsAndroid = AndroidInitializationSettings('red_bus');
+    final initializationSettingsAndroid =
+        AndroidInitializationSettings('red_bus');
     final initializationSettingsIOS = IOSInitializationSettings();
     final initializationSettings = InitializationSettings(
       initializationSettingsAndroid,
@@ -34,14 +34,14 @@ class LocalNotifications {
     }
   }
 
-
-  Future<void> showDailyAtTime(Time time, int id, String title, String description) async { //notificação todos os dias a X hora
+  Future<void> showDailyAtTime(
+      Time time, int id, String title, String description) async {
+    //notificação todos os dias a X hora
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'Favoritos channel id','Favoritos','Notificações sobre Favoritos',
-      importance: Importance.Max,
-      priority: Priority.High,
-      ticker: "notification ticker"
-    );
+        'Favoritos channel id', 'Favoritos', 'Notificações sobre Favoritos',
+        importance: Importance.Max,
+        priority: Priority.High,
+        ticker: "notification ticker");
     final iOSPlatformChannelSpecifics = IOSNotificationDetails();
     final platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics,
@@ -56,76 +56,96 @@ class LocalNotifications {
     );
   }
 
-  Future<void> show(int id, String title, String description) async { // notificação imediata
+  Future<void> show(int id, String title, String description) async {
+    // notificação imediata
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'Favoritos channel id','Favoritos','Notificações sobre Favoritos',
-      importance: Importance.Max,
-      priority: Priority.High,
-      ticker: "notification ticker"
-    );
+        'Favoritos channel id', 'Favoritos', 'Notificações sobre Favoritos',
+        importance: Importance.Max,
+        priority: Priority.High,
+        ticker: "notification ticker");
     final iOSPlatformChannelSpecifics = IOSNotificationDetails();
     final platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics,
       iOSPlatformChannelSpecifics,
     );
     await _flutterLocalNotificationsPlugin.show(
-      id,
-      title,
-      description,
-      platformChannelSpecifics,
-      payload: "notification payload"
-    );
-  }  
+        id, title, description, platformChannelSpecifics,
+        payload: "notification payload");
+  }
 
   Future<void> cancelAllNotifications() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
   Future<List<PendingNotificationRequest>> getListPendingNotifications() async {
-    final listNotifications = await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
+    final listNotifications =
+        await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
     print("Pending notifications: \n");
-    for(var notification in listNotifications){
+    for (var notification in listNotifications) {
       print(notification.id.toString() + " : " + notification.body);
     }
     return listNotifications;
   }
 
-  void setNotifications() async{
+  void setNotifications() async {
     this.cancelAllNotifications();
     sharedPreferences = await SharedPreferences.getInstance();
-    final userId = sharedPreferences.getInt("id");
+
     var startId = 1;
-    var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/favoritos';
-    try {      
-      final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 8));
-      if(response.statusCode==200){
+    var url = 'http://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization':
+              "Bearer " + sharedPreferences.getString("access_token")
+        },
+      ).timeout(const Duration(seconds: 8));
+      if (response.statusCode == 200) {
         var dados = jsonDecode(response.body);
-        
-        for(var fav in dados){          
-          url= 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/horariosLinha/'+fav['id_linha'].toString();
-          
+
+        for (var fav in dados) {
+          url = 'http://' +
+              DotEnv().env['IP_ADDRESS'] +
+              '/api/horariosLinha/' +
+              fav['id_linha'].toString();
+
           try {
-            final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 8));
-            if(response.statusCode==200){
+            final response = await http.get(
+              url,
+              headers: {
+                'Authorization':
+                    "Bearer " + sharedPreferences.getString("access_token")
+              },
+            ).timeout(const Duration(seconds: 8));
+            if (response.statusCode == 200) {
               var dados = jsonDecode(response.body);
-              for(var hora in dados){
+              for (var hora in dados) {
                 var horaInicio = hora['hora_inicio'];
-                var time = Time(int.parse(horaInicio.split(":")[0]),int.parse(horaInicio.split(":")[1]),int.parse(horaInicio.split(":")[2]));
-                this.showDailyAtTime(time, ++startId, fav['nome'], "A linha "+ fav['id_linha'].toString() + " está a começar a viagem");
+                var time = Time(
+                    int.parse(horaInicio.split(":")[0]),
+                    int.parse(horaInicio.split(":")[1]),
+                    int.parse(horaInicio.split(":")[2]));
+                this.showDailyAtTime(
+                    time,
+                    ++startId,
+                    fav['nome'],
+                    "A linha " +
+                        fav['id_linha'].toString() +
+                        " está a começar a viagem");
               }
             }
-          }catch (e) {
+          } catch (e) {
             print(e);
           }
         }
-      }else{
+      } else {
         print("Status != 200");
       }
-    }catch(e){
+    } catch (e) {
       print(e);
     }
     print("confirmar lista de notificações: ");
     this.getListPendingNotifications();
   }
-
 }

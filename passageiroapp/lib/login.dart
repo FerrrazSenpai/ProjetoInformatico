@@ -8,19 +8,19 @@ import 'package:passageiroapp/drawer.dart';
 import 'package:passageiroapp/connectivity.dart';
 
 Future main() async {
-  await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
+  await DotEnv().load('.env'); //Use - DotEnv().env['IP_ADDRESS'];
   runApp(LoginPage());
 }
 
 class LoginPage extends StatefulWidget {
   @override
-  _LoginPageState createState()=> _LoginPageState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
   var _error = "";
   bool connected;
-  bool checkBoxValue=false;
+  bool checkBoxValue = false;
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +33,22 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Theme.of(context).primaryColor,
       body: ConnectivityPage(
         widget: Container(
-          padding: EdgeInsets.only(left: 30, right: 30),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15.0),
-              topRight: Radius.circular(15.0),
+            padding: EdgeInsets.only(left: 30, right: 30),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15.0),
+                topRight: Radius.circular(15.0),
+              ),
             ),
-          ),
-          child: ListView(
-            children: <Widget>[
-              titleSection(),
-              formSection(),
-              errorSection(),
-              buttonSection(),
-              checkBoxSection(),
-              /*Container(
+            child: ListView(
+              children: <Widget>[
+                titleSection(),
+                formSection(),
+                errorSection(),
+                buttonSection(),
+                checkBoxSection(),
+                /*Container(
                 child: RaisedButton(
                 child: Text('Continuar sem autenticação'),
                 onPressed: () {
@@ -56,45 +56,43 @@ class _LoginPageState extends State<LoginPage> {
                 },
               ),
               )*/
-            ],
-          )
-        ),
+              ],
+            )),
       ),
-      drawer: DrawerPage(loginStatus: false,),
+      drawer: DrawerPage(
+        loginStatus: false,
+      ),
     );
   }
-
 
   Container titleSection() {
     return Container(
-      margin: EdgeInsets.only(top: 110.0, left: 30.0, right:30.0),
-      child: new Image.asset('assets/bus.png', width:100, height:100),
+      margin: EdgeInsets.only(top: 110.0, left: 30.0, right: 30.0),
+      child: new Image.asset('assets/bus.png', width: 100, height: 100),
     );
   }
 
-  Container  formSection(){
+  Container formSection() {
     return Container(
         child: Column(
-          children: <Widget>[
-            SizedBox(height: 60.0),
-            formInput("Email", Icons.email),
-            SizedBox(height: 10.0),
-            formInput("Password", Icons.lock),
-            SizedBox(height: 20.0),
-          ],
-        )
-    );
+      children: <Widget>[
+        SizedBox(height: 60.0),
+        formInput("Email", Icons.email),
+        SizedBox(height: 10.0),
+        formInput("Password", Icons.lock),
+        SizedBox(height: 20.0),
+      ],
+    ));
   }
 
   TextEditingController emailControler = new TextEditingController();
   TextEditingController passwordControler = new TextEditingController();
 
-
-  TextFormField formInput(String hint, IconData iconName){
+  TextFormField formInput(String hint, IconData iconName) {
     return TextFormField(
       cursorColor: Colors.white,
       style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900),
-      obscureText: hint == "Password" ? true : false ,
+      obscureText: hint == "Password" ? true : false,
       controller: hint == "Password" ? passwordControler : emailControler,
       decoration: InputDecoration(
         labelText: hint,
@@ -103,14 +101,15 @@ class _LoginPageState extends State<LoginPage> {
           fontWeight: FontWeight.w400,
           fontSize: 18,
         ),
-        icon: Icon(iconName, 
+        icon: Icon(
+          iconName,
           color: Theme.of(context).primaryColor,
         ),
       ),
     );
   }
 
-  Container buttonSection(){
+  Container buttonSection() {
     return Container(
       padding: EdgeInsets.only(top: 20.0),
       margin: EdgeInsets.symmetric(horizontal: 30.0),
@@ -122,12 +121,12 @@ class _LoginPageState extends State<LoginPage> {
         elevation: 20.0,
         padding: EdgeInsets.all(15.0),
         shape: RoundedRectangleBorder(
-          borderRadius: new BorderRadius.circular(20.0),
-          side: BorderSide(color: Colors.black54)
-        ),
+            borderRadius: new BorderRadius.circular(20.0),
+            side: BorderSide(color: Colors.black54)),
         splashColor: Colors.black54,
         colorBrightness: Brightness.light,
-        child: Text("Iniciar Sessão",
+        child: Text(
+          "Iniciar Sessão",
           style: new TextStyle(
             color: Colors.white,
             letterSpacing: 2.0,
@@ -139,34 +138,36 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Container errorSection(){
+  Container errorSection() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 15.0),
-      child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
-      Row(
-        
-        children: <Widget>[
-          Icon(
-            Icons.error_outline,
-            color: Colors.red[700],
-            size: 20.0,
-          ),
-          SizedBox(width: 5.0),
-          Expanded(
-            child:Text('$_error', 
-            style: TextStyle(
-              color: Colors.red[700],
-              fontSize: 15.0,
-              fontWeight: FontWeight.w600,
-              ),
+      child: _error == ""
+          ? Container(
+              margin: EdgeInsets.only(top: 20.0),
             )
-          ),
-        ],
-      ),
+          : Row(
+              children: <Widget>[
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red[700],
+                  size: 20.0,
+                ),
+                SizedBox(width: 5.0),
+                Expanded(
+                    child: Text(
+                  '$_error',
+                  style: TextStyle(
+                    color: Colors.red[700],
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                )),
+              ],
+            ),
     );
   }
 
-  Row checkBoxSection(){
+  Row checkBoxSection() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -175,54 +176,55 @@ class _LoginPageState extends State<LoginPage> {
             unselectedWidgetColor: Theme.of(context).primaryColor,
           ),
           child: Checkbox(
-            value: checkBoxValue,
-            hoverColor: Colors.red,
-            activeColor: Theme.of(context).primaryColor,
-            checkColor: Theme.of(context).accentColor,
-            onChanged: (bool value){
-              setState(() {
-                checkBoxValue = value;
-              });
-            }
-          ),
+              value: checkBoxValue,
+              hoverColor: Colors.red,
+              activeColor: Theme.of(context).primaryColor,
+              checkColor: Theme.of(context).accentColor,
+              onChanged: (bool value) {
+                setState(() {
+                  checkBoxValue = value;
+                });
+              }),
         ),
         Container(
-          padding: EdgeInsets.only(right: 20.0),
-          child: Text("Manter sessão iniciada", 
-            style: TextStyle(color: Colors.black),
-            textAlign: TextAlign.start,)
-          ),
+            padding: EdgeInsets.only(right: 20.0),
+            child: Text(
+              "Manter sessão iniciada",
+              style: TextStyle(color: Colors.black),
+              textAlign: TextAlign.start,
+            )),
       ],
     );
   }
-
 
   signIn(String email, String password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     setState(() {
-      _error = ""; //clear errors 
+      _error = ""; //clear errors
     });
 
-    final regexEmail = RegExp(r"^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$");
+    final regexEmail = RegExp(
+        r"^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$");
 
-    if (!regexEmail.hasMatch(email) || password.trim()==""){
+    if (!regexEmail.hasMatch(email) || password.trim() == "") {
       setState(() {
-        _error = "Preencha os dois campos"; //clear errors 
+        _error = "Preencha os dois campos"; //clear errors
       });
       return;
     }
 
     Map body = {
-      "email" : email,
-      "password" : password,
+      "email": email,
+      "password": password,
     };
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/loginCliente";
-    try {      
-      final response = await http.post(url, body: body).timeout(const Duration(seconds: 5));
+    try {
+      final response =
+          await http.post(url, body: body).timeout(const Duration(seconds: 5));
       print(response.statusCode);
-      if(response.statusCode == 200) {
-        if(response.body.trim()=="{\"msg\":\"Not authorized\"}"){ 
+      if (response.statusCode == 200) {
+        if (response.body.trim() == "{\"msg\":\"Not authorized\"}") {
           setState(() {
             _error = "Email ou password incorretos";
           });
@@ -232,7 +234,8 @@ class _LoginPageState extends State<LoginPage> {
 
         var jsonResponse = json.decode(response.body);
 
-        if(jsonResponse.containsKey('user') && jsonResponse['user']['tipo'] != "c"){ 
+        if (jsonResponse.containsKey('user') &&
+            jsonResponse['user']['tipo'] != "c") {
           // tipo c é utilizadores da app de passageiros - quero garantir que nao permitimos login com credencias da app condutor
           setState(() {
             _error = "Email ou password incorretos";
@@ -241,57 +244,44 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
 
-        if(jsonResponse['token'].containsKey('access_token')) {
+        if (jsonResponse['token'].containsKey('access_token')) {
           sharedPreferences.setInt("id", jsonResponse['user']['id']);
           sharedPreferences.setBool("checkBox", checkBoxValue);
           sharedPreferences.setBool("update_notifications", true);
-          sharedPreferences.setString("access_token", jsonResponse['token']['access_token'].toString());
+          sharedPreferences.setString(
+              "access_token", jsonResponse['token']['access_token'].toString());
           sharedPreferences.setString("email", email);
           sharedPreferences.setString("nome", jsonResponse['user']['nome']);
           sharedPreferences.setInt("idCliente", jsonResponse['user']['id']);
           sharedPreferences.setBool("loginStatus", true);
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
-        }
-        else{
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) => MapPage(
+                        title: "Página inicial",
+                      )),
+              (Route<dynamic> route) => false);
+        } else {
           setState(() {
             _error = "Erro a receber a informação do servidor";
           });
           print("A resposta não tem a estrutura certa");
         }
-      }
-      else if(response.statusCode == 400){
+      } else if (response.statusCode == 400) {
         setState(() {
-            _error = "Email ou password incorretos";
-          });
-          print("Email ou password incorretos");
-      }
-      else{
+          _error = "Email ou password incorretos";
+        });
+        print("Email ou password incorretos");
+      } else {
         setState(() {
-            _error = "Resposta inesperada do servidor, tente novamente!";
-          });
+          _error = "Resposta inesperada do servidor, tente novamente!";
+        });
         print("Erro, a resposta não é 200 nem 400 ... \n" + response.body);
       }
-    }
-    catch(e){
+    } catch (e) {
       setState(() {
-        _error="Erro de conexão ao servidor";
+        _error = "Erro de conexão ao servidor";
       });
       print("Erro de conexão ao servidor" + e.toString());
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

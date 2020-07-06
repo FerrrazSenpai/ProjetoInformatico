@@ -185,7 +185,6 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       _buildLocationInfo(),
-                      //_buildMarkerType(),
                     ],
                   ),
                 ),
@@ -202,7 +201,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     sharedPreferences = await SharedPreferences.getInstance();
     final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
     try {      
-      final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 7));
+      final response = await http.get(url,).timeout(const Duration(seconds: 7));
       if(response.statusCode==200){
         var markers =jsonDecode(response.body);
         for (var i=0; i<markers.length; i++){
@@ -230,6 +229,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
       }
     }catch(e){
       print(e);
+      setState(() {
+        _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("O servidor não enviou as paragens!"),));
+      });
     }
   }
 
@@ -269,7 +271,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                     children: [ 
                       Text("Linha "+linha['id_linha'].toString(), 
                         style: TextStyle(
-                          color: _color.computeLuminance() > 0.1 ? Colors.black : Colors.white,
+                          color: Colors.white,
                           fontSize: 15.5
                         )
                       )
@@ -345,7 +347,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
     print("url tempo: " + url);
     try {      
-      final response = await http.get(url,headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},).timeout(const Duration(seconds: 7));
+      final response = await http.get(url,).timeout(const Duration(seconds: 15));
       print("status code: " + response.statusCode.toString() );
   
       if(response.statusCode==200){

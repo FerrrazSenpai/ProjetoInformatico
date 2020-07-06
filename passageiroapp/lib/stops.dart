@@ -127,13 +127,11 @@ class _StopsPageState extends State<StopsPage> {
         widget.line.toString();
 
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'Authorization':
-              "Bearer " + sharedPreferences.getString("access_token")
-        },
-      ).timeout(const Duration(seconds: 15));
+      final response = await http
+          .get(
+            url,
+          )
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         var dados = jsonDecode(response.body);

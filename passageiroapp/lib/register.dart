@@ -300,7 +300,7 @@ class _RegisterPageState extends State<RegisterPage> {
             return;
           }
 
-          final regexEmail = RegExp(r"^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$");
+          final regexEmail = RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
           if(!regexEmail.hasMatch(emailControler.text)){
             setState(() {
               _error = "Email invalido!";
@@ -336,7 +336,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
           if(passwordControler.text.length <3){
             setState(() {
-              _error = "A password tem de ser maior!";
+              _error = "A password tem de ter, pelo menos, 3 carateres!";
             });
             return;
           }
@@ -442,7 +442,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
     catch(e){
       setState(() {
-        _error="Erro de conexão ao servidor: "+e.toString();
+        _error="Erro de conexão ao servidor, tente novamente!";
       });
       print("Erro de conexão ao servidor: "+e.toString());
     }

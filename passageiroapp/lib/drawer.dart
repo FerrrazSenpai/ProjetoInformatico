@@ -12,7 +12,7 @@ class DrawerPage extends StatefulWidget {
   DrawerPage({Key key, this.loginStatus}) : super(key: key);
 
   final bool loginStatus;
-  
+
   @override
   MyDrawer createState() => MyDrawer();
 }
@@ -21,9 +21,9 @@ class MyDrawer extends State<DrawerPage> {
   SharedPreferences sharedPreferences;
   var action;
   String nome;
-  
+
   Color _color;
-  
+
   @override
   void initState() {
     super.initState();
@@ -32,34 +32,32 @@ class MyDrawer extends State<DrawerPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    if(widget.loginStatus){
+    if (widget.loginStatus) {
       return Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: _color
-              ),
+              decoration: BoxDecoration(color: _color),
               child: Container(
                 child: Column(
                   children: <Widget>[
                     Icon(
                       FontAwesomeIcons.busAlt,
-                      color: _color == Colors.black ? Colors.white : Colors.black,
+                      color:
+                          _color == Colors.black ? Colors.white : Colors.black,
                       size: 85.0,
                     ),
-                    SizedBox(
-                      height: 15.0
-                    ),
+                    SizedBox(height: 15.0),
                     Expanded(
-                      child: Text("$nome",
+                      child: Text(
+                        "$nome",
                         style: TextStyle(
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold,
-                          color: _color == Colors.black ? Colors.white : Colors.black
-                        ),
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.bold,
+                            color: _color == Colors.black
+                                ? Colors.white
+                                : Colors.black),
                       ),
                     ),
                   ],
@@ -67,53 +65,91 @@ class MyDrawer extends State<DrawerPage> {
               ),
             ),
             ListTile(
-              leading: Icon(FontAwesomeIcons.home, color: Colors.black,size: 22.0,),
-              title: Text('Página Inicial', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                FontAwesomeIcons.home,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Página Inicial',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => MapPage(
+                              title: "Página inicial",
+                            )),
+                    (Route<dynamic> route) => false);
               },
             ),
             ListTile(
-              leading: Icon(Icons.linear_scale, color: Colors.black,size: 22.0,),
-              title: Text('Linhas', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                Icons.linear_scale,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Linhas',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LinesPage()), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => LinesPage()),
+                    (Route<dynamic> route) => false);
               },
             ),
             ListTile(
-              leading: Icon(Icons.favorite, color: Colors.black,size: 22.0,),
-              title: Text('Favoritos', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                Icons.favorite,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Favoritos',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => FavoritesPage()), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => FavoritesPage()),
+                    (Route<dynamic> route) => false);
               },
             ),
             ListTile(
-              leading: Icon(FontAwesomeIcons.signOutAlt, color: Colors.black,size: 22.0,),
-              title: Text('Terminar Sessão', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                FontAwesomeIcons.signOutAlt,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Terminar Sessão',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                action =
-                await Dialogs.yesAbortDialog(context, 'Alerta', 'Pretende realmente sair?');
+                action = await Dialogs.yesAbortDialog(
+                    context, 'Alerta', 'Pretende realmente terminar sessão?');
                 _onPressLogout();
               },
             ),
           ],
         ),
       );
-    }else{
+    } else {
       return Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
-                color: _color
-              ),
+              decoration: BoxDecoration(color: _color),
               child: Container(
                 child: Column(
                   children: <Widget>[
                     Icon(
                       FontAwesomeIcons.busAlt,
-                      color: _color == Colors.black ? Colors.white : Colors.black,
+                      color:
+                          _color == Colors.black ? Colors.white : Colors.black,
                       size: 100.0,
                     ),
                   ],
@@ -121,39 +157,79 @@ class MyDrawer extends State<DrawerPage> {
               ),
             ),
             ListTile(
-              leading: Icon(FontAwesomeIcons.home, color: Colors.black,size: 22.0,),
-              title: Text('Página Inicial', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                FontAwesomeIcons.home,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Página Inicial',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => MapPage(
+                              title: "Página inicial",
+                            )),
+                    (Route<dynamic> route) => false);
               },
             ),
             ListTile(
-              leading: Icon(Icons.linear_scale, color: Colors.black,size: 22.0,),
-              title: Text('Linhas', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                Icons.linear_scale,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Linhas',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LinesPage()), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => LinesPage()),
+                    (Route<dynamic> route) => false);
               },
             ),
             ListTile(
-              leading: Icon(FontAwesomeIcons.signInAlt, color: Colors.black,size: 22.0,),
-              title: Text('Iniciar Sessão', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                FontAwesomeIcons.signInAlt,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Iniciar Sessão',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => LoginPage()),
+                    (Route<dynamic> route) => false);
               },
             ),
             ListTile(
-              leading: Icon(FontAwesomeIcons.userPlus, color: Colors.black,size: 22.0,),
-              title: Text('Criar Conta', style: TextStyle(fontSize: 17.0),),
+              leading: Icon(
+                FontAwesomeIcons.userPlus,
+                color: Colors.black,
+                size: 22.0,
+              ),
+              title: Text(
+                'Criar Conta',
+                style: TextStyle(fontSize: 17.0),
+              ),
               onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder:  (BuildContext context) => RegisterPage()), (Route<dynamic> route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => RegisterPage()),
+                    (Route<dynamic> route) => false);
               },
-
             ),
           ],
         ),
       );
     }
-    
   }
 
   // void _logout() async {
@@ -165,7 +241,7 @@ class MyDrawer extends State<DrawerPage> {
   //       'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
   //     },).timeout(const Duration(seconds: 3));
 
-  //     print(response.statusCode);  
+  //     print(response.statusCode);
   //     sharedPreferences.setBool("loginStatus", false);
   //     sharedPreferences.clear();
   //   }catch(e){
@@ -177,10 +253,14 @@ class MyDrawer extends State<DrawerPage> {
     sharedPreferences = await SharedPreferences.getInstance();
 
     if (action == DialogAction.confirm) {
-      // _logout();
       setState(() {
         sharedPreferences.setBool("loginStatus", false);
-        Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MapPage(title: "Página inicial",)), (Route<dynamic> route) => false);
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (BuildContext context) => MapPage(
+                      title: "Página inicial",
+                    )),
+            (Route<dynamic> route) => false);
       });
     }
   }
@@ -191,18 +271,5 @@ class MyDrawer extends State<DrawerPage> {
       nome = sharedPreferences.getString("nome");
     });
     return sharedPreferences;
-  }  
-
-  // checkLoginStatus() async {
-  //   sharedPreferences = await SharedPreferences.getInstance();
-
-  //   if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")){
-  //     _loginStatus = false;
-  //   }else if (sharedPreferences.getString("access_token") == null) {
-  //     sharedPreferences.remove("access_token");
-  //     _loginStatus = false;
-  //   }else{
-  //     _loginStatus = true;
-  //   }
-  // }
+  }
 }

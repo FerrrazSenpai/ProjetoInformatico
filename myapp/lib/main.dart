@@ -9,11 +9,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
 Future main() async {
-  await DotEnv().load('.env');  //Use - DotEnv().env['IP_ADDRESS'];
+  await DotEnv().load('.env'); //Use - DotEnv().env['IP_ADDRESS'];
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.dumpErrorToConsole(details);
-    if (kReleaseMode)
-      exit(1);
+    if (kReleaseMode) exit(1);
   };
   runApp(MyApp());
 }
@@ -47,16 +46,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   SharedPreferences sharedPreferences;
-  // Timer timer;
-  // static const duration = const Duration(seconds: 1);
-  // bool counter = false;
-
-  // void handleTick() {
-  //   if(!counter)
-  //   setState(() {
-  //     counter = true;
-  //   });
-  // }
 
   @override
   void initState() {
@@ -64,60 +53,32 @@ class _MyHomePageState extends State<MyHomePage> {
     checkLoginStatus();
   }
 
-   checkLoginStatus() async {
+  checkLoginStatus() async {
     sharedPreferences = await SharedPreferences.getInstance();
     sharedPreferences.setBool("ativo", null);
-    if(sharedPreferences.getBool("checkBox")==null || !sharedPreferences.getBool("checkBox")){
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
-    }else if (sharedPreferences.getString("access_token") == null) {
+    if (sharedPreferences.getBool("checkBox") == null ||
+        !sharedPreferences.getBool("checkBox")) {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+          (Route<dynamic> route) => false);
+    } else if (sharedPreferences.getString("access_token") == null) {
       sharedPreferences.remove("access_token");
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => LoginPage()), (Route<dynamic> route) => false);
-    }
-    else{
-      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: widget.title)), (Route<dynamic> route) => false);
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+          (Route<dynamic> route) => false);
+    } else {
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  DashboardPage(title: widget.title)),
+          (Route<dynamic> route) => false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
-    // if (timer == null) {
-    //   timer = Timer.periodic(duration, (Timer t) {
-    //     handleTick();
-    //   });
-    // }
-
     return Scaffold(
       backgroundColor: Colors.black,
-      // body: Padding(
-      //   padding: const EdgeInsets.only(top: 275),
-      //   child: Center(
-      //     child: Container(
-      //       child: Column(
-      //         children: <Widget>[
-      //           Container(
-      //             width: 40,
-      //             height: 40,
-      //             child: CircularProgressIndicator(
-      //               strokeWidth: 5.0,
-      //               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-      //             ),
-      //           ),
-      //           SizedBox(
-      //             height: 20
-      //           ),
-      //           Text("A carregar ...", 
-      //           style: TextStyle(
-      //             color: Colors.white,
-      //             fontSize: 20,
-      //             fontWeight: FontWeight.w700
-      //           )
-      //           ),
-      //         ]
-      //       )
-      //     ),
-      //   ),
-      // ),
     );
   }
 }

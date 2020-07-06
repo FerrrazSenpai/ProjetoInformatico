@@ -20,20 +20,14 @@ class Dialogs {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SizedBox(
-                height: 20.0
-              ),
+              SizedBox(height: 20.0),
               Container(
-                child: Text("Pretende realmente sair desta aplicação? ",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 19.0
-                  ),
+                child: Text(
+                  body,
+                  style: TextStyle(color: Colors.black, fontSize: 19.0),
                 ),
               ),
-              SizedBox(
-                height: 20.0
-              ),
+              SizedBox(height: 20.0),
               Flexible(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -41,13 +35,14 @@ class Dialogs {
                     Expanded(
                       child: ButtonTheme(
                         child: FlatButton(
-                          onPressed: () => Navigator.of(context).pop(DialogAction.cancel),
-                          child: const Text('Cancelar',
+                          onPressed: () =>
+                              Navigator.of(context).pop(DialogAction.cancel),
+                          child: const Text(
+                            'Cancelar',
                             style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0
-                            ),
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18.0),
                           ),
                         ),
                       ),
@@ -55,13 +50,14 @@ class Dialogs {
                     Expanded(
                       child: ButtonTheme(
                         child: FlatButton(
-                          onPressed: () => Navigator.of(context).pop(DialogAction.confirm),
-                          child: const Text('Confirmar',
+                          onPressed: () =>
+                              Navigator.of(context).pop(DialogAction.confirm),
+                          child: const Text(
+                            'Confirmar',
                             style: TextStyle(
-                              color: Colors.blue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0
-                            ),
+                                color: Colors.blue,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18.0),
                           ),
                         ),
                       ),

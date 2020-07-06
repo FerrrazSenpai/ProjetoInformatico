@@ -13,7 +13,7 @@ class SetupPage extends StatefulWidget {
 
   final String btnText;
   @override
-  _SetupPageState createState()=> _SetupPageState();
+  _SetupPageState createState() => _SetupPageState();
 }
 
 class _SetupPageState extends State<SetupPage> {
@@ -27,12 +27,14 @@ class _SetupPageState extends State<SetupPage> {
   // var _defaultBus = 0;
   bool checkBoxValue = false;
 
-  final TextEditingController __selectedLineController = new TextEditingController();
-  final TextEditingController __selectedBusController = new TextEditingController();
+  final TextEditingController __selectedLineController =
+      new TextEditingController();
+  final TextEditingController __selectedBusController =
+      new TextEditingController();
 
   List bus = List();
   List linhas = List();
-  
+
   @override
   void initState() {
     super.initState();
@@ -41,29 +43,36 @@ class _SetupPageState extends State<SetupPage> {
 
   Future getData() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horarioCondutor/" + sharedPreferences.getString("id_condutor");
+    var url = "http://" +
+        DotEnv().env['IP_ADDRESS'] +
+        "/api/horarioCondutor/" +
+        sharedPreferences.getString("id_condutor");
     //var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
     try {
       final response = await http.get(
         url,
-        headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},
-        ).timeout(const Duration(seconds: 6));
-    
-      if(response.body[1]=="]"){ //ou seja a resposta é só []
+        headers: {
+          'Authorization':
+              "Bearer " + sharedPreferences.getString("access_token")
+        },
+      ).timeout(const Duration(seconds: 6));
+
+      if (response.body[1] == "]") {
+        //ou seja a resposta é só []
         print("EMPTY RESPONSE");
         setState(() {
-          _error="Nenhum serviço está agendado para as próximas horas";
+          _error = "Nenhum serviço está agendado para as próximas horas";
         });
         return; //nao ha nada para fazer nesta funcao entao
       }
       Map<String, dynamic> list = jsonDecode(response.body)[0];
       //array = jsonDecode(response.body)[0];
 
-
       //print("linha: " + array["id_linha"]);
       //print("bus: " + array["id_autocarro"]);
 
-      if(list.containsKey('id_linha')){   //se vier linha da api
+      if (list.containsKey('id_linha')) {
+        //se vier linha da api
         setState(() {
           _selectedLine = int.parse(list['id_linha'].toString());
           __selectedLineController.text = _selectedLine.toString();
@@ -71,85 +80,78 @@ class _SetupPageState extends State<SetupPage> {
         });
       }
 
-      if(list.containsKey('id_autocarro')){ 
+      if (list.containsKey('id_autocarro')) {
         setState(() {
           _selectedBus = int.parse(list['id_autocarro'].toString());
           __selectedBusController.text = _selectedBus.toString();
           // _defaultBus=_selectedBus;
-
         });
       }
-    }catch(e){
+    } catch (e) {
       setState(() {
-        _error= "Houve um problema ao estabelecer conexão";
+        _error = "Houve um problema ao estabelecer conexão";
       });
       print(e.toString());
     }
-    
   }
-
-
-  
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        elevation: 0.0, 
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              FontAwesomeIcons.busAlt,
-              color: Theme.of(context).accentColor,
-              size: 60.0,
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: Theme.of(context).primaryColor,
-      body: new ConnectivityPage(
-        widget: Container(
-          margin: EdgeInsets.only(top: 20.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).accentColor,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(15.0),
-              topRight: Radius.circular(15.0),
-            ),
-          ),
-          child: ListView(
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: Theme.of(context).primaryColor,
+          elevation: 0.0,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 75.0, left:  25.0),
-                child: costumLabel("Numero do autocarro:"),
+              Icon(
+                FontAwesomeIcons.busAlt,
+                color: Theme.of(context).accentColor,
+                size: 60.0,
               ),
-              //dropDownNrBus(),
-              _formInput('Autocarro'),
-              Padding(
-                padding: EdgeInsets.only(top: 15.0, left:  25.0),
-                child: costumLabel("Numero da linha:"),
-              ),
-              //dropDownLinhas(),
-              _formInput('Linha'),
-              _checkBoxSection(),
-              _errorSection(),
-              _buttonSection(),
             ],
           ),
-        ),          
-      )
-    );
+        ),
+        backgroundColor: Theme.of(context).primaryColor,
+        body: new ConnectivityPage(
+          widget: Container(
+            margin: EdgeInsets.only(top: 20.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).accentColor,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(15.0),
+                topRight: Radius.circular(15.0),
+              ),
+            ),
+            child: ListView(
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(top: 75.0, left: 25.0),
+                  child: costumLabel("Numero do autocarro:"),
+                ),
+                //dropDownNrBus(),
+                _formInput('Autocarro'),
+                Padding(
+                  padding: EdgeInsets.only(top: 15.0, left: 25.0),
+                  child: costumLabel("Numero da linha:"),
+                ),
+                //dropDownLinhas(),
+                _formInput('Linha'),
+                _checkBoxSection(),
+                _errorSection(),
+                _buttonSection(),
+              ],
+            ),
+          ),
+        ));
   }
 
-  Container _buttonSection(){
+  Container _buttonSection() {
     return Container(
       padding: EdgeInsets.only(top: 20.0, bottom: 15.0),
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
-
           // print("bus: " + __selectedBusController.text); //debug
           // print("linha: " + __selectedLineController.text); //debug
           // print("btnText = " + widget.btnText);
@@ -160,30 +162,36 @@ class _SetupPageState extends State<SetupPage> {
 
           //   if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
           //   {
-          //     //fazer o post para corrigir 
+          //     //fazer o post para corrigir
           //     //
           //     //correctInfo();
           //     //confirmar se o pedido é com id horario ou condutor
           //   }
-            
+
           // }
 
-          if((__selectedBusController.text == "" || __selectedLineController.text == "") && widget.btnText == 'Avançar'){
+          if ((__selectedBusController.text == "" ||
+                  __selectedLineController.text == "") &&
+              widget.btnText == 'Avançar') {
             sharedPreferences.setString("id_autocarro", null);
             sharedPreferences.setString("id_linha", null);
             // print("Vem do login e nao preencheu tudo");
-          }else if((__selectedBusController.text == "" || __selectedLineController.text == "") && widget.btnText == 'Voltar à página inicial'){
+          } else if ((__selectedBusController.text == "" ||
+                  __selectedLineController.text == "") &&
+              widget.btnText == 'Voltar à página inicial') {
             // print("Nada é alterado");
-          }else{
-            sharedPreferences.setString("id_autocarro", __selectedBusController.text);
-            sharedPreferences.setString("id_linha", __selectedLineController.text);
+          } else {
+            sharedPreferences.setString(
+                "id_autocarro", __selectedBusController.text);
+            sharedPreferences.setString(
+                "id_linha", __selectedLineController.text);
             // print("Correu tudo bem");
           }
 
-          if(checkBoxValue){
+          if (checkBoxValue) {
             sharedPreferences.setString("id_autocarro", null);
-            sharedPreferences.setString("id_linha", null);   
-            // print("Checkbox ativada delete all");         
+            sharedPreferences.setString("id_linha", null);
+            // print("Checkbox ativada delete all");
           }
           // if(sharedPreferences.getString('id_autocarro') != null && sharedPreferences.getString('id_linha') != null){
           //   print("autocarro corrente: " + sharedPreferences.getString('id_autocarro'));
@@ -192,19 +200,22 @@ class _SetupPageState extends State<SetupPage> {
           //   print("ta null");
           // }
 
-          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => DashboardPage(title: 'Página inicial')), (Route<dynamic> route) => false);
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      DashboardPage(title: 'Página inicial')),
+              (Route<dynamic> route) => false);
         },
-
         color: Theme.of(context).primaryColor,
         elevation: 20.0,
         padding: EdgeInsets.all(15.0),
         shape: RoundedRectangleBorder(
-          borderRadius: new BorderRadius.circular(20.0),
-          side: BorderSide(color: Colors.black54)
-        ),
+            borderRadius: new BorderRadius.circular(20.0),
+            side: BorderSide(color: Colors.black54)),
         splashColor: Colors.black54,
         colorBrightness: Brightness.light,
-        child: Text(widget.btnText,
+        child: Text(
+          widget.btnText,
           style: new TextStyle(
             color: Colors.white,
             letterSpacing: 2.0,
@@ -216,140 +227,139 @@ class _SetupPageState extends State<SetupPage> {
     );
   }
 
-  DropdownButton dropDownNrBus(){
+  DropdownButton dropDownNrBus() {
     return DropdownButton(
       items: bus.map((id) {
-        return 
-           DropdownMenuItem(
-            value: id,
-            child: Text(id.toString()),
-          );
-        }
-      ).toList(),
-             
+        return DropdownMenuItem(
+          value: id,
+          child: Text(id.toString()),
+        );
+      }).toList(),
       onChanged: (value) {
         setState(() {
           _selectedBus = value;
         });
       },
-          
       hint: Text('Select Item'),
       value: _selectedBus,
     );
   }
 
-  Container costumLabel(String text){
+  Container costumLabel(String text) {
     return Container(
       child: Text(
-        text, 
+        text,
         style: TextStyle(
-          fontSize: 19.0,
-          fontWeight: FontWeight.bold,
-          color: Colors.white
-        ),
+            fontSize: 19.0, fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
-
   }
 
-  DropdownButton dropDownLinhas(){
+  DropdownButton dropDownLinhas() {
     return DropdownButton<int>(
       items: linhas.map((id) {
-        return 
-           DropdownMenuItem<int>(
-            value: id,
-            child: Text(id.toString()),
-          );
-        }
-      ).toList(),
-             
+        return DropdownMenuItem<int>(
+          value: id,
+          child: Text(id.toString()),
+        );
+      }).toList(),
       onChanged: (value) {
         setState(() {
           _selectedLine = value;
         });
       },
-          
       hint: Text('Select Item'),
       value: _selectedLine,
     );
   }
 
-  Container _errorSection(){
+  Container _errorSection() {
     return Container(
       padding: EdgeInsets.only(left: 40.0, top: 12.0),
-      child: _error == "" ? Container(margin: EdgeInsets.only(top: 20.0),) :
-      Row(
-        children: <Widget>[
-          Flexible(
-            child: Row(
+      child: _error == ""
+          ? Container(
+              margin: EdgeInsets.only(top: 20.0),
+            )
+          : Row(
               children: <Widget>[
-                Icon(
-                  FontAwesomeIcons.exclamationCircle,
-                  color: Colors.red[700],
-                  size: 20.0,
-                ),
-                SizedBox(width: 7.0),
-                Expanded(
-                  child: Text('$_error', 
-                    style: TextStyle(
-                      color: Colors.red[700],
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.w600,
-                    ),
+                Flexible(
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        FontAwesomeIcons.exclamationCircle,
+                        color: Colors.red[700],
+                        size: 20.0,
+                      ),
+                      SizedBox(width: 7.0),
+                      Expanded(
+                        child: Text(
+                          '$_error',
+                          style: TextStyle(
+                            color: Colors.red[700],
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
   correctInfo() async {
     //sharedPreferences = await SharedPreferences.getInstance();
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/horario/" + sharedPreferences.getString("id_condutor");
+    var url = "http://" +
+        DotEnv().env['IP_ADDRESS'] +
+        "/api/horario/" +
+        sharedPreferences.getString("id_condutor");
 //VER SE É ID_CONDUTOR OU ID_HORARIO
 
     Map body = {
-      "id_autocarro" : _selectedBus,
-      "id_linha" : _selectedLine,
+      "id_autocarro": _selectedBus,
+      "id_linha": _selectedLine,
     };
 
-    try {      
-      final response = await http.post(
-        url,
-        headers: {'Authorization': "Bearer " + sharedPreferences.getString("access_token")},
-        body: body).timeout(const Duration(seconds: 6));
-      
+    try {
+      final response = await http
+          .post(url,
+              headers: {
+                'Authorization':
+                    "Bearer " + sharedPreferences.getString("access_token")
+              },
+              body: body)
+          .timeout(const Duration(seconds: 6));
+
       print(response.statusCode);
-    
-    }catch(e){
+    } catch (e) {
       print(e);
       setState(() {
-        _error=e.toString();
+        _error = e.toString();
       });
     }
   }
 
-  Padding _formInput(String hint){
+  Padding _formInput(String hint) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
       child: TextFormField(
         cursorColor: Colors.white,
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
-        controller: hint == "Autocarro" ? __selectedBusController : __selectedLineController,
+        controller: hint == "Autocarro"
+            ? __selectedBusController
+            : __selectedLineController,
         decoration: InputDecoration(
-          border: InputBorder.none,
-          hintText: hint,
-          hintStyle: TextStyle(color: Colors.white60),
-          filled: true,
-          fillColor: Colors.grey[800]
-        ),
+            border: InputBorder.none,
+            hintText: hint,
+            hintStyle: TextStyle(color: Colors.white60),
+            filled: true,
+            fillColor: Colors.grey[800]),
         autocorrect: false,
         keyboardType: TextInputType.number,
         inputFormatters: <TextInputFormatter>[
-            WhitelistingTextInputFormatter.digitsOnly
+          WhitelistingTextInputFormatter.digitsOnly
         ],
         onChanged: (String value) {
           _selectedBus = int.parse(value);
@@ -358,7 +368,7 @@ class _SetupPageState extends State<SetupPage> {
     );
   }
 
-  Padding _checkBoxSection(){
+  Padding _checkBoxSection() {
     return Padding(
       padding: const EdgeInsets.only(left: 15.0),
       child: Row(
@@ -369,28 +379,23 @@ class _SetupPageState extends State<SetupPage> {
               unselectedWidgetColor: Theme.of(context).primaryColor,
             ),
             child: Checkbox(
-              value: checkBoxValue,
-              hoverColor: Colors.red,
-              activeColor: Theme.of(context).primaryColor,
-              checkColor: Theme.of(context).accentColor,
-              onChanged: (bool value){
-                setState(() {
-                  checkBoxValue = value;
-                });
-              }
-            ),
+                value: checkBoxValue,
+                hoverColor: Colors.red,
+                activeColor: Theme.of(context).primaryColor,
+                checkColor: Theme.of(context).accentColor,
+                onChanged: (bool value) {
+                  setState(() {
+                    checkBoxValue = value;
+                  });
+                }),
           ),
           Container(
-            padding: EdgeInsets.only(right: 15.0),
-            child: Text(
-              "Avançar sem autocarro", 
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16 
-              ),
-              textAlign: TextAlign.start,
-            )
-          ),
+              padding: EdgeInsets.only(right: 15.0),
+              child: Text(
+                "Avançar sem autocarro",
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+                textAlign: TextAlign.start,
+              )),
         ],
       ),
     );

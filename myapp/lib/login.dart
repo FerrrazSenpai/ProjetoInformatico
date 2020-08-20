@@ -233,7 +233,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response =
-          await http.post(url, body: body).timeout(const Duration(seconds: 6));
+          await http.post(url, body: body).timeout(const Duration(seconds: 10));
       print(response.statusCode);
       if (response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);

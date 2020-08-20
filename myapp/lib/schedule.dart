@@ -301,21 +301,6 @@ class SchedulePageStateState extends State<SchedulePage>
       case '4':
         _color = Colors.black;
         break;
-      // case '5':
-      //   _color = Colors.green[800];
-      // break;
-      // case '6':
-      //   _color = Colors.pink[300];
-      // break;
-      // case '7':
-      //   _color = Colors.yellow[600];
-      // break;
-      // case '8':
-      //   _color = Colors.orange[700];
-      // break;
-      // case '9':
-      //   _color = Colors.black;
-      // break;
       default:
         _color = Colors.teal;
         break;
@@ -348,7 +333,13 @@ class SchedulePageStateState extends State<SchedulePage>
     var count2;
 
     try {
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization':
+              "Bearer " + sharedPreferences.getString("access_token")
+        },
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         _events = {};
@@ -369,9 +360,6 @@ class SchedulePageStateState extends State<SchedulePage>
 
             if (!_events.containsKey(_selectedDay)) {
               for (var j = 0; j < dados.length; j++) {
-                // linha = (dados[j]['id_linha']).toString();
-                // horaInicio = dados[j]['hora_inicio'].toString().substring(0,2) + 'h' + dados[j]['hora_inicio'].toString().substring(3,5);
-                // horaFim = dados[j]['hora_fim'].toString().substring(0,2) + 'h' + dados[j]['hora_fim'].toString().substring(3,5);
                 if (dados[i]['data'] == dados[j]['data']) {
                   count++;
                 }

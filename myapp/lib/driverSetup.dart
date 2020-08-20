@@ -55,7 +55,7 @@ class _SetupPageState extends State<SetupPage> {
           'Authorization':
               "Bearer " + sharedPreferences.getString("access_token")
         },
-      ).timeout(const Duration(seconds: 6));
+      ).timeout(const Duration(seconds: 15));
 
       if (response.body[1] == "]") {
         //ou seja a resposta é só []
@@ -330,7 +330,7 @@ class _SetupPageState extends State<SetupPage> {
                     "Bearer " + sharedPreferences.getString("access_token")
               },
               body: body)
-          .timeout(const Duration(seconds: 6));
+          .timeout(const Duration(seconds: 15));
 
       print(response.statusCode);
     } catch (e) {

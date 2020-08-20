@@ -204,27 +204,34 @@ class _LoginPageState extends State<LoginPage> {
       _error = ""; //clear errors
     });
 
-    final regexEmail = RegExp(
-        r"^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$");
 
-    if (!regexEmail.hasMatch(email) || password.trim() == "") {
+    if (email.trim()=="" || password.trim() == "") {
       setState(() {
-        _error = "Preencha os dois campos"; //clear errors
+        _error = "Preencha ambos os campos!"; 
       });
       return;
     }
 
+
+    //Informar o user se o email não tiver as caracteristicas de um email, não o vai impedir de continuar 
+    final regexEmail = RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+    if (!regexEmail.hasMatch(email.trim())) {
+      setState(() {
+        _error = "Tem a certeza que o email está correto?";
+      });
+    }
+
     Map body = {
-      "email": email,
-      "password": password,
+      "email": email.trim(),
+      "password": password.trim(),
     };
     var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/loginCliente";
     try {
       final response =
           await http.post(url, body: body).timeout(const Duration(seconds: 5));
       print(response.statusCode);
-      if (response.statusCode == 200) {
-        if (response.body.trim() == "{\"msg\":\"Not authorized\"}") {
+      if (response.statusCode == 200) { 
+        if (response.body.trim() == "{\"msg\":\"Not authorized\"}") { //se a resposta for 200, mas no conteudo estiver Not autorized
           setState(() {
             _error = "Email ou password incorretos";
           });
@@ -234,9 +241,8 @@ class _LoginPageState extends State<LoginPage> {
 
         var jsonResponse = json.decode(response.body);
 
-        if (jsonResponse.containsKey('user') &&
-            jsonResponse['user']['tipo'] != "c") {
-          // tipo c é utilizadores da app de passageiros - quero garantir que nao permitimos login com credencias da app condutor
+        if (jsonResponse.containsKey('user') && jsonResponse['user']['tipo'] != "c") { // condição especial
+          // tipo c é utilizadores da app de passageiros - quero garantir que nao permitimos login com credencias da app condutor, ou seja se o tipo for != de c não vai poder entrar
           setState(() {
             _error = "Email ou password incorretos";
           });
@@ -244,7 +250,7 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
 
-        if (jsonResponse['token'].containsKey('access_token')) {
+        if (jsonResponse['token'].containsKey('access_token')) { //garantir que a respostra trás o access token
           sharedPreferences.setInt("id", jsonResponse['user']['id']);
           sharedPreferences.setBool("checkBox", checkBoxValue);
           sharedPreferences.setBool("update_notifications", true);
@@ -260,26 +266,26 @@ class _LoginPageState extends State<LoginPage> {
                         title: "Página inicial",
                       )),
               (Route<dynamic> route) => false);
-        } else {
+        } else { //se a resposta não tiver o access token
           setState(() {
-            _error = "Erro a receber a informação do servidor";
+            _error = "Erro a receber a informação do servidor. Tente novamente!";
           });
           print("A resposta não tem a estrutura certa");
         }
-      } else if (response.statusCode == 400) {
+      } else if (response.statusCode == 400 || response.statusCode == 401) {  //se retornar 401, classico password errada
         setState(() {
           _error = "Email ou password incorretos";
         });
         print("Email ou password incorretos");
-      } else {
+      } else { // se nao for nem 200 nem 400 //algo de estranho se passou com o servidor - tentar outra vez
         setState(() {
-          _error = "Resposta inesperada do servidor, tente novamente!";
+          _error = "Erro de conexão ao servidor, tente novamente!";
         });
         print("Erro, a resposta não é 200 nem 400 ... \n" + response.body);
       }
-    } catch (e) {
-      setState(() {
-        _error = "Erro de conexão ao servidor";
+    } catch (e) { //ocorreu algum erro durante o pedido, tentar outra vez
+      setState(() { 
+        _error = "Erro de conexão ao servidor, tente novamente!";
       });
       print("Erro de conexão ao servidor" + e.toString());
     }

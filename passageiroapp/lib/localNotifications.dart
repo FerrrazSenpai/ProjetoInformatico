@@ -14,6 +14,7 @@ class LocalNotifications {
   }
 
   void _initializeNotifications() {
+    //inicializar as variaveis necessarias
     _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     final initializationSettingsAndroid =
         AndroidInitializationSettings('red_bus');
@@ -35,8 +36,8 @@ class LocalNotifications {
   }
 
   Future<void> showDailyAtTime(
-      Time time, int id, String title, String description) async {
-    //notificação todos os dias a X hora
+    Time time, int id, String title, String description) async {
+    //notificação todos os dias a X hora 
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'Favoritos channel id', 'Favoritos', 'Notificações sobre Favoritos',
         importance: Importance.Max,
@@ -56,23 +57,6 @@ class LocalNotifications {
     );
   }
 
-  Future<void> show(int id, String title, String description) async {
-    // notificação imediata
-    final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'Favoritos channel id', 'Favoritos', 'Notificações sobre Favoritos',
-        importance: Importance.Max,
-        priority: Priority.High,
-        ticker: "notification ticker");
-    final iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    final platformChannelSpecifics = NotificationDetails(
-      androidPlatformChannelSpecifics,
-      iOSPlatformChannelSpecifics,
-    );
-    await _flutterLocalNotificationsPlugin.show(
-        id, title, description, platformChannelSpecifics,
-        payload: "notification payload");
-  }
-
   Future<void> cancelAllNotifications() async {
     await _flutterLocalNotificationsPlugin.cancelAll();
   }
@@ -87,7 +71,9 @@ class LocalNotifications {
     return listNotifications;
   }
 
-  void setNotifications() async {
+  Future<bool> setNotifications() async {
+    //ajustar as notificações (as notificações varia consuantes os favoritos)
+    //vou fazer isto sempre o utilador faça login, ou então altere os seus favoritos
     this.cancelAllNotifications();
     sharedPreferences = await SharedPreferences.getInstance();
 
@@ -102,7 +88,7 @@ class LocalNotifications {
         },
       ).timeout(const Duration(seconds: 8));
       if (response.statusCode == 200) {
-        var dados = jsonDecode(response.body);
+        var dados = jsonDecode(response.body)['data'];
 
         for (var fav in dados) {
           url = 'http://' +
@@ -113,10 +99,6 @@ class LocalNotifications {
           try {
             final response = await http.get(
               url,
-              headers: {
-                'Authorization':
-                    "Bearer " + sharedPreferences.getString("access_token")
-              },
             ).timeout(const Duration(seconds: 8));
             if (response.statusCode == 200) {
               var dados = jsonDecode(response.body);
@@ -137,15 +119,18 @@ class LocalNotifications {
             }
           } catch (e) {
             print(e);
+            return false;
           }
         }
       } else {
         print("Status != 200");
+        return false;
       }
     } catch (e) {
       print(e);
+      return false;
     }
-    print("confirmar lista de notificações: ");
-    this.getListPendingNotifications();
+    //this.getListPendingNotifications();
+    return true;
   }
 }

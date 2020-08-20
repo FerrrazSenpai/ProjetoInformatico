@@ -45,45 +45,6 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   var _userPosition;
   AnimationController _controller;
   Animation _myAnimation;
-
-
-
-  void _setSourceIcon() async {
-    _sourceIcon = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(devicePixelRatio: 2.5), 'assets/paragem.png');
-  }
-
-  void _initForAnimation(){
-    //preparar as coisas para a animação
-    _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 2000),);
-    _myAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _controller.forward();    
-  }
-
-  //exemplo de notificação
-  void _sendNotification () async {
-    final LocalNotifications notifications = LocalNotifications();
-
-    Timer(Duration(seconds: 10), () {
-      notifications.show(1, "Teste", "Notificação de Teste");
-    });
-    //var timeNotification = DateTime.now().add(Duration(seconds: 60));
-    //var time = Time(timeNotification.hour, timeNotification.minute, timeNotification.second);
-    //notifications.showDailyAtTime(time,1, "Scheduled Notification", "Notificação agendada há um minuto");
-  }
-
-  
-  @override
-  void initState() {
-    super.initState();
-    _initForAnimation();
-    _userLocation();
-    _setSourceIcon();
-    _getMarkers();
-    _sendNotification();
-    _updateNotifications();
-  }
-
   String timeRecord="Clique na linha para obter a previsão";
   GoogleMapController mapController;
   Set<Marker> markers = Set();
@@ -92,10 +53,32 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   var _selectedParagemID;
   var _selectedParagemName="";
   bool _loadingPrediction = false;
-  final LatLng _center = const LatLng(39.733222, -8.821096); //coordenadas estg
+  final LatLng _estg = const LatLng(39.733222, -8.821096); //coordenadas estg
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   Color _color = Colors.teal;
 
+  void _setSourceIcon() async {
+    //preparar o icon das paragens
+    _sourceIcon = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.5), 'assets/paragem.png');
+  }
+
+  void _initForAnimation(){
+    //preparar as coisas para a animação inicial do mapa
+    _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 2000),);
+    _myAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _controller.forward();    
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    _initForAnimation();
+    _userLocation();
+    _setSourceIcon();
+    _getMarkers();
+    _updateNotifications();
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -140,7 +123,6 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
               myLocationButtonEnabled: true,
               myLocationEnabled: true,
               initialCameraPosition: CameraPosition(
-                //target: _center, //Centar na estg
                 target:  _userPosition,
                 zoom: 17.0,
               ),
@@ -199,6 +181,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
 
   _getMarkers() async {
     sharedPreferences = await SharedPreferences.getInstance();
+    
     final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
     try {      
       final response = await http.get(url,).timeout(const Duration(seconds: 7));
@@ -226,6 +209,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
             );
           });
         }
+      }else{
+        print(response.statusCode);
+        setState(() {
+          _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("O servidor não enviou as paragens!"),));
+        });
       }
     }catch(e){
       print(e);
@@ -234,9 +222,6 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
       });
     }
   }
-
-  
-
 
   Widget _buildLocationInfo() {
     List<Widget> widgets = [];
@@ -306,7 +291,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                ...widgets
+                ...widgets  //lista dos botões de cada linha existente na paracem
               ]
             )),
             Row(
@@ -328,49 +313,51 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   }
 
   void _userLocation() async {
+    //obter as coordenadas atuais do utilizador para focar nele
     try{
       Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
       print(usrCurrentPosition);
       setState(() {
-        _userPosition = LatLng(usrCurrentPosition.latitude, usrCurrentPosition.longitude);
+        //_userPosition = LatLng(usrCurrentPosition.latitude, usrCurrentPosition.longitude);
+        _userPosition = _estg; //centrar na estg porque com a quarentena a nossa localização atual é em casa; com isto a app vai abrir logo em Leiria e evitamos andar a dar scroll para lá chegar
       });
       }catch(e){
         _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Ao não aceitar as permissões vai perder algumas funcionalidades!"),));
         setState(() {
-          _userPosition = const LatLng(39.733222, -8.821096); //ao nao ter permissoes de localização vai centar na estg
+          _userPosition = _estg; //ao nao ter permissoes de localização vai centar na estg
         });
       }
   }
   
   getTime(String linha, String paragemID) async {
+    //obter a previsao que falta ate chegar um autocarro de X linha a Y paragem
     sharedPreferences = await SharedPreferences.getInstance();
     String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
-    print("url tempo: " + url);
     try {      
-      final response = await http.get(url,).timeout(const Duration(seconds: 15));
-      print("status code: " + response.statusCode.toString() );
-  
+      final response = await http.get(url,).timeout(const Duration(seconds: 22)); //mais tempo que o normal porque este pedido geralmente é bastante mais lento que os outros
+
       if(response.statusCode==200){
         setState(() {
           timeRecord = response.body;
         });
-      }else if(response.statusCode==500){
+      }else if(response.statusCode==500){ //quando aquela linha nao tem autocarros a circular o servidor envia um 500
         setState(() {
           timeRecord = "Sem autocarros a circular";
         });
       }
-      else{
+      else{ //se o statuscode nao for 200 nem 500 o servidor enviou uma resposta inadequada
         setState(() {
-          timeRecord = "Erro: " + response.statusCode.toString();
+          timeRecord = "Problemas no servidor: Tente Novamente";
         }); 
       }
     }
-    catch(e){
+    catch(e){ //se der erro durante o pedido dizemos ao user para tentar novamente; p.e. se o servidor nao responder em tempo util
       print(e);
       setState(() {
           timeRecord = "Tente novamente!";
       }); 
     }
+
     setState(() {
         _loadingPrediction=false;
     });
@@ -409,18 +396,21 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   }
   
   void _updateNotifications() async {
+    //depois de um utilizador se logar vamos correr a função para configurar as notificações adequadas aos favoritos dele
     await _checkLoginStatus();
     if(_loginStatus==true){ 
       sharedPreferences = await SharedPreferences.getInstance();
+      
       var updateNotifications = sharedPreferences.getBool("update_notifications");
-      if(updateNotifications==null){ //codigo a eliminar, é só para nao dar erro a primeira vez a correr a app sem ter ainda esta nova variavel no shared pref.
-        sharedPreferences.setBool("update_notifications",true);
-        updateNotifications=true;
-      }
       if(updateNotifications){
         final LocalNotifications notifications = LocalNotifications();
-        notifications.setNotifications();
+        var notificationsUpdated = await notifications.setNotifications();
         sharedPreferences.setBool("update_notifications",false);
+        if(!notificationsUpdated){
+          _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Erro ao atualizar as notifições!"),));
+        }else{
+          _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Notificações atualizadas com sucesso!"),));
+        }
       }
     }
   }

@@ -232,23 +232,6 @@ class MyDrawer extends State<DrawerPage> {
     }
   }
 
-  // void _logout() async {
-  //   sharedPreferences = await SharedPreferences.getInstance();
-
-  //   var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
-  //   try{
-  //     final response = await http.post(url,headers: {
-  //       'Authorization' : "Bearer " + sharedPreferences.getString("access_token"),
-  //     },).timeout(const Duration(seconds: 3));
-
-  //     print(response.statusCode);
-  //     sharedPreferences.setBool("loginStatus", false);
-  //     sharedPreferences.clear();
-  //   }catch(e){
-  //     print("Erro de conexão ao servidor, Access não eliminado");
-  //   }
-  // }
-
   _onPressLogout() async {
     sharedPreferences = await SharedPreferences.getInstance();
 

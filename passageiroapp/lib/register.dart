@@ -412,7 +412,7 @@ class _RegisterPageState extends State<RegisterPage> {
       "localidade": localidadeControler.text.trim(),
     };
 
-    var url = "http://" +
+    var url = "https://" +
         DotEnv().env['IP_ADDRESS'] +
         "/api/utilizadores/registerClient";
     try {

@@ -166,16 +166,17 @@ class DashboardPageState extends State<DashboardPage> {
 
   _postLocation() async {
     sharedPreferences = await SharedPreferences.getInstance();
-
-    var url = 'http://' + DotEnv().env['IP_ADDRESS'] + '/api/tempos';
+    
+    var url = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/tempos';
     Map body = {
       "latitude": userLocation.latitude.toString(),
       "longitude": userLocation.longitude.toString(),
       "velocidade": speedkmh.toStringAsFixed(3),
-      "hora": formatDate(time, [HH, ":", nn]),
+      "hora": formatDate(time, [HH, ":", nn, ":", ss]),
       "id_linha": sharedPreferences.getString("id_linha"),
       "id_autocarro": sharedPreferences.getString("id_autocarro"),
       "id_condutor": sharedPreferences.getString("id_condutor"),
+      "data": formatDate(time, [yyyy, "-", mm, "-", dd]),
     };
 
     var response = await http.post(
@@ -572,7 +573,7 @@ class DashboardPageState extends State<DashboardPage> {
   _getSchedule() async {
     sharedPreferences = await SharedPreferences.getInstance();
 
-    var url = 'http://' +
+    var url = 'https://' +
         DotEnv().env['IP_ADDRESS'] +
         '/api/getHorarios/' +
         sharedPreferences.getString("id_condutor");

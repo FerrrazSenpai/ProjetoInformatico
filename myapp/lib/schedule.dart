@@ -320,7 +320,7 @@ class SchedulePageStateState extends State<SchedulePage>
   _getSchedule() async {
     sharedPreferences = await SharedPreferences.getInstance();
 
-    var url = 'http://' +
+    var url = 'https://' +
         DotEnv().env['IP_ADDRESS'] +
         '/api/getHorariosTodos/' +
         sharedPreferences.getString('id_condutor');

@@ -228,7 +228,7 @@ class _LoginPageState extends State<LoginPage> {
     };
 
     //var jsonResponse = null;
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/loginAPI";
+    var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/loginAPI";
     //final response = null;
 
     try {

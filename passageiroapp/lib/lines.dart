@@ -258,9 +258,9 @@ class _LinesPageState extends State<LinesPage> {
 
     List _favorites;
 
-    var urlLinhas = 'http://' + DotEnv().env['IP_ADDRESS'] + '/api/linhas';
+    var urlLinhas = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/linhas';
     var urlFavoritos =
-        'http://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
+        'https://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
 
     try {
       final responseLin = await http
@@ -388,7 +388,7 @@ class _LinesPageState extends State<LinesPage> {
     String idFavorito;
 
     var urlFavoritos =
-        'http://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
+        'https://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
 
     try {
       final responseFav = await http.get(
@@ -409,7 +409,7 @@ class _LinesPageState extends State<LinesPage> {
           }
         }
 
-        var urlRemoverFavorito = 'http://' +
+        var urlRemoverFavorito = 'https://' +
             DotEnv().env['IP_ADDRESS'] +
             '/api/favoritos/' +
             idFavorito;
@@ -436,7 +436,7 @@ class _LinesPageState extends State<LinesPage> {
 
     String idCliente = sharedPreferences.getInt("idCliente").toString();
 
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/favoritos";
+    var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/favoritos";
 
     Map body = {
       "id_cliente": idCliente,

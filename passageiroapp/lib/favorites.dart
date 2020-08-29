@@ -204,7 +204,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   // _getLines() async {
 
-  //   var url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
+  //   var url = 'https://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
 
   //   try {
   //     final response = await http.get(url).timeout(const Duration(seconds: 15));
@@ -276,8 +276,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
     String nomeLinha;
 
     var urlFavoritos =
-        'http://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
-    var urlLinhas = 'http://' + DotEnv().env['IP_ADDRESS'] + '/api/linhas';
+        'https://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
+    var urlLinhas = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/linhas';
 
     try {
       final responseFav = await http.get(
@@ -361,7 +361,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     int idFavorito;
 
     var urlFavoritos =
-        'http://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
+        'https://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
 
     try {
       final responseFav = await http.get(
@@ -382,7 +382,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           }
         }
 
-        var urlRemoverFavorito = 'http://' +
+        var urlRemoverFavorito = 'https://' +
             DotEnv().env['IP_ADDRESS'] +
             '/api/favoritos/' +
             idFavorito.toString();

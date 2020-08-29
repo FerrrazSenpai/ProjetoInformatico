@@ -225,7 +225,7 @@ class _LoginPageState extends State<LoginPage> {
       "email": email.trim(),
       "password": password.trim(),
     };
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/loginCliente";
+    var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/loginCliente";
     try {
       final response =
           await http.post(url, body: body).timeout(const Duration(seconds: 5));

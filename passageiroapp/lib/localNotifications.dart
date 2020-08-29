@@ -78,7 +78,7 @@ class LocalNotifications {
     sharedPreferences = await SharedPreferences.getInstance();
 
     var startId = 1;
-    var url = 'http://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
+    var url = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
     try {
       final response = await http.get(
         url,
@@ -91,7 +91,7 @@ class LocalNotifications {
         var dados = jsonDecode(response.body)['data'];
 
         for (var fav in dados) {
-          url = 'http://' +
+          url = 'https://' +
               DotEnv().env['IP_ADDRESS'] +
               '/api/horariosLinha/' +
               fav['id_linha'].toString();

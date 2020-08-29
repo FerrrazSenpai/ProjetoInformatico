@@ -121,7 +121,7 @@ class _StopsPageState extends State<StopsPage> {
     sharedPreferences = await SharedPreferences.getInstance();
     String nomeParagem;
 
-    var url = 'http://' +
+    var url = 'https://' +
         DotEnv().env['IP_ADDRESS'] +
         '/api/paragens/' +
         widget.line.toString();

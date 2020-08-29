@@ -43,11 +43,11 @@ class _SetupPageState extends State<SetupPage> {
 
   Future getData() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    var url = "http://" +
+    var url = "https://" +
         DotEnv().env['IP_ADDRESS'] +
         "/api/horarioCondutor/" +
         sharedPreferences.getString("id_condutor");
-    //var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
+    //var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/info";
     try {
       final response = await http.get(
         url,
@@ -93,6 +93,7 @@ class _SetupPageState extends State<SetupPage> {
       });
       print(e.toString());
     }
+    
   }
 
   Widget build(BuildContext context) {
@@ -311,7 +312,7 @@ class _SetupPageState extends State<SetupPage> {
 
   correctInfo() async {
     //sharedPreferences = await SharedPreferences.getInstance();
-    var url = "http://" +
+    var url = "https://" +
         DotEnv().env['IP_ADDRESS'] +
         "/api/horario/" +
         sharedPreferences.getString("id_condutor");

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:passageiroapp/drawer.dart';
 import 'package:http/http.dart' as http;
@@ -182,7 +184,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   _getMarkers() async {
     sharedPreferences = await SharedPreferences.getInstance();
     
-    final String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
+    final String url = 'https://'+ DotEnv().env['IP_ADDRESS']+'/api/linhasParagens';
     try {      
       final response = await http.get(url,).timeout(const Duration(seconds: 7));
       if(response.statusCode==200){
@@ -230,7 +232,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
       _functionColor(linha['id_linha']);
       widgets.add(
         Padding(
-          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 4.0),
           child: Row(
             children: <Widget>[
               ButtonTheme(
@@ -287,24 +289,30 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
               )
             ),
             SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                ...widgets  //lista dos botões de cada linha existente na paracem
-              ]
-            )),
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  ...widgets  //lista dos botões de cada linha existente na paragem
+                ]
+              )
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
-                Text(timeRecord),
+                Container(
+                  height: 25,
+                  child: SingleChildScrollView(
+                    child: Text(timeRecord)
+                  ),
+                ),
                 _loadingPrediction == true ? SizedBox(
                   child: CircularProgressIndicator(
                     strokeWidth: 2, backgroundColor: Colors.blue[400],
                   ),
                   height: 12.0, width: 12.0, 
                 ) : Container(),
-              ]
+              ],
             ),
           ],
         ),
@@ -314,33 +322,33 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
 
   void _userLocation() async {
     //obter as coordenadas atuais do utilizador para focar nele
-    try{
+    try{      
       Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-      print(usrCurrentPosition);
       setState(() {
         //_userPosition = LatLng(usrCurrentPosition.latitude, usrCurrentPosition.longitude);
         _userPosition = _estg; //centrar na estg porque com a quarentena a nossa localização atual é em casa; com isto a app vai abrir logo em Leiria e evitamos andar a dar scroll para lá chegar
       });
-      }catch(e){
-        _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Ao não aceitar as permissões vai perder algumas funcionalidades!"),));
-        setState(() {
-          _userPosition = _estg; //ao nao ter permissoes de localização vai centar na estg
-        });
-      }
+    }catch(e){
+      _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Ao não ativar a localização vai perder algumas funcionalidades!"),));
+      setState(() {
+        _userPosition = _estg; //ao nao ter permissoes de localização vai centar na estg
+      });
+    }
   }
   
   getTime(String linha, String paragemID) async {
     //obter a previsao que falta ate chegar um autocarro de X linha a Y paragem
     sharedPreferences = await SharedPreferences.getInstance();
-    String url = 'http://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
+    String url = 'https://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
+
     try {      
-      final response = await http.get(url,).timeout(const Duration(seconds: 22)); //mais tempo que o normal porque este pedido geralmente é bastante mais lento que os outros
+      final response = await http.get(url,).timeout(const Duration(seconds: 70)); //mais tempo que o normal porque este pedido é bastante mais lento que os outros
 
       if(response.statusCode==200){
         setState(() {
           timeRecord = response.body;
         });
-      }else if(response.statusCode==500){ //quando aquela linha nao tem autocarros a circular o servidor envia um 500
+      }else if(response.statusCode==500){ //quando a linha nao tem autocarros a circular o servidor envia um 500
         setState(() {
           timeRecord = "Sem autocarros a circular";
         });

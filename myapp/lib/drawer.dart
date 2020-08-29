@@ -151,7 +151,7 @@ class MyDrawer extends State<DrawerPage> {
   }
 
   void _logout() async {
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
+    var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
     try {
       final response = await http.post(
         url,
@@ -179,7 +179,7 @@ class MyDrawer extends State<DrawerPage> {
   _onPressLogout() async {
     sharedPreferences = await SharedPreferences.getInstance();
 
-    var url = "http://" + DotEnv().env['IP_ADDRESS'] + "/api/userid";
+    var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/userid";
     /* final response =  */ await http.get(
       url,
       headers: {

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 Future main() async {
   await DotEnv().load('.env'); //Use - DotEnv().env['IP_ADDRESS'];
@@ -55,7 +56,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   checkLoginStatus() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setBool("ativo", null);
     if (sharedPreferences.getBool("checkBox") == null ||
         !sharedPreferences.getBool("checkBox")) {
       Navigator.of(context).pushAndRemoveUntil(
@@ -67,11 +67,39 @@ class _MyHomePageState extends State<MyHomePage> {
           MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
           (Route<dynamic> route) => false);
     } else {
+      checkLocationHistory();
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (BuildContext context) =>
                   DashboardPage(title: widget.title)),
           (Route<dynamic> route) => false);
+    }
+  }
+
+  checkLocationHistory() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    if (sharedPreferences.getBool("ativo") == true) {
+      sharedPreferences.setBool("ativo", false);
+      var url = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/historicos';
+
+      Map body = {
+        "id_linha": sharedPreferences.getString("id_linha"),
+        "hora_inicio": sharedPreferences.getString("horaInicio"),
+        "hora_fim": sharedPreferences.getString("horaFim"),
+        "data": sharedPreferences.getString("dataRota")
+      };
+
+      var response = await http.post(
+        url,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization':
+              "Bearer " + sharedPreferences.getString("access_token"),
+        },
+        body: body,
+      );
+      print(response.body);
     }
   }
 

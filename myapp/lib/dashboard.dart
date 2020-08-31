@@ -50,15 +50,15 @@ class DashboardPageState extends State<DashboardPage> {
   String linha;
   String bus;
   bool isActive = false;
-
-  static const duration = const Duration(seconds: 1);
+  bool firstPost = false;
+  static const duration = const Duration(seconds: 3);
 
   _functionActive() async {
     sharedPreferences = await SharedPreferences.getInstance();
     if (sharedPreferences.getBool("ativo") != null) {
       isActive = sharedPreferences.getBool("ativo");
     } else {
-      sharedPreferences.setBool("ativo", false);
+      sharedPreferences.setBool(" ativo", false);
       isActive = false;
     }
   }
@@ -166,7 +166,18 @@ class DashboardPageState extends State<DashboardPage> {
 
   _postLocation() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    
+
+    if (firstPost) {
+      sharedPreferences.setString(
+          "horaInicio", formatDate(time, [HH, ":", nn, ":", ss]));
+      sharedPreferences.setString(
+          "dataRota", formatDate(time, [yyyy, "-", mm, "-", dd]));
+      firstPost = !firstPost;
+    } else {
+      sharedPreferences.setString(
+          "horaFim", formatDate(time, [HH, ":", nn, ":", ss]));
+    }
+
     var url = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/tempos';
     Map body = {
       "latitude": userLocation.latitude.toString(),
@@ -333,15 +344,11 @@ class DashboardPageState extends State<DashboardPage> {
         setState(() {
           isActive = !isActive;
           sharedPreferences.setBool("ativo", isActive);
+          switchBusState(isActive);
           if (isActive) {
-            _getLocation().then((value) {
-              userLocation = value;
-              // 1m/s -> 3.6km/h  speed -> speedkmh
-              speedkmh = userLocation.speed.toDouble() * 3.600;
-              time = DateTime.fromMillisecondsSinceEpoch(
-                  userLocation.time.toInt());
-              _postLocation();
-            });
+            firstPost = true;
+          } else if (!isActive) {
+            postHistory();
           }
         });
       };
@@ -646,5 +653,52 @@ class DashboardPageState extends State<DashboardPage> {
     } catch (e) {
       print(e);
     }
+  }
+
+  switchBusState(bool locked) async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    var url = 'https://' +
+        DotEnv().env['IP_ADDRESS'] +
+        '/api/autocarros/update/' +
+        bus;
+
+    Map body = {"estado": locked ? "ocupado" : "livre"};
+
+    var response = await http.put(
+      url,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization':
+            "Bearer " + sharedPreferences.getString("access_token"),
+      },
+      body: body,
+    );
+
+    print(response.body);
+  }
+
+  postHistory() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+
+    var url = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/historicos';
+
+    Map body = {
+      "id_linha": linha,
+      "hora_inicio": sharedPreferences.getString("horaInicio"),
+      "hora_fim": sharedPreferences.getString("horaFim"),
+      "data": sharedPreferences.getString("dataRota")
+    };
+
+    var response = await http.post(
+      url,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization':
+            "Bearer " + sharedPreferences.getString("access_token"),
+      },
+      body: body,
+    );
+    print(response.body);
   }
 }

@@ -232,7 +232,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
       _functionColor(linha['id_linha']);
       widgets.add(
         Padding(
-          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 4.0),
+          padding: EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 0.0),
           child: Row(
             children: <Widget>[
               ButtonTheme(
@@ -273,7 +273,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     }
     return Expanded(
       child: Container(
-        margin: EdgeInsets.only(left: 20,right: 20),
+        margin: EdgeInsets.only(left: 20,right: 20,top:10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -297,22 +297,27 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                 ]
               )
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget> [
-                Container(
-                  height: 25,
-                  child: SingleChildScrollView(
-                    child: Text(timeRecord)
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget> [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(timeRecord, textAlign:TextAlign.center,),
+                      padding: EdgeInsetsDirectional.only(bottom:7),
+                    ),
                   ),
-                ),
-                _loadingPrediction == true ? SizedBox(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2, backgroundColor: Colors.blue[400],
-                  ),
-                  height: 12.0, width: 12.0, 
-                ) : Container(),
-              ],
+                  _loadingPrediction == true ? Flexible(
+                    child: SizedBox(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2, backgroundColor: Colors.blue[400],
+                      ),
+                      height: 12.0, width: 12.0, 
+                    )
+                  ) : Container(),
+                ],
+              )
             ),
           ],
         ),

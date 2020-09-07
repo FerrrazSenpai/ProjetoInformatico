@@ -24,9 +24,6 @@ class _SetupPageState extends State<SetupPage> {
   var _error = "";
   int _selectedBus;
   int _selectedLine;
-  // int _idCondutor;
-  // var _defaultLine = 0;
-  // var _defaultBus = 0;
   bool checkBoxValue = false;
   bool _absorbing = true;
 
@@ -59,14 +56,12 @@ class _SetupPageState extends State<SetupPage> {
       ).timeout(const Duration(seconds: 15));
 
       array = jsonDecode(response.body)["data"];
-      var listaBus=[];
 
       for(var elem in array){
         if(elem["estado"]=="livre"){
           bus.add(elem["id_autocarro"]);
         }
       }
-      //bus=listaBus; ///rever isto
     }catch(e){
       print(e.toString());
     }
@@ -106,9 +101,7 @@ class _SetupPageState extends State<SetupPage> {
         },
       ).timeout(const Duration(seconds: 15));
       print(response.body);
-      if (response.body[1] == "]") {
-        //ou seja a resposta é só [], não há horario
-        print("EMPTY RESPONSE");
+      if (response.body == "[]") { //ou seja, o server responde só [], não há horario na base de dados para este condutor
         setState(() {
           _error = "Não tem nenhum serviço está agendado para as próximas horas";
         });
@@ -133,7 +126,7 @@ class _SetupPageState extends State<SetupPage> {
           var timeFimMinutes = (timeFim.hour*60) + timeFim.minute;
           var currentTimeMinutes = (currentTime.hour*60) + currentTime.minute;
 
-          if(currentTimeMinutes>timeMinutes && currentTimeMinutes<timeFimMinutes){ //se ja tiver começado && ainda nao tiver acabado, vai preencher os campos automaticamente
+          if(currentTimeMinutes>timeMinutes && currentTimeMinutes<timeFimMinutes){ //se ja tiver começado && ainda nao tiver acabado(ou seja está na hora do serviço), vai preencher os campos automaticamente
             if(bus.contains(info[0]["id_autocarro"])){
               _selectedBus = info[0]["id_autocarro"];
             }else{
@@ -149,30 +142,6 @@ class _SetupPageState extends State<SetupPage> {
           });
         }
       }
-      /*
-      Map<String, dynamic> list = jsonDecode(response.body)[0];
-      //array = jsonDecode(response.body)[0];
-
-      //print("linha: " + array["id_linha"]);
-      //print("bus: " + array["id_autocarro"]);
-
-      if (list.containsKey('id_linha')) {
-        //se vier linha da api
-        setState(() {
-          _selectedLine = int.parse(list['id_linha'].toString());
-          __selectedLineController.text = _selectedLine.toString();
-          // _defaultLine=_selectedLine;
-        });
-      }
-
-      if (list.containsKey('id_autocarro')) {
-        setState(() {
-          _selectedBus = int.parse(list['id_autocarro'].toString());
-          __selectedBusController.text = _selectedBus.toString();
-          // _defaultBus=_selectedBus;
-        });
-      }
-      */
     } catch (e) {
       print(e.toString());
       setState(() {
@@ -182,7 +151,7 @@ class _SetupPageState extends State<SetupPage> {
     }
     
     setState(() {
-      //tinha o absorving == true para impedir o user de mexer enquanto a app fazia os pedidos ao servidor.Como os pedidos já estão todos concluidos, passa a false para o user poder mexer
+      //antes o absorving estava == true para impedir o user de mexer enquanto a app fazia os pedidos ao servidor.Como os pedidos já estão todos concluidos, passa a false para o user poder mexer
       _absorbing=false;
     }); 
   }
@@ -225,14 +194,12 @@ class _SetupPageState extends State<SetupPage> {
                     padding: EdgeInsets.only(top: 75.0, left: 25.0),
                     child: costumLabel("Numero do autocarro:"),
                   ),
-                  //_formInput('Autocarro'),
                   _dropdownInput('Autocarro'),
                   Padding(
                     padding: EdgeInsets.only(top: 15.0, left: 25.0),
                     child: costumLabel("Numero da linha:"),
                   ),
                   _dropdownInput('Linha'),
-                  //_formInput('Linha'),
                   _checkBoxSection(),
                   _errorSection(),
                   _absorbing==false ?_buttonSection() : _loading()
@@ -249,26 +216,7 @@ class _SetupPageState extends State<SetupPage> {
       padding: EdgeInsets.only(top: 20.0, bottom: 15.0),
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
-        onPressed: () {
-          // print("bus: " + __selectedBusController.text); //debug
-          // print("linha: " + __selectedLineController.text); //debug
-          // print("btnText = " + widget.btnText);
-
-          // if(_selectedLine!=null && _selectedBus!=null ){
-          //   print("bus: " + _selectedBus.toString()); //debug
-          //   print("linha: " + _selectedLine.toString()); //debug
-
-          //   if((_selectedLine !=_defaultLine) || (_selectedBus != _defaultBus)) //É preciso corrigir o que esta na bd
-          //   {
-          //     //fazer o post para corrigir
-          //     //
-          //     //correctInfo();
-          //     //confirmar se o pedido é com id horario ou condutor
-          //   }
-
-          // }
-          //print("id_autocarro:"+ _selectedBus.toString() + ", id_linha:" +  _selectedLine.toString());
-          
+        onPressed: () {         
           if ((_selectedBus.toString() == "" ||
                 _selectedLine.toString() == "" ||
                   _selectedBus == null || 
@@ -296,12 +244,6 @@ class _SetupPageState extends State<SetupPage> {
             sharedPreferences.setString("id_linha", null);
             // print("Checkbox ativada delete all");
           }
-          // if(sharedPreferences.getString('id_autocarro') != null && sharedPreferences.getString('id_linha') != null){
-          //   print("autocarro corrente: " + sharedPreferences.getString('id_autocarro'));
-          //   print("linha atual: " + sharedPreferences.getString('id_linha'));
-          // }else{
-          //   print("ta null");
-          // }
 
           Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
@@ -377,12 +319,11 @@ class _SetupPageState extends State<SetupPage> {
   }
 
   correctInfo() async {
-    //sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences = await SharedPreferences.getInstance();
     var url = "https://" +
         DotEnv().env['IP_ADDRESS'] +
         "/api/horario/" +
         sharedPreferences.getString("id_condutor");
-//VER SE É ID_CONDUTOR OU ID_HORARIO
 
     Map body = {
       "id_autocarro": _selectedBus,

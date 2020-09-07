@@ -253,10 +253,9 @@ class _RegisterPageState extends State<RegisterPage> {
       child: RaisedButton(
         onPressed: () {
           setState(() {
-            _error = "";
+            _error = ""; //limpar erros
           });
           FocusScope.of(context).unfocus(); //tirar o focus de qualquer caixa de texto -> fechar o teclado caso esteja aberto
-          print("Carregou");
           if (nameControler.text.trim() == "" ||
               emailControler.text.trim() == "" ||
               passwordControler.text.trim() == "" ||
@@ -288,13 +287,13 @@ class _RegisterPageState extends State<RegisterPage> {
             return;
           }
 
-          //ver se a data é valida
+          //confirmar se a data é valida
           dataNascimento = ano.toString() +
               mes.toString().padLeft(2, '0') +
               dia.toString().padLeft(2, '0');
           try {
             var date = DateTime.parse(
-                dataNascimento); //se a dar nao for valida normalmente dá logo erro aqui e salta para o catch
+                dataNascimento); //se a data nao for valida normalmente dá logo erro aqui e salta para o catch
             if (!date.isBefore(DateTime.now())) {
               setState(() {
                 _error = "A data de nascimento é invalida!";
@@ -304,7 +303,7 @@ class _RegisterPageState extends State<RegisterPage> {
             var year = date.year.toString().padLeft(4, '0');
             var month = date.month.toString().padLeft(2, '0');
             var day = date.day.toString().padLeft(2, '0');
-            if (dataNascimento != "$year$month$day") {
+            if (dataNascimento != "$year$month$day") { //permite ver se o utilizador nao inseriu algum dia não existente, p.e. 31 de setembro
               setState(() {
                 _error = "A data de nascimento é invalida!";
               });
@@ -402,7 +401,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   register() async {
-    //SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     Map body = {
       "nome": nameControler.text.trim(),
       "email": emailControler.text.trim(),

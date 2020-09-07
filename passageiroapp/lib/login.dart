@@ -48,14 +48,6 @@ class _LoginPageState extends State<LoginPage> {
                 errorSection(),
                 buttonSection(),
                 checkBoxSection(),
-                /*Container(
-                child: RaisedButton(
-                child: Text('Continuar sem autenticação'),
-                onPressed: () {
-                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'App Passageiro')), (Route<dynamic> route) => false);
-                },
-              ),
-              )*/
               ],
             )),
       ),
@@ -251,7 +243,7 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
 
-        if (jsonResponse['token'].containsKey('access_token')) { //garantir que a respostra trás o access token
+        if (jsonResponse['token'].containsKey('access_token')) { //garantir que a respostra traz o access token
           sharedPreferences.setBool("checkBox", checkBoxValue);
           sharedPreferences.setBool("update_notifications", true);
           sharedPreferences.setString(

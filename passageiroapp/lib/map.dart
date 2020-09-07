@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:passageiroapp/drawer.dart';
 import 'package:http/http.dart' as http;
@@ -130,10 +129,10 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
               ),
 
               onTap: (LatLng location) {
-                    setState(() {
-                    _markerToastPosition = -200;
-                    timeRecord="Clique na linha para obter a previsão";
-                    _loadingPrediction=false;
+                setState(() {
+                  _markerToastPosition = -200;
+                  timeRecord="Clique na linha para obter a previsão";
+                  _loadingPrediction=false;
                 });
               },
               markers: Set.from(markersAPI),
@@ -227,7 +226,6 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
 
   Widget _buildLocationInfo() {
     List<Widget> widgets = [];
-    Timer _timer;
     
     for(var linha in linhasParagem){
       _functionColor(linha['id_linha']);
@@ -253,7 +251,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                         _loadingPrediction=false;
                         timeRecord=" ";
                       });
-                      _timer = new Timer(Duration(milliseconds: 50), () {
+                      Timer(Duration(milliseconds: 50), () {
                         setState(() {
                           timeRecord="A carregar ...";
                           _loadingPrediction=true;
@@ -341,7 +339,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   }
 
   void _userLocation() async {
-    //obter as coordenadas atuais do utilizador para focar nele
+    //obter as coordenadas atuais do utilizador para focar na sua localização
     //como estamos em casa o foco está na estg em vez de na localização do utilizador, por isso o codigo de focar no utilizador está comentado
     try{      
       //Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
@@ -363,7 +361,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     String url = 'https://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
 
     try {      
-      final response = await http.get(url,).timeout(const Duration(seconds: 70)); //mais tempo que o normal porque este pedido é bastante mais lento que os outros
+      final response = await http.get(url,).timeout(const Duration(seconds: 80)); //mais tempo que o normal porque este pedido é bastante mais lento que os outros
 
       if(response.statusCode==200){
         setState(() {

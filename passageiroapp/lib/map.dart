@@ -342,8 +342,9 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
 
   void _userLocation() async {
     //obter as coordenadas atuais do utilizador para focar nele
+    //como estamos em casa o foco está na estg em vez de na localização do utilizador, por isso o codigo de focar no utilizador está comentado
     try{      
-      Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+      //Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       setState(() {
         //_userPosition = LatLng(usrCurrentPosition.latitude, usrCurrentPosition.longitude);
         _userPosition = _estg; //centrar na estg porque com a quarentena a nossa localização atual é em casa; com isto a app vai abrir logo em Leiria e evitamos andar a dar scroll para lá chegar

@@ -7,6 +7,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:passageiroapp/map.dart';
 import 'package:passageiroapp/lines.dart';
 import 'package:passageiroapp/favorites.dart';
+import 'package:passageiroapp/localNotifications.dart';
+
 
 class DrawerPage extends StatefulWidget {
   DrawerPage({Key key, this.loginStatus}) : super(key: key);
@@ -236,6 +238,7 @@ class MyDrawer extends State<DrawerPage> {
     sharedPreferences = await SharedPreferences.getInstance();
 
     if (action == DialogAction.confirm) {
+      LocalNotifications().cancelAllNotifications();//cancelar todas as notificações agendadas
       setState(() {
         sharedPreferences.setBool("loginStatus", false);
         sharedPreferences.remove("access_token");

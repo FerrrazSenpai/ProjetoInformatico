@@ -107,17 +107,15 @@ class _SetupPageState extends State<SetupPage> {
       ).timeout(const Duration(seconds: 15));
       print(response.body);
       if (response.body[1] == "]") {
-        //ou seja a resposta é só []
+        //ou seja a resposta é só [], não há horario
         print("EMPTY RESPONSE");
         setState(() {
           _error = "Não tem nenhum serviço está agendado para as próximas horas";
         });
-        //return; //nao ha nada para fazer nesta funcao entao
       }else{
         var info = json.decode(response.body);
-        print(info);
-        //[{id_autocarro: 4, id_linha: 2, data: 2020-08-31, hora_inicio: 09:55:29, hora_fim: 11:10:10}]
-        if(info[0].containsKey("id_autocarro") && info[0].containsKey("id_linha") && info[0].containsKey("hora_inicio")){
+
+        if(info[0].containsKey("id_autocarro") && info[0].containsKey("id_linha") && info[0].containsKey("hora_inicio") && info[0].containsKey("hora_fim")){
           var hInicio = info[0]["hora_inicio"];
           var aux= hInicio.toString().split(":");
 
@@ -128,7 +126,6 @@ class _SetupPageState extends State<SetupPage> {
           print(timeInicio);
           var timeFim = TimeOfDay(hour: int.parse(auxFim[0]), minute: int.parse(auxFim[1]));
           print(timeFim);
-
           var currentTime = TimeOfDay.now();
           print(currentTime);
 
@@ -136,13 +133,20 @@ class _SetupPageState extends State<SetupPage> {
           var timeFimMinutes = (timeFim.hour*60) + timeFim.minute;
           var currentTimeMinutes = (currentTime.hour*60) + currentTime.minute;
 
-          if(currentTimeMinutes>timeMinutes && currentTimeMinutes<timeFimMinutes){ //se ja tiver começado && ainda nao tiver acabado
-            _selectedBus = info[0]["id_autocarro"];
-            _selectedLine = info[0]["id_linha"];
-          }
-
-
-          
+          if(currentTimeMinutes>timeMinutes && currentTimeMinutes<timeFimMinutes){ //se ja tiver começado && ainda nao tiver acabado, vai preencher os campos automaticamente
+            if(bus.contains(info[0]["id_autocarro"])){
+              _selectedBus = info[0]["id_autocarro"];
+            }else{
+              _error="Autocarro ocupado";
+            }
+            if(linhas.contains(info[0]["id_linha"])){
+              _selectedLine = info[0]["id_linha"];
+            }          
+          }         
+        }else{
+          setState(() {
+            _error="Horario mal formatado, contactar superior";
+          });
         }
       }
       /*
@@ -172,16 +176,15 @@ class _SetupPageState extends State<SetupPage> {
     } catch (e) {
       print(e.toString());
       setState(() {
-        _error = "Houve um problema ao estabelecer conexão" + e.toString()+ url;
+        _error = "Houve um problema ao estabelecer conexão com o servidor";
       });
       print(e.toString());
     }
-    print("aqui");
+    
     setState(() {
+      //tinha o absorving == true para impedir o user de mexer enquanto a app fazia os pedidos ao servidor.Como os pedidos já estão todos concluidos, passa a false para o user poder mexer
       _absorbing=false;
-    });
-    
-    
+    }); 
   }
     
 
@@ -513,36 +516,26 @@ class _SetupPageState extends State<SetupPage> {
     );
   }
 
-  void _openLoadingDialog(BuildContext context) {
-  showDialog(
-    barrierDismissible: false,
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        content: CircularProgressIndicator(),
-      );
-    },
-  );}
-
-   Padding _loading() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 100.0),
-      child: Container(
-                child: Center(
-                  child: Row(
-                    children: <Widget>[
-                      Text('A carregar dados ... ', style: TextStyle(color: Colors.white, fontSize: 16.0)),
-                      SizedBox(
-                        child:CircularProgressIndicator(
-                          strokeWidth: 2 , backgroundColor: Colors.blue[400],
-                        ),
-                      height: 14.0, width: 14.0, 
-                      )
-                    ],
-                  )
-                )
-              ),
-
+   Container _loading() {
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text('A carregar dados ... ', style: TextStyle(
+            color: Colors.white,
+            letterSpacing: 2.0,
+            fontSize: 18.0,
+            fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(
+            child:CircularProgressIndicator(
+              strokeWidth: 2 , backgroundColor: Colors.blue[400],
+            ),
+          height: 18.0, width: 18.0, 
+          )
+        ],
+      )
     );
   }
 

@@ -116,6 +116,7 @@ class _LoginPageState extends State<LoginPage> {
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
+          FocusScope.of(context).unfocus();//tirar o focus das caixas de texto, esconder o teclado
           _signIn(emailControler.text, passwordControler.text);
         },
         color: Theme.of(context).primaryColor,
@@ -212,12 +213,18 @@ class _LoginPageState extends State<LoginPage> {
       _error = ""; //clear errors
     });
 
-    final regexEmail = RegExp(
-        r"^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$");
-
-    if (!regexEmail.hasMatch(email) || password.trim() == "") {
+    if (email.trim()=="" || password.trim() == "") {
       setState(() {
-        _error = "Preencha os dois campos"; //clear errors
+        _error = "Preencha os dois campos";
+      });
+      return;
+    }
+
+    //Informar o user se o email não tiver as caracteristicas de um email
+    final regexEmail = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+    if (!regexEmail.hasMatch(email.trim())) {
+      setState(() {
+        _error = "Tem a certeza que o email está correto?";
       });
       return;
     }
@@ -227,9 +234,7 @@ class _LoginPageState extends State<LoginPage> {
       "password": password,
     };
 
-    //var jsonResponse = null;
     var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/loginAPI";
-    //final response = null;
 
     try {
       final response =
@@ -237,11 +242,10 @@ class _LoginPageState extends State<LoginPage> {
       print(response.statusCode);
       if (response.statusCode == 200) {
         var jsonResponse = json.decode(response.body);
-        if (jsonResponse['user']['tipo'] == 'd') {
+        print(jsonResponse);
+        if (response.body.trim() != "{\"msg\":\"Not authorized\"}" && jsonResponse['user']['tipo'] == 'd') { //garantir que nao permito utiliadores com credenciais da outra aplicação façam login nesta aplicacao
           if (jsonResponse['token'].containsKey('access_token')) {
             sharedPreferences.setBool("checkBox", checkBoxValue);
-            //print(jsonResponse['token'].containsKey('access_token'));
-            //print("id: " + jsonResponse['user']['id'].toString());
             sharedPreferences.setString("access_token",
                 jsonResponse['token']['access_token'].toString());
             sharedPreferences.setString("email", email);
@@ -259,22 +263,20 @@ class _LoginPageState extends State<LoginPage> {
                           btnText: 'Avançar',
                         )),
                 (Route<dynamic> route) => false);
-            //print(jsonResponse['access_token']);
-            //print(sharedPreferences.getBool("checkBox"));
           } else {
             sharedPreferences.clear();
             setState(() {
-              _error = "Algo correu muito mal";
+              _error = "Erro a receber a informação do servidor. Tente novamente!";
             });
-            print("Algo correu muito mal");
+            print("Erro a receber a informação do servidor. Tente novamente!");
           }
         } else {
           sharedPreferences.clear();
           setState(() {
-            _error = "Credenciais inválidas";
+            _error = "Email ou password incorretos"; //mensagem de erro generica para nao revelar que sao credenciais da outra aplicacao
           });
         }
-      } else if (response.statusCode == 400) {
+      } else if (response.statusCode == 400 ) {
         sharedPreferences.clear();
         setState(() {
           _error = "Email ou password incorretos";
@@ -283,21 +285,21 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         sharedPreferences.clear();
         setState(() {
-          _error = "Algo correu muito mal";
+          _error = "Por favor, tente novamente!";
         });
-        print("uncaught exception \n" + response.body);
+        print("uncaught exception: \n" + response.body);
       }
     } catch (e) {
       if (e.toString().contains("TimeoutException")) {
         setState(() {
-          _error = "Demasiado tempo para conectar ao servidor";
+          _error = "Demasiado tempo para conectar ao servidor, tente novamente!";
         });
         print("demasiado tempo para conectar ao servidor");
       }
       sharedPreferences.clear();
       print(e);
       setState(() {
-        _error = "Erro de conexão ao servidor";
+        _error = "Erro de conexão ao servidor, tente novamente!";
       });
 
       print("Erro de conexão ao servidor");

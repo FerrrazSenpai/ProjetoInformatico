@@ -227,6 +227,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
 
   Widget _buildLocationInfo() {
     List<Widget> widgets = [];
+    Timer _timer;
     
     for(var linha in linhasParagem){
       _functionColor(linha['id_linha']);
@@ -241,10 +242,24 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                 child: RaisedButton(
                   onPressed: (){
                     getTime(linha['id_linha'].toString(), _selectedParagemID);
-                    setState(() {
-                      timeRecord="A carregar ... ";
-                      _loadingPrediction=true;
-                    });
+                    
+                    if(timeRecord!="A carregar ..."){ 
+                        setState(() {
+                          timeRecord="A carregar ...";
+                          _loadingPrediction=true;
+                        });
+                    }else{//caso já estivesse a carregar, limpar o texto, usar um delay de 50 milisegundos para o utilizador conseguir ver o texto a alterar, voltar a escrever o texto
+                      setState(() {
+                        _loadingPrediction=false;
+                        timeRecord=" ";
+                      });
+                      _timer = new Timer(Duration(milliseconds: 50), () {
+                        setState(() {
+                          timeRecord="A carregar ...";
+                          _loadingPrediction=true;
+                        });
+                      });
+                    }
                   },
                   color: _color,
                   padding: EdgeInsets.all(2.0),
@@ -418,11 +433,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
       if(updateNotifications){
         final LocalNotifications notifications = LocalNotifications();
         var notificationsUpdated = await notifications.setNotifications();
-        sharedPreferences.setBool("update_notifications",false);
         if(!notificationsUpdated){
           _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Erro ao atualizar as notifições!"),));
         }else{
           _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Notificações atualizadas com sucesso!"),));
+          sharedPreferences.setBool("update_notifications",false);
         }
       }
     }

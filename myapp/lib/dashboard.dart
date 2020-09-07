@@ -51,14 +51,14 @@ class DashboardPageState extends State<DashboardPage> {
   String bus;
   bool isActive = false;
   bool firstPost = false;
-  static const duration = const Duration(seconds: 3);
+  static const duration = const Duration(seconds: 4);
 
   _functionActive() async {
     sharedPreferences = await SharedPreferences.getInstance();
     if (sharedPreferences.getBool("ativo") != null) {
       isActive = sharedPreferences.getBool("ativo");
     } else {
-      sharedPreferences.setBool(" ativo", false);
+      sharedPreferences.setBool("ativo", false);
       isActive = false;
     }
   }

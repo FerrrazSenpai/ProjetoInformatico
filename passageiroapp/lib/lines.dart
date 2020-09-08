@@ -423,6 +423,7 @@ class _LinesPageState extends State<LinesPage> {
         ).timeout(const Duration(seconds: 15));
         print(responseRemoveFav.body);
         if (responseRemoveFav.statusCode == 200) {
+          sharedPreferences.setBool("update_notifications", true); //passar a variavel controlo das notificações para true, para as notificações serem atualizadas
           var dados = jsonDecode(responseRemoveFav.body);
         }
       }
@@ -452,10 +453,10 @@ class _LinesPageState extends State<LinesPage> {
               "Bearer " + sharedPreferences.getString("access_token")
         },
       ).timeout(const Duration(seconds: 5));
-
-      if (response.statusCode == 200) {
+    
+      if (response.statusCode == 201) {
+        sharedPreferences.setBool("update_notifications", true); //passar a variavel controlo das notificações para true, para as notificações serem atualizadas
         var dados = jsonDecode(response.body);
-
         print(dados);
       }
     } catch (e) {

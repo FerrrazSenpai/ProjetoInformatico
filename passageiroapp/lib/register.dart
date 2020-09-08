@@ -106,7 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   TextFormField formInput(String hint, IconData iconName) {
     return TextFormField(
-      cursorColor: Colors.white,
+      cursorColor: Colors.black,
       style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400),
       obscureText: hint == "Password" ? true : false,
       controller: hint == "Password" ? passwordControler : emailControler,
@@ -128,7 +128,7 @@ class _RegisterPageState extends State<RegisterPage> {
   TextFormField formInputWControler(
       String hint, IconData iconName, var controller) {
     return TextFormField(
-      cursorColor: Colors.white,
+      cursorColor: Colors.black,
       style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400),
       obscureText: hint == "Confirmar Password" ? true : false,
       controller: controller,
@@ -253,11 +253,9 @@ class _RegisterPageState extends State<RegisterPage> {
       child: RaisedButton(
         onPressed: () {
           setState(() {
-            _error = "";
+            _error = ""; //limpar erros
           });
-          FocusScope.of(context)
-              .unfocus(); //tirar o focus de qualquer caixa de texto -> fechar o teclado caso esteja aberto
-          print("Carregou");
+          FocusScope.of(context).unfocus(); //tirar o focus de qualquer caixa de texto -> fechar o teclado caso esteja aberto
           if (nameControler.text.trim() == "" ||
               emailControler.text.trim() == "" ||
               passwordControler.text.trim() == "" ||
@@ -274,15 +272,14 @@ class _RegisterPageState extends State<RegisterPage> {
 
           final regexName =
               new RegExp(r'^[a-zàáâãèéêìíóôõùúçA-ZÀÁÂĖÈÉÊÌÍÒÓÔÕÙÚÛÇ\s]+$');
-          if (!regexName.hasMatch(nameControler.text)) {
+          if (!regexName.hasMatch(nameControler.text) || nameControler.text.length<3 || nameControler.text.length>30){
             setState(() {
               _error = "Nome invalido!";
             });
             return;
           }
 
-          final regexEmail = RegExp(
-              r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+          final regexEmail = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
           if (!regexEmail.hasMatch(emailControler.text)) {
             setState(() {
               _error = "Email invalido!";
@@ -290,22 +287,23 @@ class _RegisterPageState extends State<RegisterPage> {
             return;
           }
 
-          //ver se a data é valida
+          //confirmar se a data é valida
           dataNascimento = ano.toString() +
               mes.toString().padLeft(2, '0') +
               dia.toString().padLeft(2, '0');
           try {
             var date = DateTime.parse(
-                dataNascimento); //se a dar nao for valida normalmente dá logo erro aqui e salta para o catch
+                dataNascimento); //se a data nao for valida normalmente dá logo erro aqui e salta para o catch
             if (!date.isBefore(DateTime.now())) {
               setState(() {
                 _error = "A data de nascimento é invalida!";
               });
+              return;
             }
             var year = date.year.toString().padLeft(4, '0');
             var month = date.month.toString().padLeft(2, '0');
             var day = date.day.toString().padLeft(2, '0');
-            if (dataNascimento != "$year$month$day") {
+            if (dataNascimento != "$year$month$day") { //permite ver se o utilizador nao inseriu algum dia não existente, p.e. 31 de setembro
               setState(() {
                 _error = "A data de nascimento é invalida!";
               });
@@ -337,7 +335,7 @@ class _RegisterPageState extends State<RegisterPage> {
             return;
           }
 
-          if (!regexName.hasMatch(localidadeControler.text)) {
+          if (!regexName.hasMatch(localidadeControler.text) || localidadeControler.text.length>30) {
             setState(() {
               _error = "Localidade invalida";
             });
@@ -403,7 +401,6 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   register() async {
-    //SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     Map body = {
       "nome": nameControler.text.trim(),
       "email": emailControler.text.trim(),
@@ -419,8 +416,18 @@ class _RegisterPageState extends State<RegisterPage> {
       var response =
           await http.post(url, body: body).timeout(const Duration(seconds: 7));
       print(response.statusCode);
-      var jsonResponse = json.decode(response.body);
+      
+      
+      if(response.statusCode == 302){
+        print(response.body);
+        setState(() {
+          _error = "Erro: Email já registado!";
+        });
+        return;
+      }
+
       if (response.statusCode == 201) {
+        var jsonResponse = json.decode(response.body);
         print(jsonResponse);
 
         _scaffoldKey.currentState.showSnackBar(SnackBar(
@@ -438,9 +445,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 ));
       } else {
         setState(() {
-          _error = "Erro: " + jsonResponse;
+          _error = "Erro! Tente novamente";
         });
-        print("Error: status != 201\n" + jsonResponse);
+        print("Error: status != 201\n" + response.body);
       }
     } catch (e) {
       setState(() {

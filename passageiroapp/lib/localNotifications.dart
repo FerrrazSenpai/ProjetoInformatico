@@ -42,7 +42,7 @@ class LocalNotifications {
         'Favoritos channel id', 'Favoritos', 'Notificações sobre Favoritos',
         importance: Importance.Max,
         priority: Priority.High,
-        ticker: "notification ticker");
+        ticker: "Notificação App Passageiro");
     final iOSPlatformChannelSpecifics = IOSNotificationDetails();
     final platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics,
@@ -72,12 +72,12 @@ class LocalNotifications {
   }
 
   Future<bool> setNotifications() async {
-    //ajustar as notificações (as notificações varia consuantes os favoritos)
-    //vou fazer isto sempre o utilador faça login, ou então altere os seus favoritos
+    //ajustar as notificações (as notificações varia consoantes os favoritos do utilizador)
+    //vou fazer isto sempre o utilador faça login, ou então altere os seus favoritos (adicione ou remova uma linha)
     this.cancelAllNotifications();
     sharedPreferences = await SharedPreferences.getInstance();
-
     var startId = 1;
+    
     var url = 'https://' + DotEnv().env['IP_ADDRESS'] + '/api/favoritos';
     try {
       final response = await http.get(

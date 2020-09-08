@@ -48,14 +48,6 @@ class _LoginPageState extends State<LoginPage> {
                 errorSection(),
                 buttonSection(),
                 checkBoxSection(),
-                /*Container(
-                child: RaisedButton(
-                child: Text('Continuar sem autenticação'),
-                onPressed: () {
-                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context) => MyHomePage(title: 'App Passageiro')), (Route<dynamic> route) => false);
-                },
-              ),
-              )*/
               ],
             )),
       ),
@@ -90,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
 
   TextFormField formInput(String hint, IconData iconName) {
     return TextFormField(
-      cursorColor: Colors.white,
+      cursorColor: Colors.black,
       style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900),
       obscureText: hint == "Password" ? true : false,
       controller: hint == "Password" ? passwordControler : emailControler,
@@ -115,6 +107,7 @@ class _LoginPageState extends State<LoginPage> {
       margin: EdgeInsets.symmetric(horizontal: 30.0),
       child: RaisedButton(
         onPressed: () {
+          FocusScope.of(context).unfocus();//tirar o focus das caixas de texto, esconder o teclado
           signIn(emailControler.text, passwordControler.text);
         },
         color: Theme.of(context).primaryColor,
@@ -204,7 +197,6 @@ class _LoginPageState extends State<LoginPage> {
       _error = ""; //clear errors
     });
 
-
     if (email.trim()=="" || password.trim() == "") {
       setState(() {
         _error = "Preencha ambos os campos!"; 
@@ -212,30 +204,31 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-
-    //Informar o user se o email não tiver as caracteristicas de um email, não o vai impedir de continuar 
-    final regexEmail = RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
+    //Informar o user se o email não tiver as caracteristicas de um email 
+    final regexEmail = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
     if (!regexEmail.hasMatch(email.trim())) {
       setState(() {
         _error = "Tem a certeza que o email está correto?";
       });
+      return;
     }
 
     Map body = {
       "email": email.trim(),
       "password": password.trim(),
     };
+
     var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/loginCliente";
     try {
       final response =
-          await http.post(url, body: body).timeout(const Duration(seconds: 5));
+          await http.post(url, body: body).timeout(const Duration(seconds: 10));
       print(response.statusCode);
       if (response.statusCode == 200) { 
-        if (response.body.trim() == "{\"msg\":\"Not authorized\"}") { //se a resposta for 200, mas no conteudo estiver Not autorized
+        if (response.body.trim() == "{\"msg\":\"Not authorized\"}") { //se a resposta for 200, mas no conteudo estiver Not autorized não quero deixar entrar (são credenciais da outra aplicação)
           setState(() {
             _error = "Email ou password incorretos";
           });
-          print("Email ou password incorretos");
+          print("Email ou password incorretos1");
           return;
         }
 
@@ -250,8 +243,7 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
 
-        if (jsonResponse['token'].containsKey('access_token')) { //garantir que a respostra trás o access token
-          sharedPreferences.setInt("id", jsonResponse['user']['id']);
+        if (jsonResponse['token'].containsKey('access_token')) { //garantir que a respostra traz o access token
           sharedPreferences.setBool("checkBox", checkBoxValue);
           sharedPreferences.setBool("update_notifications", true);
           sharedPreferences.setString(
@@ -272,14 +264,14 @@ class _LoginPageState extends State<LoginPage> {
           });
           print("A resposta não tem a estrutura certa");
         }
-      } else if (response.statusCode == 400 || response.statusCode == 401) {  //se retornar 401, classico password errada
+      } else if (response.statusCode == 400 || response.statusCode == 401) {  // classico password errada
         setState(() {
           _error = "Email ou password incorretos";
         });
         print("Email ou password incorretos");
       } else { // se nao for nem 200 nem 400 //algo de estranho se passou com o servidor - tentar outra vez
         setState(() {
-          _error = "Erro de conexão ao servidor, tente novamente!";
+          _error = "Por favor, tente novamente!";
         });
         print("Erro, a resposta não é 200 nem 400 ... \n" + response.body);
       }

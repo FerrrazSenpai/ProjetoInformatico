@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:passageiroapp/drawer.dart';
 import 'package:http/http.dart' as http;
@@ -130,10 +129,10 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
               ),
 
               onTap: (LatLng location) {
-                    setState(() {
-                    _markerToastPosition = -200;
-                    timeRecord="Clique na linha para obter a previsão";
-                    _loadingPrediction=false;
+                setState(() {
+                  _markerToastPosition = -200;
+                  timeRecord="Clique na linha para obter a previsão";
+                  _loadingPrediction=false;
                 });
               },
               markers: Set.from(markersAPI),
@@ -241,10 +240,24 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
                 child: RaisedButton(
                   onPressed: (){
                     getTime(linha['id_linha'].toString(), _selectedParagemID);
-                    setState(() {
-                      timeRecord="A carregar ... ";
-                      _loadingPrediction=true;
-                    });
+                    
+                    if(timeRecord!="A carregar ..."){ 
+                        setState(() {
+                          timeRecord="A carregar ...";
+                          _loadingPrediction=true;
+                        });
+                    }else{//caso já estivesse a carregar, limpar o texto, usar um delay de 50 milisegundos para o utilizador conseguir ver o texto a alterar, voltar a escrever o texto
+                      setState(() {
+                        _loadingPrediction=false;
+                        timeRecord=" ";
+                      });
+                      Timer(Duration(milliseconds: 50), () {
+                        setState(() {
+                          timeRecord="A carregar ...";
+                          _loadingPrediction=true;
+                        });
+                      });
+                    }
                   },
                   color: _color,
                   padding: EdgeInsets.all(2.0),
@@ -326,9 +339,10 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
   }
 
   void _userLocation() async {
-    //obter as coordenadas atuais do utilizador para focar nele
+    //obter as coordenadas atuais do utilizador para focar na sua localização
+    //como estamos em casa o foco está na estg em vez de na localização do utilizador, por isso o codigo de focar no utilizador está comentado
     try{      
-      Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+      //Position usrCurrentPosition = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       setState(() {
         //_userPosition = LatLng(usrCurrentPosition.latitude, usrCurrentPosition.longitude);
         _userPosition = _estg; //centrar na estg porque com a quarentena a nossa localização atual é em casa; com isto a app vai abrir logo em Leiria e evitamos andar a dar scroll para lá chegar
@@ -347,7 +361,7 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
     String url = 'https://'+ DotEnv().env['IP_ADDRESS']+'/api/tempo/'+paragemID+'/'+linha;
 
     try {      
-      final response = await http.get(url,).timeout(const Duration(seconds: 70)); //mais tempo que o normal porque este pedido é bastante mais lento que os outros
+      final response = await http.get(url,).timeout(const Duration(seconds: 80)); //mais tempo que o normal porque este pedido é bastante mais lento que os outros
 
       if(response.statusCode==200){
         setState(() {
@@ -418,11 +432,11 @@ class _MapPageState extends State<MapPage> with SingleTickerProviderStateMixin{
       if(updateNotifications){
         final LocalNotifications notifications = LocalNotifications();
         var notificationsUpdated = await notifications.setNotifications();
-        sharedPreferences.setBool("update_notifications",false);
         if(!notificationsUpdated){
           _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Erro ao atualizar as notifições!"),));
         }else{
           _scaffoldKey.currentState.showSnackBar(SnackBar( content: Text("Notificações atualizadas com sucesso!"),));
+          sharedPreferences.setBool("update_notifications",false);
         }
       }
     }

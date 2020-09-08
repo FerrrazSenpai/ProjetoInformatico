@@ -202,40 +202,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
     }
   }
 
-  // _getLines() async {
-
-  //   var url = 'https://'+ DotEnv().env['IP_ADDRESS']+'/api/linhas';
-
-  //   try {
-  //     final response = await http.get(url).timeout(const Duration(seconds: 15));
-
-  //     if(response.statusCode==200){
-  //       var dados = jsonDecode(response.body);
-
-  //       print(_favorites);
-  //       _events = new List.generate(_favorites.length, (i) => i + 1);
-
-  //       for(var i = 0; i < _favorites.length; i++){
-  //         id = _favorites[i].toString();
-  //         print(id);
-  //         for(var j = 0; j < dados['data'].length; j++){
-  //           if(dados['data'][j]['id_linha'].toString() == id){
-  //             nomeLinha = dados['data'][j]['nome'].toString();
-  //             _events[i] = id + nomeLinha;
-  //           }
-  //         }
-  //       }
-
-  //       setState(() {
-  //         print(_events);
-  //       });
-
-  //     }
-  //   }catch(e){
-  //     print(e);
-  //   }
-  // }
-
   _showSnackBar() {
     final snackBar = new SnackBar(
       content: Container(

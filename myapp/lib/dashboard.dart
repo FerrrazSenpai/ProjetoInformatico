@@ -11,7 +11,6 @@ import 'package:app_condutor/connectivity.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -21,7 +20,6 @@ class MyApp extends StatelessWidget {
         title: 'Página inicial',
       ),
     );
-    //home: new LoginPage(),
   }
 }
 
@@ -51,7 +49,7 @@ class DashboardPageState extends State<DashboardPage> {
   String bus;
   bool isActive = false;
   bool firstPost = false;
-  static const duration = const Duration(seconds: 3);
+  static const duration = const Duration(minutes: 1);
 
   _functionActive() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -89,8 +87,7 @@ class DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    //_getUserData();
-    _getUserData2();
+    _getUserData();
     _setupVerification();
     _functionColor(linha);
     _getSchedule();
@@ -130,7 +127,6 @@ class DashboardPageState extends State<DashboardPage> {
             widget: ListView(
               children: <Widget>[
                 _getProfile(),
-                //_buildEventList(),
                 Text(
                   "Meus serviços para o dia de hoje",
                   textAlign: TextAlign.center,
@@ -206,7 +202,7 @@ class DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  _getUserData2() async {
+  _getUserData() async {
     sharedPreferences = await SharedPreferences.getInstance();
     String dia;
     String ano;
@@ -571,7 +567,7 @@ class DashboardPageState extends State<DashboardPage> {
 
     setState(() {
       _getSchedule();
-      _getUserData2();
+      _getUserData();
     });
 
     return null;
@@ -674,8 +670,6 @@ class DashboardPageState extends State<DashboardPage> {
       },
       body: body,
     );
-
-    print(response.body);
   }
 
   postHistory() async {
@@ -699,6 +693,5 @@ class DashboardPageState extends State<DashboardPage> {
       },
       body: body,
     );
-    print(response.body);
   }
 }

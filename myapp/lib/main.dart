@@ -19,7 +19,6 @@ Future main() async {
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -67,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
           MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
           (Route<dynamic> route) => false);
     } else {
-      checkLocationHistory();
+      // checkLocationHistory();
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (BuildContext context) =>
@@ -99,7 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         body: body,
       );
-      print(response.body);
     }
   }
 

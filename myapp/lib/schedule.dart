@@ -347,7 +347,6 @@ class SchedulePageStateState extends State<SchedulePage>
 
         if (response.body[1] == "]") {
           //ou seja a resposta é só []
-          print("Não há nada agendado");
           setState(() {
             _selectedEvents = [];
           });

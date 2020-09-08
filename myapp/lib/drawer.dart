@@ -150,23 +150,6 @@ class MyDrawer extends State<DrawerPage> {
     );
   }
 
-  void _logout() async {
-    var url = "https://" + DotEnv().env['IP_ADDRESS'] + "/api/logout";
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization':
-              "Bearer " + sharedPreferences.getString("access_token"),
-        },
-      ).timeout(const Duration(seconds: 3));
-
-      print(response.statusCode);
-    } catch (e) {
-      print("Erro de conexão ao servidor, Access não eliminado");
-    }
-  }
-
   Future<SharedPreferences> _getData() async {
     sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
@@ -189,7 +172,6 @@ class MyDrawer extends State<DrawerPage> {
     ).timeout(const Duration(seconds: 6));
 
     if (action == DialogAction.confirm) {
-      _logout();
       sharedPreferences.clear();
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
